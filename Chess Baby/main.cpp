@@ -25,7 +25,7 @@ Have a 1D array for the pieces on the board. The index of the piece would just b
 int boardInfoCount = 0;
 
 #include <SFML/Graphics.hpp>
-#include <iostream>
+#include <iostream> //Testing 
 #include "ChessBoard.h"
 //#include "PieceInterface.h"
 #include "StaticMemberInitialization.h"

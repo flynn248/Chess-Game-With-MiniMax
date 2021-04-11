@@ -1,7 +1,7 @@
 //Developed by Shane Flynn
 //Chess game with an AI using Alpha Beta pruning on a minimax algortihm
 //Last edited 04/11/2021
-
+//This was added inside of finialize legal moves
 /* Things to Ponder
 
 How will you know which piece is grabbed when on click? //Could make a find who is clicked function. Just loop through the pieces on which ever color's turn it is
@@ -25,7 +25,7 @@ Have a 1D array for the pieces on the board. The index of the piece would just b
 int boardInfoCount = 0;
 
 #include <SFML/Graphics.hpp>
-#include <iostream> //Testing 
+#include <iostream>
 #include "ChessBoard.h"
 //#include "PieceInterface.h"
 #include "StaticMemberInitialization.h"

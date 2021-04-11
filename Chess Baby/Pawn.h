@@ -46,6 +46,15 @@ public:
 		movableSquaresForDisplay |= (pieceBitBoard >> 9) & bitBoard & notCapturable & ~FILE_H; //Capture left. Includes potential promotion
 		movableSquaresForDisplay |= (pieceBitBoard >> 7) & enPassantWhite; //enPassant right
 		movableSquaresForDisplay |= (pieceBitBoard >> 9) & enPassantWhite; //enPassant left
+
+		if ((rankMasks[piecePosition / 8] & whKing) != 0) { //edge case to prevent pawn from enPassanting their king into check
+			if ((rankMasks[piecePosition / 8] & blRook) != 0 || (rankMasks[piecePosition / 8] & blQueen) != 0) {
+				movableSquaresForDisplay ^= (pieceBitBoard >> 7) & bitBoard & notCapturable & ~FILE_A;
+				movableSquaresForDisplay ^= (pieceBitBoard >> 9) & bitBoard & notCapturable & ~FILE_H;
+				std::cout << "Special Condition found" << std::endl;
+			}
+		}
+
 		movableSquaresForDisplay |= (pieceBitBoard >> 8) & ~bitBoard;
 		movableSquaresForDisplay |= (pieceBitBoard >> 16) & ~bitBoard & ~(bitBoard >> 8)& RANK_4;
 		movableSquaresForDisplay &= squaresToBlockCheckOrCapture;
@@ -72,6 +81,15 @@ public:
 		movableSquaresForDisplay |= (pieceBitBoard << 9) & bitBoard & notCapturable & ~FILE_A; //Capture left. Includes potential promotion
 		movableSquaresForDisplay |= (pieceBitBoard << 7) & enPassantBlack; //enPassant right
 		movableSquaresForDisplay |= (pieceBitBoard << 9) & enPassantBlack; //enPassant left
+		
+		if ((rankMasks[piecePosition / 8] & blKing) != 0 ) 	{ //edge case to prevent pawn from enPassanting their king into check
+			if ((rankMasks[piecePosition / 8] & whRook) != 0 || (rankMasks[piecePosition / 8] & whQueen) != 0) 	{
+				movableSquaresForDisplay ^= (pieceBitBoard << 7) & bitBoard & notCapturable & ~FILE_H;
+				movableSquaresForDisplay ^= (pieceBitBoard << 9) & bitBoard & notCapturable & ~FILE_A;
+				std::cout << "Special Condition found" << std::endl;
+			}
+		}
+		
 		movableSquaresForDisplay |= (pieceBitBoard << 8) & ~bitBoard;
 		movableSquaresForDisplay |= (pieceBitBoard << 16) & ~bitBoard & ~(bitBoard << 8) & RANK_5;
 		movableSquaresForDisplay &= squaresToBlockCheckOrCapture;

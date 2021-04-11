@@ -50,9 +50,6 @@ public:
 		}
 		else //if piece is not pinned
 			movableSquaresForDisplay |= (HorzNVerticalMoves(piecePosition) | diagNAntiDagMoves(piecePosition)) & notCapturable & squaresToBlockCheckOrCapture;
-
-		printBitBoard(fileMasks[59 % 8]);
-		std::cout << std::endl;
 	}
 
 	void updateAttackSquares(unsigned long long pieceBitBoard, unsigned long long kingBitBoard, unsigned long long& enemyKingLociSpread, unsigned long long& myPieces) {
@@ -160,7 +157,7 @@ public:
 		}
 
 	}
-
+	/*
 	void findPathToCheck(unsigned long long attackerBitBoard, unsigned long long kingBitBoard) { //unused code
 		unsigned long long queenPiece = attackerBitBoard;
 		unsigned long long aPathToAttackKing = 0ULL;
@@ -187,6 +184,7 @@ public:
 			queenPiece = attackerBitBoard;
 		}
 	}
+	*/
 
 	std::unique_ptr<std::vector<uint16_t>> playerLegalMoves() { //Get legal moves for human player
 		if (isWhite) {
@@ -207,7 +205,7 @@ public:
 
 		while (queenPiece != 0) {
 			int queenLocation = numOfTrailingZeros(queenPiece);
-			allPotentialMoves = (HorzNVerticalMoves(queenLocation) | diagNAntiDagMoves(queenLocation)) & notCapturable;
+			allPotentialMoves = (HorzNVerticalMoves(queenLocation) | diagNAntiDagMoves(queenLocation)) & notCapturable & squaresToBlockCheckOrCapture;
 			attackSquaresQueen |= allPotentialMoves;
 			unsigned long long aPotentialMove = allPotentialMoves & ~(allPotentialMoves - 1);
 

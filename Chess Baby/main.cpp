@@ -27,7 +27,7 @@ int boardInfoCount = 0;
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include "ChessBoard.h"
-#include "PieceInterface.h"
+//#include "PieceInterface.h"
 #include "StaticMemberInitialization.h"
 //#include "BoardSquare.h"
 //#include "MoveGenerator.h"

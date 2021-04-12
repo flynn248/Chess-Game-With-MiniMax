@@ -207,7 +207,6 @@ public:
 
 		return possibleMoves;
 	}
-
 	std::unique_ptr<std::vector<uint16_t>> castlingMovesBlack() {
 		std::unique_ptr<std::vector<uint16_t>> possibleMoves = std::make_unique<std::vector<uint16_t>>();
 

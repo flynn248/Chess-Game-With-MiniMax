@@ -109,37 +109,12 @@ public:
 				std::cout << "ERROR: Failed to find path from pinned piece to king!\n";
 		}
 	}
-	/*
-	void findIfPiecesIsPinned(unsigned long long& cake) {
-
-	}
-	void findPathToCheck(unsigned long long attackerBitBoard, unsigned long long kingBitBoard) { //unused code
-		unsigned long long bishopPiece = attackerBitBoard;
-		unsigned long long aPathToAttackKing = 0ULL;
-
-		while (bishopPiece != 0) 	{
-			int bishopLocation = numOfTrailingZeros(bishopPiece);
-			aPathToAttackKing = diagonalMoves(bishopLocation) & (notCapturable | kingBitBoard);
-			if ((aPathToAttackKing & kingBitBoard) != 0)
-				squaresToBlockCheckOrCapture |= (aPathToAttackKing ^ kingBitBoard);
-
-			aPathToAttackKing = antiDiagMoves(bishopLocation) & (notCapturable | kingBitBoard);
-			if ((aPathToAttackKing & kingBitBoard) != 0)
-				squaresToBlockCheckOrCapture |= (aPathToAttackKing ^ kingBitBoard);
-
-			attackerBitBoard &= ~(1ULL << bishopLocation);
-			bishopPiece = attackerBitBoard;
-		}
-	}
-	*/
 
 	std::unique_ptr<std::vector<uint16_t>> playerLegalMoves() { //Get legal moves for human player
-		if (isWhite) {
+		if (isWhite) 
 			return legalMoves(whBishop);
-		}
-		else {
+		else 
 			return legalMoves(blBishop);
-		}
 	}
 
 	std::unique_ptr<std::vector<uint16_t>> legalMoves(unsigned long long pieceBitBoard) { //might want to add parameters to have something more local for whBishop. Might cause update issues later
@@ -149,10 +124,13 @@ public:
 		unsigned long long allPotentialMoves = 0ULL;
 
 		//attackSquaresBishop = 0ULL;
-
+		
 		while (bishopPiece != 0) {
 			int bishopLocation = numOfTrailingZeros(bishopPiece);
-			allPotentialMoves = diagNAntiDagMoves(bishopLocation) & notCapturable & squaresToBlockCheckOrCapture;
+			if (((1ULL << bishopPiece) & pinnedPiecesBitBoard) != 0)//if piece is pinned
+				allPotentialMoves = moveableSquaresWhenPinned(bishopPiece);
+			else
+				allPotentialMoves = diagNAntiDagMoves(bishopLocation) & notCapturable & squaresToBlockCheckOrCapture;
 			//attackSquaresBishop |= allPotentialMoves;
 			unsigned long long aPotentialMove = allPotentialMoves & ~(allPotentialMoves - 1);
 

@@ -69,12 +69,10 @@ public:
 	}
 
 	std::unique_ptr<std::vector<uint16_t>> playerLegalMoves() { //Get legal moves for human player
-		if (isWhite) {
+		if (isWhite)
 			return legalMoves(whKnight);
-		}
-		else {
+		else
 			return legalMoves(blKnight);
-		}
 	}
 
 	std::unique_ptr<std::vector<uint16_t>> legalMoves(unsigned long long pieceBitBoard) {
@@ -86,6 +84,10 @@ public:
 		//attackSquaresKnight = 0ULL;
 		while (knightPiece != 0) { //find center of knight
 			int knightLocation = numOfTrailingZeros(knightPiece);
+
+			if ((pinnedPiecesBitBoard & (1ULL << knightLocation)) != 0) //A pinned knight cannot move
+				continue;
+
 			if (knightLocation > 18)
 				allPotentialMoves = KnightSpan << (knightLocation - 18);
 			else

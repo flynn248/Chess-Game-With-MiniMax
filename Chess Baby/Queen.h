@@ -68,7 +68,6 @@ public:
 			if ((diagonalMasks[(queenLocation / 8) + (queenLocation % 8)] & kingBitBoard) != 0) { //if enemy king is in attack path
 				if (((uneditedAttackPath & ~myPieces) & enemyKingLociSpread) != 0) { //if one enemy piece is on path of attack to king
 					pinnedPiecesBitBoard |= (uneditedAttackPath & ~myPieces) & enemyKingLociSpread;
-					std::cout << "You a bitch\n";
 				}
 			}
 
@@ -84,18 +83,17 @@ public:
 			}
 
 			attackSquaresQueen |= aPathToAttackKing;
+			enemyPiecesThatAreDefended |= uneditedAttackPath & myPieces;
 
 			uneditedAttackPath = antiDiagMoves(queenLocation);
 			//for finding a pinned piece
 			if ((antiDiagonalMasks[(queenLocation / 8) + 7 - (queenLocation % 8)] & kingBitBoard) != 0) { //if enemy king is in attack path
 				if (((uneditedAttackPath & ~myPieces) & enemyKingLociSpread) != 0) { //if one enemy piece is on path of attack to king
 					pinnedPiecesBitBoard |= (uneditedAttackPath & ~myPieces) & enemyKingLociSpread;
-					std::cout << "You a bitch\n";
 				}
 			}
 
 			aPathToAttackKing = uneditedAttackPath & notCapturable;
-			
 			if ((aPathToAttackKing & kingBitBoard) != 0) {
 				locationOfPieceAttackingKing |= 1ULL << queenLocation;
 				if (((oneNegatedPiece & aPathToAttackKing) & kingBitBoard) != 0)
@@ -107,13 +105,13 @@ public:
 			}
 
 			attackSquaresQueen |= aPathToAttackKing;
+			enemyPiecesThatAreDefended |= uneditedAttackPath & myPieces;
 
 			uneditedAttackPath = verticalMoves(queenLocation);
 			//for finding a pinned piece
 			if ((fileMasks[queenLocation % 8] & kingBitBoard) != 0) { //if enemy king is in attack path
 				if (((uneditedAttackPath & ~myPieces) & enemyKingLociSpread) != 0) { //if one enemy piece is on path of attack to king
 					pinnedPiecesBitBoard |= (uneditedAttackPath & ~myPieces) & enemyKingLociSpread;
-					std::cout << "You a bitch\n";
 				}
 			}
 
@@ -129,13 +127,13 @@ public:
 			}
 
 			attackSquaresQueen |= aPathToAttackKing;
+			enemyPiecesThatAreDefended |= uneditedAttackPath & myPieces;
 
 			uneditedAttackPath = horizontalMoves(queenLocation);
 			//for finding a pinned piece
 			if ((rankMasks[queenLocation / 8] & kingBitBoard) != 0) { //if enemy king is in attack path
 				if (((uneditedAttackPath & ~myPieces) & enemyKingLociSpread) != 0) { //if one enemy piece is on path of attack to king
 					pinnedPiecesBitBoard |= (uneditedAttackPath & ~myPieces) & enemyKingLociSpread;
-					std::cout << "You a bitch\n";
 				}
 			}
 
@@ -151,6 +149,7 @@ public:
 			}
 
 			attackSquaresQueen |= aPathToAttackKing;
+			enemyPiecesThatAreDefended |= uneditedAttackPath & myPieces;
 
 			pieceBitBoard &= ~(1ULL << queenLocation);
 			queenPiece = pieceBitBoard;
@@ -201,12 +200,12 @@ public:
 		unsigned long long queenPiece = pieceBitBoard;
 		unsigned long long allPotentialMoves = 0ULL;
 
-		attackSquaresQueen = 0ULL;
+		//attackSquaresQueen = 0ULL;
 
 		while (queenPiece != 0) {
 			int queenLocation = numOfTrailingZeros(queenPiece);
 			allPotentialMoves = (HorzNVerticalMoves(queenLocation) | diagNAntiDagMoves(queenLocation)) & notCapturable & squaresToBlockCheckOrCapture;
-			attackSquaresQueen |= allPotentialMoves;
+			//attackSquaresQueen |= allPotentialMoves;
 			unsigned long long aPotentialMove = allPotentialMoves & ~(allPotentialMoves - 1);
 
 			while (aPotentialMove != 0) {

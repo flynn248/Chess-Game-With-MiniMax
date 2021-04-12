@@ -419,7 +419,6 @@ struct Player {
 			if ((board->whRook & 0x100000000000000) != 0x100000000000000) //if left rook moved
 				board->castleRooks[1] = -1;
 			if (King *king = dynamic_cast<King*>(grabbedPiece)) 	{
-				std::cout << "There is a king!" << std::endl;
 				king->updateHasKingMoved();
 			}
 		}

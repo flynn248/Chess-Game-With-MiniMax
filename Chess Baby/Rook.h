@@ -77,6 +77,7 @@ public:
 			}
 
 			attackSquaresRook |= aPathToAttackKing;
+			enemyPiecesThatAreDefended |= uneditedAttackPath & myPieces;
 
 			uneditedAttackPath = horizontalMoves(rookLocation);
 			//for finding a pinned piece
@@ -99,6 +100,7 @@ public:
 			}
 
 			attackSquaresRook |= aPathToAttackKing;
+			enemyPiecesThatAreDefended |= uneditedAttackPath & myPieces;
 
 			pieceBitBoard &= ~(1ULL << rookLocation);
 			rookPiece = pieceBitBoard;
@@ -121,12 +123,12 @@ public:
 		unsigned long long rookPiece = pieceBitBoard;
 		unsigned long long allPotentialMoves = 0ULL;
 
-		attackSquaresRook = 0ULL;
+		//attackSquaresRook = 0ULL;
 
 		while (rookPiece != 0) {
 			int rookLocation = numOfTrailingZeros(rookPiece);
-			allPotentialMoves = HorzNVerticalMoves(rookLocation) & notCapturable;
-			attackSquaresRook |= allPotentialMoves;
+			allPotentialMoves = HorzNVerticalMoves(rookLocation) & notCapturable & squaresToBlockCheckOrCapture;
+			//attackSquaresRook |= allPotentialMoves;
 			unsigned long long aPotentialMove = allPotentialMoves & ~(allPotentialMoves - 1);
 
 			while (aPotentialMove != 0) {

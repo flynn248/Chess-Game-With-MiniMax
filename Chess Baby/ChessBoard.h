@@ -205,10 +205,11 @@ public:
 
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
-				std::cout << std::bitset<1>(aBitBoard >> (i*8 + j)) << "  ";
+				std::cout << std::bitset<1>(aBitBoard >> (i*8 + j)) << " ";
 			}
 			std::cout << std::endl;
 		}
+		std::cout << std::endl;
 	}
 												  
 	/*
@@ -439,14 +440,16 @@ public:
 		locationOfPieceAttackingKing = 0ULL;
 		pinnedPiecesBitBoard = 0ULL;
 		checkPathXRayThroughKing = 0ULL;
+		enemyPiecesThatAreDefended = 0ULL;
 		unsigned long long closestPiecesToKing = findClosestPieceToKing(numOfTrailingZeros(blKing)); //for finding pinned pieces for black
 
-		whKingPiece->updateAttackSquares(whKing);
-		whPawnPiece->updateAttackSquaresWhite(whPawn);
+		whKingPiece->updateAttackSquares(whKing, whPieces);
+		whPawnPiece->updateAttackSquaresWhite(whPawn, whPieces);
 		whRookPiece->updateAttackSquares(whRook, blKing, closestPiecesToKing, whPieces);
 		whQueenPiece->updateAttackSquares(whQueen, blKing, closestPiecesToKing, whPieces);
 		whBishopPiece->updateAttackSquares(whBishop, blKing, closestPiecesToKing, whPieces);
-		whKnightPiece->updateAttackSquares(whKnight, blKing);
+		whKnightPiece->updateAttackSquares(whKnight, blKing, whPieces);
+		printBitBoard(enemyPiecesThatAreDefended);
 
 		squaresWhiteAttacks = 0ULL;
 		squaresWhiteAttacks |= attackSquaresKing;
@@ -480,14 +483,15 @@ public:
 		locationOfPieceAttackingKing = 0ULL;
 		pinnedPiecesBitBoard = 0ULL;
 		checkPathXRayThroughKing = 0ULL;
+		enemyPiecesThatAreDefended = 0ULL;
 		unsigned long long closestPiecesToKing = findClosestPieceToKing(numOfTrailingZeros(whKing)); //for finding pinned pieces for white
 		//printBitBoard(closestPiecesToKing);
-		blKingPiece->updateAttackSquares(blKing);
-		blPawnPiece->updateAttackSquaresBlack(blPawn);
+		blKingPiece->updateAttackSquares(blKing, blPieces);
+		blPawnPiece->updateAttackSquaresBlack(blPawn, blPieces);
 		blRookPiece->updateAttackSquares(blRook, whKing, closestPiecesToKing, blPieces);
 		blQueenPiece->updateAttackSquares(blQueen, whKing, closestPiecesToKing, blPieces);
 		blBishopPiece->updateAttackSquares(blBishop, whKing, closestPiecesToKing, blPieces);
-		blKnightPiece->updateAttackSquares(blKnight, whKing);
+		blKnightPiece->updateAttackSquares(blKnight, whKing, blPieces);
 
 		squaresBlackAttacks = 0ULL;
 		squaresBlackAttacks |= attackSquaresKing;

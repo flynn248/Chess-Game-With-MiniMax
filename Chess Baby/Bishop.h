@@ -22,26 +22,10 @@ public:
 	}
 	void singlePieceMoveableSquares(const int& piecePosition) {
 		movableSquaresForDisplay = 0ULL;
-		if (((1ULL << piecePosition) & pinnedPiecesBitBoard) != 0) {//if piece is pinned
-			if (isWhite) {
-				if ((diagonalMasks[(piecePosition / 8) + (piecePosition % 8)] & whKing) != 0) //if king is at a diagonal
-					movableSquaresForDisplay |= diagonalMoves(piecePosition) & notCapturable;
-				else if ((antiDiagonalMasks[(piecePosition / 8) + 7 - (piecePosition % 8)] & whKing) != 0) //if king is at antiDiagonal
-					movableSquaresForDisplay |= antiDiagMoves(piecePosition) & notCapturable;
-				else
-					std::cout << "ERROR: Failed to find path from pinned piece to king!\n";
-			}
-			else {
-				if ((diagonalMasks[(piecePosition / 8) + (piecePosition % 8)] & blKing) != 0) //if king is at a diagonal
-					movableSquaresForDisplay |= diagonalMoves(piecePosition) & notCapturable;
-				else if ((antiDiagonalMasks[(piecePosition / 8) + 7 - (piecePosition % 8)] & blKing) != 0) //if king is at antiDiagonal
-					movableSquaresForDisplay |= antiDiagMoves(piecePosition) & notCapturable;
-				else
-					std::cout << "ERROR: Failed to find path from pinned piece to king!\n";
-			}
-		}
+		if (((1ULL << piecePosition) & pinnedPiecesBitBoard) != 0)//if piece is pinned
+			movableSquaresForDisplay = moveableSquaresWhenPinned(piecePosition);
 		else //if piece is not pinned
-			movableSquaresForDisplay |= diagNAntiDagMoves(piecePosition) & notCapturable & squaresToBlockCheckOrCapture;
+			movableSquaresForDisplay = diagNAntiDagMoves(piecePosition) & notCapturable & squaresToBlockCheckOrCapture;
 	}
 
 	void updateAttackSquares(unsigned long long pieceBitBoard, unsigned long long kingBitBoard, unsigned long long& enemyKingLociSpread, unsigned long long& myPieces) { //, unsigned long long& piecesThatArePinned
@@ -63,7 +47,7 @@ public:
 					std::cout << "You a bitch\n";
 				}
 			}
-
+						
 			aPathToAttackKing = uneditedAttackPath & notCapturable;
 			if ((aPathToAttackKing & kingBitBoard) != 0) 	{ //for check purposes
 				locationOfPieceAttackingKing |= 1ULL << bishopLocation;
@@ -76,6 +60,7 @@ public:
 			}
 
 			attackSquaresBishop |= aPathToAttackKing;			
+			enemyPiecesThatAreDefended |= uneditedAttackPath & myPieces;
 
 			uneditedAttackPath = antiDiagMoves(bishopLocation); 
 			//for finding a pinned piece
@@ -99,16 +84,35 @@ public:
 			}
 
 			attackSquaresBishop |= aPathToAttackKing;
+			enemyPiecesThatAreDefended |= uneditedAttackPath & myPieces;
 
 			pieceBitBoard &= ~(1ULL << bishopLocation); //remove bishop from bitmap of bishops
 			bishopPiece = pieceBitBoard; //grab next bishop on map
 		}
 	}
-
+	
+	unsigned long long moveableSquaresWhenPinned(const int& piecePosition) {
+		if (isWhite) {
+			if ((diagonalMasks[(piecePosition / 8) + (piecePosition % 8)] & whKing) != 0) //if king is at a diagonal
+				return diagonalMoves(piecePosition) & notCapturable;
+			else if ((antiDiagonalMasks[(piecePosition / 8) + 7 - (piecePosition % 8)] & whKing) != 0) //if king is at antiDiagonal
+				return antiDiagMoves(piecePosition) & notCapturable;
+			else
+				std::cout << "ERROR: Failed to find path from pinned piece to king!\n";
+		}
+		else {
+			if ((diagonalMasks[(piecePosition / 8) + (piecePosition % 8)] & blKing) != 0) //if king is at a diagonal
+				return diagonalMoves(piecePosition) & notCapturable;
+			else if ((antiDiagonalMasks[(piecePosition / 8) + 7 - (piecePosition % 8)] & blKing) != 0) //if king is at antiDiagonal
+				return antiDiagMoves(piecePosition) & notCapturable;
+			else
+				std::cout << "ERROR: Failed to find path from pinned piece to king!\n";
+		}
+	}
+	/*
 	void findIfPiecesIsPinned(unsigned long long& cake) {
 
 	}
-
 	void findPathToCheck(unsigned long long attackerBitBoard, unsigned long long kingBitBoard) { //unused code
 		unsigned long long bishopPiece = attackerBitBoard;
 		unsigned long long aPathToAttackKing = 0ULL;
@@ -127,6 +131,7 @@ public:
 			bishopPiece = attackerBitBoard;
 		}
 	}
+	*/
 
 	std::unique_ptr<std::vector<uint16_t>> playerLegalMoves() { //Get legal moves for human player
 		if (isWhite) {
@@ -143,12 +148,12 @@ public:
 		unsigned long long bishopPiece = pieceBitBoard;
 		unsigned long long allPotentialMoves = 0ULL;
 
-		attackSquaresBishop = 0ULL;
+		//attackSquaresBishop = 0ULL;
 
 		while (bishopPiece != 0) {
 			int bishopLocation = numOfTrailingZeros(bishopPiece);
-			allPotentialMoves = diagNAntiDagMoves(bishopLocation) & notCapturable;
-			attackSquaresBishop |= allPotentialMoves;
+			allPotentialMoves = diagNAntiDagMoves(bishopLocation) & notCapturable & squaresToBlockCheckOrCapture;
+			//attackSquaresBishop |= allPotentialMoves;
 			unsigned long long aPotentialMove = allPotentialMoves & ~(allPotentialMoves - 1);
 
 			while (aPotentialMove != 0) {

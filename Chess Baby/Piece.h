@@ -139,10 +139,11 @@ public:
 
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
-				std::cout << std::bitset<1>(aBitBoard >> (i * 8 + j)) << "  ";
+				std::cout << std::bitset<1>(aBitBoard >> (i * 8 + j)) << " ";
 			}
 			std::cout << std::endl;
 		}
+		std::cout << std::endl;
 	}
 
 	int getValue() const {

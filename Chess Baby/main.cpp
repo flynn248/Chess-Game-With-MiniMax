@@ -349,6 +349,8 @@ void initializePiecePosition(const float& frstSquareCentRef) {
 
 	Fixed bug
 		-EnPassent into check
+
+	Add a board of enemy pieces that are defending another. Can be found by negating notCapturable
 */
 
 /* Stuff from the Chess Wiki

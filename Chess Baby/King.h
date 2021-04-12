@@ -49,11 +49,13 @@ public:
 		//	squaresKingCanMove = ~squaresTheEnemyAttacks;//| (squaresTheEnemyAttacks ^ squaresToBlockCheckOrCapture) for if king is in check
 		//else
 		//	squaresKingCanMove = ~squaresTheEnemyAttacks; //if king is not in check
-
+		if (!isWhite) 	{
+			printBitBoard(squaresTheEnemyAttacks);
+		}
 		if (piecePosition % 8 < 4)  //prevent magical looping of king to other side of board
-			movableSquaresForDisplay &= ~FILE_GH & notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing;
+			movableSquaresForDisplay &= ~FILE_GH & notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing & ~enemyPiecesThatAreDefended;
 		else
-			movableSquaresForDisplay &= ~FILE_AB & notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing;
+			movableSquaresForDisplay &= ~FILE_AB & notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing & ~enemyPiecesThatAreDefended;
 
 	}
 	void singlePieceCastleSquaresWhite() {
@@ -94,7 +96,7 @@ public:
 	void updateHasKingMoved() {
 		hasKingMoved = true;
 	}
-	void updateAttackSquares(unsigned long long& pieceBitBoard) {
+	void updateAttackSquares(unsigned long long& pieceBitBoard, const unsigned long long& myPieces) {
 		unsigned long long allPotentialMoves = 0ULL;
 
 		int kingLocation = numOfTrailingZeros(pieceBitBoard);
@@ -103,13 +105,14 @@ public:
 		else
 			allPotentialMoves = KingSpan >> (9 - kingLocation);
 
+		enemyPiecesThatAreDefended |= allPotentialMoves & myPieces;
+		
 		if (kingLocation % 8 < 4)  //prevent magical looping of king to other side of board
 			allPotentialMoves &= ~FILE_GH & notCapturable;
 		else
 			allPotentialMoves &= ~FILE_AB & notCapturable;
 
 		attackSquaresKing = 0ULL;
-		allPotentialMoves;
 		attackSquaresKing |= allPotentialMoves;
 	}
 

@@ -75,6 +75,7 @@ unsigned long long BoardInfo::pinnedPiecesBitBoard = 0ULL;
 //unsigned long long BoardInfo::queenPinnedLegalMoves = 0ULL;
 //unsigned long long BoardInfo::bishopPinnedLegalMoves = 0ULL;
 //unsigned long long BoardInfo::rookPinnedLegalMoves = 0ULL;
+unsigned long long BoardInfo::enemyPiecesThatAreDefended = 0ULL;
 
 unsigned long long BoardInfo::squaresToBlockCheckOrCapture = 0xFFFFFFFFFFFFFFFF;
 unsigned long long BoardInfo::locationOfPieceAttackingKing = 0ULL;

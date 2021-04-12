@@ -37,7 +37,7 @@ public:
 			movableSquaresForDisplay &= ~FILE_AB & notCapturable & squaresToBlockCheckOrCapture;
 	}
 
-	void updateAttackSquares(unsigned long long pieceBitBoard, const unsigned long long& kingBitBoard) {
+	void updateAttackSquares(unsigned long long pieceBitBoard, const unsigned long long& kingBitBoard, const unsigned long long& myPieces) {
 
 		unsigned long long knightPiece = pieceBitBoard;
 		unsigned long long allPotentialMoves = 0ULL;
@@ -60,6 +60,7 @@ public:
 				squaresToBlockCheckOrCapture |= 1ULL << knightLocation;
 
 			attackSquaresKnight |= allPotentialMoves;
+			enemyPiecesThatAreDefended |= allPotentialMoves & myPieces;
 
 			pieceBitBoard &= ~(1ULL << knightLocation);
 			knightPiece = pieceBitBoard & ~(pieceBitBoard - 1);
@@ -82,7 +83,7 @@ public:
 
 		unsigned long long knightPiece = pieceBitBoard;
 		unsigned long long allPotentialMoves = 0ULL;
-		attackSquaresKnight = 0ULL;
+		//attackSquaresKnight = 0ULL;
 		while (knightPiece != 0) { //find center of knight
 			int knightLocation = numOfTrailingZeros(knightPiece);
 			if (knightLocation > 18)
@@ -91,11 +92,11 @@ public:
 				allPotentialMoves = KnightSpan >> (18 - knightLocation);
 
 			if (knightLocation % 8 < 4)  //prevent magical looping of knight to other side of board
-				allPotentialMoves &= ~FILE_GH & notCapturable;
+				allPotentialMoves &= ~FILE_GH & notCapturable & squaresToBlockCheckOrCapture;
 			else
-				allPotentialMoves &= ~FILE_AB & notCapturable;
+				allPotentialMoves &= ~FILE_AB & notCapturable & squaresToBlockCheckOrCapture;
 
-			attackSquaresKnight |= allPotentialMoves;
+			//attackSquaresKnight |= allPotentialMoves;
 			unsigned long long aPotentialMove = allPotentialMoves & ~(allPotentialMoves - 1);
 			while (aPotentialMove != 0) {
 				int movedSquare = numOfTrailingZeros(aPotentialMove);

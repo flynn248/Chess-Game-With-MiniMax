@@ -56,8 +56,10 @@ public:
 			else
 				allPotentialMoves &= ~FILE_AB & notCapturable;
 
-			if ((allPotentialMoves & kingBitBoard) != 0) //knight attack cannot be blocked. Only move away or capture
+			if ((allPotentialMoves & kingBitBoard) != 0) { //knight attack cannot be blocked. Only move away or capture
 				squaresToBlockCheckOrCapture |= 1ULL << knightLocation;
+				locationOfPieceAttackingKing |= 1ULL << knightLocation;
+			}
 
 			attackSquaresKnight |= allPotentialMoves;
 			enemyPiecesThatAreDefended |= allPotentialMoves & myPieces;

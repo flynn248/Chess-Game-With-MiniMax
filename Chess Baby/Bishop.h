@@ -44,7 +44,6 @@ public:
 			if ((diagonalMasks[(bishopLocation / 8) + (bishopLocation % 8)] & kingBitBoard) != 0) 	{ //if enemy king is in attack path
 				if (((uneditedAttackPath & ~myPieces) & enemyKingLociSpread) != 0) 	{ //if one enemy piece is on path of attack to king
 					pinnedPiecesBitBoard |= (uneditedAttackPath & ~myPieces) & enemyKingLociSpread;
-					std::cout << "You a bitch\n";
 				}
 			}
 						
@@ -57,6 +56,7 @@ public:
 					squaresToBlockCheckOrCapture |= ~oneNegatedPiece & aPathToAttackKing | (1ULL << bishopLocation);
 
 				checkPathXRayThroughKing |= diagonalMasks[(bishopLocation / 8) + (bishopLocation % 8)];
+				locationOfPieceAttackingKing |= 1ULL << bishopLocation;
 			}
 
 			attackSquaresBishop |= aPathToAttackKing;			
@@ -81,6 +81,7 @@ public:
 					squaresToBlockCheckOrCapture |= ~oneNegatedPiece & aPathToAttackKing | (1ULL << bishopLocation);
 				
 				checkPathXRayThroughKing |= antiDiagonalMasks[(bishopLocation / 8) + 7 - (bishopLocation % 8)];
+				locationOfPieceAttackingKing |= 1ULL << bishopLocation;
 			}
 
 			attackSquaresBishop |= aPathToAttackKing;

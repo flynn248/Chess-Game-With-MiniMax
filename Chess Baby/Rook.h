@@ -64,7 +64,6 @@ public:
 			if ((fileMasks[rookLocation % 8] & kingBitBoard) != 0) { //if enemy king is in attack path
 				if (((uneditedAttackPath & ~myPieces) & enemyKingLociSpread) != 0) { //if one enemy piece is on path of attack to king
 					pinnedPiecesBitBoard |= (uneditedAttackPath & ~myPieces) & enemyKingLociSpread;
-					std::cout << "You a bitch\n";
 				}
 			}
 
@@ -77,6 +76,7 @@ public:
 					squaresToBlockCheckOrCapture |= ~oneNegatedPiece & aPathToAttackKing | (1ULL << rookLocation);
 
 				checkPathXRayThroughKing |= fileMasks[rookLocation % 8];
+				locationOfPieceAttackingKing |= 1ULL << rookLocation;
 			}
 
 			attackSquaresRook |= aPathToAttackKing;
@@ -100,6 +100,7 @@ public:
 					squaresToBlockCheckOrCapture |= ~oneNegatedPiece & aPathToAttackKing | (1ULL << rookLocation);
 
 				checkPathXRayThroughKing |= rankMasks[rookLocation / 8];
+				locationOfPieceAttackingKing |= 1ULL << rookLocation;
 			}
 
 			attackSquaresRook |= aPathToAttackKing;

@@ -49,8 +49,8 @@ public:
 
 		if ((rankMasks[piecePosition / 8] & whKing) != 0) { //edge case to prevent pawn from enPassanting their king into check
 			if ((rankMasks[piecePosition / 8] & blRook) != 0 || (rankMasks[piecePosition / 8] & blQueen) != 0) {
-				movableSquaresForDisplay ^= (pieceBitBoard >> 7) & bitBoard & notCapturable & ~FILE_A;
-				movableSquaresForDisplay ^= (pieceBitBoard >> 9) & bitBoard & notCapturable & ~FILE_H;
+				movableSquaresForDisplay ^= (pieceBitBoard >> 7) & enPassantWhite;
+				movableSquaresForDisplay ^= (pieceBitBoard >> 9) & enPassantWhite;
 				std::cout << "Special Condition found" << std::endl;
 			}
 		}
@@ -84,8 +84,8 @@ public:
 		
 		if ((rankMasks[piecePosition / 8] & blKing) != 0 ) 	{ //edge case to prevent pawn from enPassanting their king into check
 			if ((rankMasks[piecePosition / 8] & whRook) != 0 || (rankMasks[piecePosition / 8] & whQueen) != 0) 	{
-				movableSquaresForDisplay ^= (pieceBitBoard << 7) & bitBoard & notCapturable & ~FILE_H;
-				movableSquaresForDisplay ^= (pieceBitBoard << 9) & bitBoard & notCapturable & ~FILE_A;
+				movableSquaresForDisplay ^= (pieceBitBoard << 7) & enPassantBlack;
+				movableSquaresForDisplay ^= (pieceBitBoard << 9) & enPassantBlack;
 				std::cout << "Special Condition found" << std::endl;
 			}
 		}
@@ -99,7 +99,7 @@ public:
 		attackSquaresPawn = 0ULL;
 		attackSquaresPawn |= (pieceBitBoard >> 7) & notCapturable & ~FILE_A; //Capture right. Includes potential promotion
 		attackSquaresPawn |= (pieceBitBoard >> 9) & notCapturable & ~FILE_H; //Capture left. Includes potential promotion
-
+		
 		enemyPiecesThatAreDefended |= (pieceBitBoard >> 7) & myPieces & ~FILE_A;
 		enemyPiecesThatAreDefended |= (pieceBitBoard >> 9) & myPieces & ~FILE_H;
 	}

@@ -56,6 +56,7 @@ public:
 					squaresToBlockCheckOrCapture |= ~oneNegatedPiece & aPathToAttackKing | (1ULL << queenLocation);
 
 				checkPathXRayThroughKing |= diagonalMasks[(queenLocation / 8) + (queenLocation % 8)];
+				locationOfPieceAttackingKing |= 1ULL << queenLocation;
 			}
 
 			attackSquaresQueen |= aPathToAttackKing;
@@ -78,6 +79,7 @@ public:
 					squaresToBlockCheckOrCapture |= ~oneNegatedPiece & aPathToAttackKing | (1ULL << queenLocation);
 
 				checkPathXRayThroughKing |= antiDiagonalMasks[(queenLocation / 8) + 7 - (queenLocation % 8)];
+				locationOfPieceAttackingKing |= 1ULL << queenLocation;
 			}
 
 			attackSquaresQueen |= aPathToAttackKing;
@@ -100,6 +102,7 @@ public:
 					squaresToBlockCheckOrCapture |= ~oneNegatedPiece & aPathToAttackKing | (1ULL << queenLocation);
 
 				checkPathXRayThroughKing |= fileMasks[queenLocation % 8];
+				locationOfPieceAttackingKing |= 1ULL << queenLocation;
 			}
 
 			attackSquaresQueen |= aPathToAttackKing;
@@ -122,6 +125,7 @@ public:
 					squaresToBlockCheckOrCapture |= ~oneNegatedPiece & aPathToAttackKing | (1ULL << queenLocation);
 
 				checkPathXRayThroughKing |= rankMasks[queenLocation / 8];
+				locationOfPieceAttackingKing |= 1ULL << queenLocation;
 			}
 
 			attackSquaresQueen |= aPathToAttackKing;

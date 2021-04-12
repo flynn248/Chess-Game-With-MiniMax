@@ -42,20 +42,10 @@ public:
 		else
 			movableSquaresForDisplay |= KingSpan >> (9 - piecePosition);
 
-		//unsigned long long squaresKingCanMove = 0xFFFFFFFFFFFFFFFF;
-		//printBitBoard(squaresTheEnemyAttacks);
-		//std::cout << std::endl;
-		//if (squaresToBlockCheckOrCapture != 0xFFFFFFFFFFFFFFFF)
-		//	squaresKingCanMove = ~squaresTheEnemyAttacks;//| (squaresTheEnemyAttacks ^ squaresToBlockCheckOrCapture) for if king is in check
-		//else
-		//	squaresKingCanMove = ~squaresTheEnemyAttacks; //if king is not in check
-		if (!isWhite) 	{
-			printBitBoard(squaresTheEnemyAttacks);
-		}
 		if (piecePosition % 8 < 4)  //prevent magical looping of king to other side of board
-			movableSquaresForDisplay &= ~FILE_GH & notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing & ~enemyPiecesThatAreDefended;
+			movableSquaresForDisplay &= ~FILE_GH & notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing | locationOfPieceAttackingKing & ~enemyPiecesThatAreDefended;
 		else
-			movableSquaresForDisplay &= ~FILE_AB & notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing & ~enemyPiecesThatAreDefended;
+			movableSquaresForDisplay &= ~FILE_AB & notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing | locationOfPieceAttackingKing & ~enemyPiecesThatAreDefended;
 
 	}
 	void singlePieceCastleSquaresWhite() {
@@ -151,13 +141,9 @@ public:
 				allPotentialMoves = KingSpan >> (9 - kingLocation);
 
 			if (kingLocation % 8 < 4)  //prevent magical looping of king to other side of board
-				allPotentialMoves &= ~FILE_GH & notCapturable;
+				allPotentialMoves &= ~FILE_GH & notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing & ~enemyPiecesThatAreDefended;
 			else
-				allPotentialMoves &= ~FILE_AB & notCapturable;
-
-			attackSquaresKing = 0ULL;
-			allPotentialMoves &= ~squaresTheEnemyAttacks;
-			attackSquaresKing |= allPotentialMoves;
+				allPotentialMoves &= ~FILE_AB & notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing & ~enemyPiecesThatAreDefended;
 
 			unsigned long long aPotentialMove = allPotentialMoves & ~(allPotentialMoves - 1);
 			while (aPotentialMove != 0) {

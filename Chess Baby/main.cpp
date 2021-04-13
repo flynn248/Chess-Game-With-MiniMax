@@ -22,18 +22,11 @@ Create a Tile class that holds if a piece is in a spot on chessBoard. Also hold 
 
 Have a 1D array for the pieces on the board. The index of the piece would just be the row*col. 
 */
-int boardInfoCount = 0;
-
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include "ChessBoard.h"
-//#include "PieceInterface.h"
 #include "StaticMemberInitialization.h"
-//#include "BoardSquare.h"
-//#include "MoveGenerator.h"
-//#include "Display.h"
 #include "Player.h"
-//#include "BoardInfo.h"
 
 int main() {
 	float windowWidth = 960; //x and y of window

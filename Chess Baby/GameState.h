@@ -7,7 +7,7 @@ public:
 	~GameState();
 
 private:
-
+	test;
 };
 
 #endif // !GAMESTATE_H

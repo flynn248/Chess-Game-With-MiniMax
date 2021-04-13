@@ -452,6 +452,8 @@ public:
 		whBishopPiece->updateAttackSquares(whBishop, blKing, closestPiecesToKing, whPieces);
 		whKnightPiece->updateAttackSquares(whKnight, blKing, whPieces);
 		notCapturable = ~(blPieces | whKing);
+		
+		printBitBoard(whPieces);
 
 		squaresWhiteAttacks = 0ULL;
 		squaresWhiteAttacks |= attackSquaresKing;
@@ -637,10 +639,7 @@ public:
 	Queen* getBlackQueenPiece() { return blQueenPiece; }
 	King* getBlackKingPiece() { return blKingPiece; }
 
-	std::unique_ptr<std::vector<uint16_t>> kingMovesWhite() {
-		//whKingPiece->setSquaresTheEnemyAttacks(squaresBlackAttacks);
-		return whKingPiece->legalMoves(whKing);
-	}
+	std::unique_ptr<std::vector<uint16_t>> kingMovesWhite() { return whKingPiece->legalMoves(whKing); }
 	std::unique_ptr<std::vector<uint16_t>> queenMovesWhite() { return whQueenPiece->legalMoves(whQueen); }
 	std::unique_ptr<std::vector<uint16_t>> rookMovesWhite() { return whRookPiece->legalMoves(whRook); }
 	std::unique_ptr<std::vector<uint16_t>> bishopMovesWhite() { return whBishopPiece->legalMoves(whBishop); }
@@ -649,10 +648,7 @@ public:
 	std::unique_ptr<std::vector<uint16_t>> castlingMovesWhite() { return whKingPiece->castlingMovesWhite(); }
 	std::unique_ptr<std::vector<uint16_t>> enPassantMovesWhite() { return whPawnPiece->ePassantSquaresWhite(whPawn); }
 
-	std::unique_ptr<std::vector<uint16_t>> kingMovesBlack() {
-		//blKingPiece->setSquaresTheEnemyAttacks(squaresWhiteAttacks);
-		return blKingPiece->legalMoves(blKing);
-	}
+	std::unique_ptr<std::vector<uint16_t>> kingMovesBlack() { return blKingPiece->legalMoves(blKing); }
 	std::unique_ptr<std::vector<uint16_t>> queenMovesBlack() { return blQueenPiece->legalMoves(blQueen); }
 	std::unique_ptr<std::vector<uint16_t>> rookMovesBlack() { return blRookPiece->legalMoves(blRook); }
 	std::unique_ptr<std::vector<uint16_t>> bishopMovesBlack() { return blBishopPiece->legalMoves(blBishop); }

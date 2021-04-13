@@ -400,11 +400,6 @@ struct Player {
 		return false;
 	}
 
-	void checkForCheck() {//checks for if the king is in check. Could look at attacking squares of enemy player for each piece. Add up bools where attacking king is true
-		//if the bools are greater than one, then there is at least a double check and the king has to make a move.
-		//if for any check there is no legal move, then there is check mate.
-
-	}
 	void updateGameState() {
 
 		grabbedPiece->updateBitBoardPosition();

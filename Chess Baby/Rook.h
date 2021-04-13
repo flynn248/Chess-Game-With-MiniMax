@@ -36,7 +36,7 @@ public:
 			else if ((fileMasks[piecePosition % 8] & whKing) != 0) //if king is on same file (vert)
 				return verticalMoves(piecePosition) & notCapturable;
 			else
-				std::cout << "ERROR: Failed to find path from pinned piece to king!\n";
+				return 0ULL;
 		}
 		else {
 			if ((rankMasks[piecePosition / 8] & blKing) != 0)  //if king is on same rank (horz)
@@ -44,8 +44,9 @@ public:
 			else if ((fileMasks[piecePosition % 8] & blKing) != 0) //if king is on same file (vert)
 				return verticalMoves(piecePosition) & notCapturable;
 			else
-				std::cout << "ERROR: Failed to find path from pinned piece to king!\n";
+				return 0ULL;
 		}
+		std::cout << "ERROR: Failed to find path from pinned piece to king!\n";
 	}
 
 	void updateAttackSquares(unsigned long long pieceBitBoard, unsigned long long kingBitBoard, unsigned long long& enemyKingLociSpread, unsigned long long& myPieces) {

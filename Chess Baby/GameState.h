@@ -1,7 +1,7 @@
 #ifndef GAMESTATE_H
 #define GAMESTATE_H
 
-struct GameState 				{
+struct GameState {
 public:
 	GameState();
 	~GameState();

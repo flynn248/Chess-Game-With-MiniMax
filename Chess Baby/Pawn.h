@@ -80,6 +80,7 @@ public:
 				return false;
 			}
 		}
+		return true;
 	}
 	void singlePieceMoveableSquaresBlack(const int& piecePosition) {
 		unsigned long long pieceBitBoard = (1ULL << piecePosition);
@@ -137,6 +138,7 @@ public:
 				return false;
 			}
 		}
+		return true;
 	}
 	void updateAttackSquaresWhite(const unsigned long long& pieceBitBoard, const unsigned long long& myPieces) {
 		attackSquaresPawn = 0ULL;

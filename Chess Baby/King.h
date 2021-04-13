@@ -36,16 +36,19 @@ public:
 	}
 	void singlePieceMoveableSquares(const int& piecePosition) {
 		movableSquaresForDisplay = 0ULL;
-
 		if (piecePosition > 9)
 			movableSquaresForDisplay |= KingSpan << (piecePosition - 9);
 		else
 			movableSquaresForDisplay |= KingSpan >> (9 - piecePosition);
 
+		unsigned long long pieceAttackingKing = 0ULL;
+		if ((enemyPiecesThatAreDefended & locationOfPieceAttackingKing) == 0) //if piece attacking king is not defended
+			pieceAttackingKing = locationOfPieceAttackingKing;
+		
 		if (piecePosition % 8 < 4)  //prevent magical looping of king to other side of board
-			movableSquaresForDisplay &= ~FILE_GH & notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing | locationOfPieceAttackingKing & ~enemyPiecesThatAreDefended;
+			movableSquaresForDisplay &= ~FILE_GH & notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing & ~enemyPiecesThatAreDefended | pieceAttackingKing;
 		else
-			movableSquaresForDisplay &= ~FILE_AB & notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing | locationOfPieceAttackingKing & ~enemyPiecesThatAreDefended;
+			movableSquaresForDisplay &= ~FILE_AB & notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing & ~enemyPiecesThatAreDefended | pieceAttackingKing;
 
 	}
 	void singlePieceCastleSquaresWhite() {
@@ -140,10 +143,14 @@ public:
 			else
 				allPotentialMoves = KingSpan >> (9 - kingLocation);
 
+			unsigned long long pieceAttackingKing = 0ULL;
+			if ((enemyPiecesThatAreDefended & locationOfPieceAttackingKing) == 0) //if piece attacking king is not defended
+				pieceAttackingKing = locationOfPieceAttackingKing;
+
 			if (kingLocation % 8 < 4)  //prevent magical looping of king to other side of board
-				allPotentialMoves &= ~FILE_GH & notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing & ~enemyPiecesThatAreDefended;
+				allPotentialMoves &= ~FILE_GH & notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing & ~enemyPiecesThatAreDefended | pieceAttackingKing;
 			else
-				allPotentialMoves &= ~FILE_AB & notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing & ~enemyPiecesThatAreDefended;
+				allPotentialMoves &= ~FILE_AB & notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing & ~enemyPiecesThatAreDefended | pieceAttackingKing;
 
 			unsigned long long aPotentialMove = allPotentialMoves & ~(allPotentialMoves - 1);
 			while (aPotentialMove != 0) {

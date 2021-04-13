@@ -435,7 +435,6 @@ public:
 		blKnightPiece->updatePositionForDisplay();
 	}
 	void updateSquaresWhiteAttacks() {
-		notCapturable ^= blKing;
 		squaresToBlockCheckOrCapture = 0ULL;
 		locationOfPieceAttackingKing = 0ULL;
 		pinnedPiecesBitBoard = 0ULL;
@@ -444,6 +443,7 @@ public:
 		unsigned long long closestPiecesToKing = findClosestPieceToKing(numOfTrailingZeros(blKing)); //for finding pinned pieces for black
 
 		whKingPiece->updateAttackSquares(whKing, whPieces);
+		notCapturable ^= blKing;
 		whPawnPiece->updateAttackSquaresWhite(whPawn, whPieces);
 		whRookPiece->updateAttackSquares(whRook, blKing, closestPiecesToKing, whPieces);
 		whQueenPiece->updateAttackSquares(whQueen, blKing, closestPiecesToKing, whPieces);
@@ -477,7 +477,6 @@ public:
 		checkForCheckBlack();
 	}
 	void updateSquaresBlackAttacks() {
-		notCapturable ^= whKing; //useful for finding checks
 		squaresToBlockCheckOrCapture = 0ULL;
 		locationOfPieceAttackingKing = 0ULL;
 		pinnedPiecesBitBoard = 0ULL;
@@ -486,6 +485,7 @@ public:
 		unsigned long long closestPiecesToKing = findClosestPieceToKing(numOfTrailingZeros(whKing)); //for finding pinned pieces for white
 
 		blKingPiece->updateAttackSquares(blKing, blPieces);
+		notCapturable ^= whKing; //useful for finding checks
 		blPawnPiece->updateAttackSquaresBlack(blPawn, blPieces);
 		blRookPiece->updateAttackSquares(blRook, whKing, closestPiecesToKing, blPieces);
 		blQueenPiece->updateAttackSquares(blQueen, whKing, closestPiecesToKing, blPieces);

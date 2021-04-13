@@ -99,7 +99,7 @@ public:
 			else if ((antiDiagonalMasks[(piecePosition / 8) + 7 - (piecePosition % 8)] & whKing) != 0) //if king is at antiDiagonal
 				return antiDiagMoves(piecePosition) & notCapturable;
 			else
-				std::cout << "ERROR: Failed to find path from pinned piece to king!\n";
+				return 0ULL;
 		}
 		else {
 			if ((diagonalMasks[(piecePosition / 8) + (piecePosition % 8)] & blKing) != 0) //if king is at a diagonal
@@ -107,8 +107,9 @@ public:
 			else if ((antiDiagonalMasks[(piecePosition / 8) + 7 - (piecePosition % 8)] & blKing) != 0) //if king is at antiDiagonal
 				return antiDiagMoves(piecePosition) & notCapturable;
 			else
-				std::cout << "ERROR: Failed to find path from pinned piece to king!\n";
+				return 0ULL;
 		}
+		std::cout << "ERROR: Failed to find path from pinned piece to king!\n";
 	}
 
 	std::unique_ptr<std::vector<uint16_t>> playerLegalMoves() { //Get legal moves for human player
@@ -126,8 +127,8 @@ public:
 		
 		while (bishopPiece != 0) {
 			int bishopLocation = numOfTrailingZeros(bishopPiece);
-			if (((1ULL << bishopPiece) & pinnedPiecesBitBoard) != 0)//if piece is pinned
-				allPotentialMoves = moveableSquaresWhenPinned(bishopPiece);
+			if (((1ULL << bishopLocation) & pinnedPiecesBitBoard) != 0)//if piece is pinned
+				allPotentialMoves = moveableSquaresWhenPinned(bishopLocation);
 			else
 				allPotentialMoves = diagNAntiDagMoves(bishopLocation) & notCapturable & squaresToBlockCheckOrCapture;
 			

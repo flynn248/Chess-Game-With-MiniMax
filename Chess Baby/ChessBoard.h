@@ -19,6 +19,8 @@ protected:
 	static const int BSIZE = 8;
 	float tileWidth;
 	bool isWhiteMove; //true for white move, false for black
+	bool isCheckMate = false,
+		isStaleMate = false;
 	sf::RectangleShape board[BSIZE][BSIZE];
 	sf::RectangleShape tileSquare;
 	sf::Color whtTileColor,
@@ -449,6 +451,7 @@ public:
 		whQueenPiece->updateAttackSquares(whQueen, blKing, closestPiecesToKing, whPieces);
 		whBishopPiece->updateAttackSquares(whBishop, blKing, closestPiecesToKing, whPieces);
 		whKnightPiece->updateAttackSquares(whKnight, blKing, whPieces);
+		notCapturable = ~(blPieces | whKing);
 
 		squaresWhiteAttacks = 0ULL;
 		squaresWhiteAttacks |= attackSquaresKing;
@@ -491,6 +494,7 @@ public:
 		blQueenPiece->updateAttackSquares(blQueen, whKing, closestPiecesToKing, blPieces);
 		blBishopPiece->updateAttackSquares(blBishop, whKing, closestPiecesToKing, blPieces);
 		blKnightPiece->updateAttackSquares(blKnight, whKing, blPieces);
+		notCapturable = ~(whPieces | blKing); //For 
 
 		squaresBlackAttacks = 0ULL;
 		squaresBlackAttacks |= attackSquaresKing;
@@ -527,6 +531,9 @@ public:
 		
 		if ((squaresBlackAttacks & whKing) == 0) {
 			squaresToBlockCheckOrCapture = 0xFFFFFFFFFFFFFFFF;
+			if (checkIfWhiteIsStaleMated() == true) 	{
+				isStaleMate = true;
+			}
 			return;
 		}
 
@@ -537,12 +544,17 @@ public:
 		if ((blAttackPawn & whKing) != 0) { numberOfChecks++; }
 
 		if (numberOfChecks == 0) { squaresToBlockCheckOrCapture = 0xFFFFFFFFFFFFFFFF; }
+		else if (checkIfWhiteIsMated() == true) { isCheckMate = true; }
+
 	}
 	void checkForCheckBlack() {
 		numberOfChecks = 0;
 
 		if ((squaresWhiteAttacks & blKing) == 0) {
 			squaresToBlockCheckOrCapture = 0xFFFFFFFFFFFFFFFF;
+			if (checkIfBlackIsStaleMated() == true) 	{
+				isStaleMate = true;
+			}
 			return;
 		}
 
@@ -553,8 +565,35 @@ public:
 		if ((whAttackPawn & blKing) != 0) { numberOfChecks++; }
 
 		if (numberOfChecks == 0) { squaresToBlockCheckOrCapture = 0xFFFFFFFFFFFFFFFF; }
+		else if (checkIfBlackIsMated() == true) { isCheckMate = true; }
 	}
-
+	
+	bool checkIfWhiteIsMated() { return checkIfWhiteCannotMove(); }
+	bool checkIfBlackIsMated() { return checkIfBlackCannotMove(); }
+	bool checkIfWhiteIsStaleMated() { return checkIfWhiteCannotMove(); }
+	bool checkIfBlackIsStaleMated() { return checkIfBlackCannotMove(); }
+	bool checkIfWhiteCannotMove() {
+		if (queenMovesWhite()->size() == 0)
+			if (rookMovesWhite()->size() == 0)
+				if (bishopMovesWhite()->size() == 0)
+					if (knightMovesWhite()->size() == 0)
+						if (pawnMovesWhite()->size() == 0)
+							if (enPassantMovesWhite()->size() == 0)
+								if (kingMovesWhite()->size() == 0)
+									return true;
+		return false;
+	}
+	bool checkIfBlackCannotMove() {
+		if (queenMovesBlack()->size() == 0)
+			if (rookMovesBlack()->size() == 0)
+				if (bishopMovesBlack()->size() == 0)
+					if (knightMovesBlack()->size() == 0)
+						if (pawnMovesBlack()->size() == 0)
+							if (enPassantMovesBlack()->size() == 0)
+								if (kingMovesBlack()->size() == 0)
+									return true;
+		return false;
+	}
 	/*
 	void testMoveGenerationSpeed() {
 
@@ -580,6 +619,9 @@ public:
 	bool getIsWhiteMove() const {
 		return isWhiteMove;
 	}
+	bool getIsCheckMate() const { 
+		return isCheckMate; }
+	bool getIsStaleMate() const { return isStaleMate; }
 
 	Pawn* getWhitePawnPiece() { return whPawnPiece; }
 	Rook* getWhiteRookPiece() { return whRookPiece; }
@@ -596,7 +638,7 @@ public:
 	King* getBlackKingPiece() { return blKingPiece; }
 
 	std::unique_ptr<std::vector<uint16_t>> kingMovesWhite() {
-		whKingPiece->setSquaresTheEnemyAttacks(squaresBlackAttacks);
+		//whKingPiece->setSquaresTheEnemyAttacks(squaresBlackAttacks);
 		return whKingPiece->legalMoves(whKing);
 	}
 	std::unique_ptr<std::vector<uint16_t>> queenMovesWhite() { return whQueenPiece->legalMoves(whQueen); }
@@ -608,7 +650,7 @@ public:
 	std::unique_ptr<std::vector<uint16_t>> enPassantMovesWhite() { return whPawnPiece->ePassantSquaresWhite(whPawn); }
 
 	std::unique_ptr<std::vector<uint16_t>> kingMovesBlack() {
-		blKingPiece->setSquaresTheEnemyAttacks(squaresWhiteAttacks);
+		//blKingPiece->setSquaresTheEnemyAttacks(squaresWhiteAttacks);
 		return blKingPiece->legalMoves(blKing);
 	}
 	std::unique_ptr<std::vector<uint16_t>> queenMovesBlack() { return blQueenPiece->legalMoves(blQueen); }

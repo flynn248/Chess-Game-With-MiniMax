@@ -55,6 +55,12 @@ int main() {
 	while (window.isOpen()) {
 
 		sf::Event e;
+		if (board->getIsCheckMate() == true)
+			std::cout << "Checkmate Bitch!\n";
+		 
+		if (board->getIsStaleMate() == true)
+			std::cout << "The Stale Has Been Mated\n";
+		
 
 		while (window.pollEvent(e)) {
 			if (e.type == sf::Event::Closed) {
@@ -354,6 +360,17 @@ void initializePiecePosition(const float& frstSquareCentRef) {
 
 04/12/2021
 	Continuing to update the legal moves for pawns.
+	The king now follows legal moves
+
+04/13/2021
+	Added ability to check for checkmate
+	Added ability to check for stalemate
+	Added SavedGameState to save the game state for the minimax algorithm
+	Fixed king movement
+	Fixed pawn movement
+	Fixed bishop pin movement
+
+	Game should be ready to implement the MiniMax algorithm
 */
 
 /* Stuff from the Chess Wiki

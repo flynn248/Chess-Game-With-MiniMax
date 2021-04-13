@@ -51,7 +51,6 @@ public:
 			if ((rankMasks[piecePosition / 8] & blRook) != 0 || (rankMasks[piecePosition / 8] & blQueen) != 0) {
 				movableSquaresForDisplay ^= (pieceBitBoard >> 7) & enPassantWhite;
 				movableSquaresForDisplay ^= (pieceBitBoard >> 9) & enPassantWhite;
-				std::cout << "Special Condition found" << std::endl;
 			}
 		}
 
@@ -76,7 +75,6 @@ public:
 		unsigned long long pieceBitBoard = (1ULL << piecePosition);
 		if ((rankMasks[piecePosition / 8] & whKing) != 0) { //edge case to prevent pawn from enPassanting their king into check
 			if ((rankMasks[piecePosition / 8] & blRook) != 0 || (rankMasks[piecePosition / 8] & blQueen) != 0) {
-				std::cout << "Fuck your enPassant" << std::endl;
 				return false;
 			}
 		}
@@ -109,7 +107,6 @@ public:
 			if ((rankMasks[piecePosition / 8] & whRook) != 0 || (rankMasks[piecePosition / 8] & whQueen) != 0) 	{
 				movableSquaresForDisplay ^= (pieceBitBoard << 7) & enPassantBlack;
 				movableSquaresForDisplay ^= (pieceBitBoard << 9) & enPassantBlack;
-				std::cout << "Special Condition found" << std::endl;
 			}
 		}
 		
@@ -134,7 +131,6 @@ public:
 		unsigned long long pieceBitBoard = (1ULL << piecePosition);
 		if ((rankMasks[piecePosition / 8] & blKing) != 0) { //edge case to prevent pawn from enPassanting their king into check
 			if ((rankMasks[piecePosition / 8] & whRook) != 0 || (rankMasks[piecePosition / 8] & whQueen) != 0) {
-				std::cout << "Not today fucker!" << std::endl;
 				return false;
 			}
 		}

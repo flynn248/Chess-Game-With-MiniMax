@@ -1,7 +1,11 @@
 #ifndef GAMESTATE_H
 #define GAMESTATE_H
 
-struct GameState {
+struct SavedGameState {
+	unsigned long long cpyBitBoard = 0ULL;
+	unsigned long long cpyWhPieces = 0ULL;
+	unsigned long long cpyBlPieces = 0ULL;
+
 	unsigned long long cpyWhKing = 0ULL;
 	unsigned long long cpyWhRook = 0ULL;
 	unsigned long long cpyWhPawn = 0ULL;
@@ -30,7 +34,14 @@ struct GameState {
 	unsigned long long cpyBlAttackKnight = 0ULL;
 	unsigned long long cpyBlAttackBishop = 0ULL;
 
-	int cpy
+	unsigned long long cpySquaresToBlockCheckOrCapture = 0ULL;
+	unsigned long long cpyLocationOfPieceAttackingKing = 0ULL;
+	unsigned long long cpyPinnedPiecesBitBoard = 0ULL;
+	unsigned long long cpyCheckPathXRayThroughKing = 0ULL;
+	unsigned long long cpyEnemyPiecesThatAreDefended = 0ULL;
+	unsigned long long cpyNotCapturable = 0ULL;
+
+	int cpyNumberOfChecks = 0;
 };
 
 #endif // !GAMESTATE_H

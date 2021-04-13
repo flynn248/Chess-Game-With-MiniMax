@@ -23,26 +23,29 @@ public:
 	}
 	void singlePieceMoveableSquares(const int& piecePosition) {
 		movableSquaresForDisplay = 0ULL;
-		if (((1ULL << piecePosition) & pinnedPiecesBitBoard) != 0) {//if piece is pinned
-			if (isWhite) {
-				if ((rankMasks[piecePosition / 8] & whKing) != 0) //if king is on same rank (horz)
-					movableSquaresForDisplay |= horizontalMoves(piecePosition) & notCapturable;
-				else if ((fileMasks[piecePosition % 8] & whKing) != 0) //if king is on same file (vert)
-					movableSquaresForDisplay |= verticalMoves(piecePosition) & notCapturable;
-				else
-					std::cout << "ERROR: Failed to find path from pinned piece to king!\n";
-			}
-			else {
-				if ((rankMasks[piecePosition / 8] & blKing) != 0) //if king is on same rank (horz)
-					movableSquaresForDisplay |= horizontalMoves(piecePosition) & notCapturable;
-				else if ((fileMasks[piecePosition % 8] & blKing) != 0) //if king is on same file (vert)
-					movableSquaresForDisplay |= verticalMoves(piecePosition) & notCapturable;
-				else
-					std::cout << "ERROR: Failed to find path from pinned piece to king!\n";
-			}
-		}
+		if (((1ULL << piecePosition) & pinnedPiecesBitBoard) != 0)//if piece is pinned
+			movableSquaresForDisplay = moveableSquaresWhenPinned(piecePosition);
 		else
-			movableSquaresForDisplay |= HorzNVerticalMoves(piecePosition) & notCapturable & squaresToBlockCheckOrCapture;
+			movableSquaresForDisplay = HorzNVerticalMoves(piecePosition) & notCapturable & squaresToBlockCheckOrCapture;
+	}
+
+	unsigned long long moveableSquaresWhenPinned(const int& piecePosition) {
+		if (isWhite) {
+			if ((rankMasks[piecePosition / 8] & whKing) != 0) //if king is on same rank (horz)
+				return horizontalMoves(piecePosition) & notCapturable;
+			else if ((fileMasks[piecePosition % 8] & whKing) != 0) //if king is on same file (vert)
+				return verticalMoves(piecePosition) & notCapturable;
+			else
+				std::cout << "ERROR: Failed to find path from pinned piece to king!\n";
+		}
+		else {
+			if ((rankMasks[piecePosition / 8] & blKing) != 0)  //if king is on same rank (horz)
+				return horizontalMoves(piecePosition) & notCapturable;
+			else if ((fileMasks[piecePosition % 8] & blKing) != 0) //if king is on same file (vert)
+				return verticalMoves(piecePosition) & notCapturable;
+			else
+				std::cout << "ERROR: Failed to find path from pinned piece to king!\n";
+		}
 	}
 
 	void updateAttackSquares(unsigned long long pieceBitBoard, unsigned long long kingBitBoard, unsigned long long& enemyKingLociSpread, unsigned long long& myPieces) {
@@ -61,7 +64,6 @@ public:
 			if ((fileMasks[rookLocation % 8] & kingBitBoard) != 0) { //if enemy king is in attack path
 				if (((uneditedAttackPath & ~myPieces) & enemyKingLociSpread) != 0) { //if one enemy piece is on path of attack to king
 					pinnedPiecesBitBoard |= (uneditedAttackPath & ~myPieces) & enemyKingLociSpread;
-					std::cout << "You a bitch\n";
 				}
 			}
 
@@ -74,9 +76,11 @@ public:
 					squaresToBlockCheckOrCapture |= ~oneNegatedPiece & aPathToAttackKing | (1ULL << rookLocation);
 
 				checkPathXRayThroughKing |= fileMasks[rookLocation % 8];
+				locationOfPieceAttackingKing |= 1ULL << rookLocation;
 			}
 
 			attackSquaresRook |= aPathToAttackKing;
+			enemyPiecesThatAreDefended |= uneditedAttackPath & myPieces;
 
 			uneditedAttackPath = horizontalMoves(rookLocation);
 			//for finding a pinned piece
@@ -96,9 +100,11 @@ public:
 					squaresToBlockCheckOrCapture |= ~oneNegatedPiece & aPathToAttackKing | (1ULL << rookLocation);
 
 				checkPathXRayThroughKing |= rankMasks[rookLocation / 8];
+				locationOfPieceAttackingKing |= 1ULL << rookLocation;
 			}
 
 			attackSquaresRook |= aPathToAttackKing;
+			enemyPiecesThatAreDefended |= uneditedAttackPath & myPieces;
 
 			pieceBitBoard &= ~(1ULL << rookLocation);
 			rookPiece = pieceBitBoard;
@@ -107,12 +113,10 @@ public:
 	}
 
 	std::unique_ptr<std::vector<uint16_t>> playerLegalMoves() { //Get legal moves for human player
-		if (isWhite) 	{
+		if (isWhite)
 			return legalMoves(whRook);
-		}
-		else 	{
+		else
 			return legalMoves(blRook);
-		}
 	}
 
 	std::unique_ptr<std::vector<uint16_t>> legalMoves(unsigned long long pieceBitBoard) {
@@ -121,12 +125,14 @@ public:
 		unsigned long long rookPiece = pieceBitBoard;
 		unsigned long long allPotentialMoves = 0ULL;
 
-		attackSquaresRook = 0ULL;
-
 		while (rookPiece != 0) {
 			int rookLocation = numOfTrailingZeros(rookPiece);
-			allPotentialMoves = HorzNVerticalMoves(rookLocation) & notCapturable;
-			attackSquaresRook |= allPotentialMoves;
+			
+			if (((1ULL << rookLocation) & pinnedPiecesBitBoard) != 0)//if piece is pinned
+				allPotentialMoves = moveableSquaresWhenPinned(rookLocation);
+			else
+				allPotentialMoves = HorzNVerticalMoves(rookLocation) & notCapturable & squaresToBlockCheckOrCapture;
+
 			unsigned long long aPotentialMove = allPotentialMoves & ~(allPotentialMoves - 1);
 
 			while (aPotentialMove != 0) {
@@ -147,21 +153,3 @@ public:
 };
 
 #endif
-
-//void updateAttackSquares(unsigned long long pieceBitBoard) {
-//	unsigned long long rookPiece = pieceBitBoard;
-//	unsigned long long allPotentialMoves = 0ULL;
-//
-//	attackSquaresRook = 0ULL;
-//
-//	while (rookPiece != 0) {
-//		int rookLocation = numOfTrailingZeros(rookPiece);
-//		allPotentialMoves = HorzNVerticalMoves(rookLocation) & notCapturable;
-//		attackSquaresRook |= allPotentialMoves;
-//		unsigned long long aPotentialMove = allPotentialMoves & ~(allPotentialMoves - 1);
-//
-//		pieceBitBoard &= ~(1ULL << rookLocation);
-//		rookPiece = pieceBitBoard;
-//	}
-//
-//}

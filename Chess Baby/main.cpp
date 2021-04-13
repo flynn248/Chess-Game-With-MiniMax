@@ -1,7 +1,7 @@
 //Developed by Shane Flynn
 //Chess game with an AI using Alpha Beta pruning on a minimax algortihm
 //Last edited 04/11/2021
-//This was added inside of finialize legal moves again
+
 /* Things to Ponder
 
 How will you know which piece is grabbed when on click? //Could make a find who is clicked function. Just loop through the pieces on which ever color's turn it is
@@ -345,6 +345,15 @@ void initializePiecePosition(const float& frstSquareCentRef) {
 	Bug
 		-King can move to an attacked square in same path as in check
 
+	When aligning the legal moves with the display moves, make a function for pinned pieces that returns the possible spots. Can work for display and legal move purposes.
+
+	Fixed bug
+		-EnPassent into check
+
+	Add a board of enemy pieces that are defending another. Can be found by negating notCapturable
+
+04/12/2021
+	Continuing to update the legal moves for pawns.
 */
 
 /* Stuff from the Chess Wiki

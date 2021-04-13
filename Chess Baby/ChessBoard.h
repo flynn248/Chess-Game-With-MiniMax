@@ -205,10 +205,11 @@ public:
 
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
-				std::cout << std::bitset<1>(aBitBoard >> (i*8 + j)) << "  ";
+				std::cout << std::bitset<1>(aBitBoard >> (i*8 + j)) << " ";
 			}
 			std::cout << std::endl;
 		}
+		std::cout << std::endl;
 	}
 												  
 	/*
@@ -439,14 +440,15 @@ public:
 		locationOfPieceAttackingKing = 0ULL;
 		pinnedPiecesBitBoard = 0ULL;
 		checkPathXRayThroughKing = 0ULL;
+		enemyPiecesThatAreDefended = 0ULL;
 		unsigned long long closestPiecesToKing = findClosestPieceToKing(numOfTrailingZeros(blKing)); //for finding pinned pieces for black
 
-		whKingPiece->updateAttackSquares(whKing);
-		whPawnPiece->updateAttackSquaresWhite(whPawn);
+		whKingPiece->updateAttackSquares(whKing, whPieces);
+		whPawnPiece->updateAttackSquaresWhite(whPawn, whPieces);
 		whRookPiece->updateAttackSquares(whRook, blKing, closestPiecesToKing, whPieces);
 		whQueenPiece->updateAttackSquares(whQueen, blKing, closestPiecesToKing, whPieces);
 		whBishopPiece->updateAttackSquares(whBishop, blKing, closestPiecesToKing, whPieces);
-		whKnightPiece->updateAttackSquares(whKnight, blKing);
+		whKnightPiece->updateAttackSquares(whKnight, blKing, whPieces);
 
 		squaresWhiteAttacks = 0ULL;
 		squaresWhiteAttacks |= attackSquaresKing;
@@ -455,7 +457,7 @@ public:
 		squaresWhiteAttacks |= attackSquaresBishop;
 		squaresWhiteAttacks |= attackSquaresPawn;
 		squaresWhiteAttacks |= attackSquaresKnight;
-		//squaresWhiteAttacks |= attackSquaresEnPassant;
+
 		blKingPiece->setSquaresTheEnemyAttacks(squaresWhiteAttacks);
 
 		whAttackKing = 0ULL;
@@ -471,7 +473,7 @@ public:
 		whAttackBishop |= attackSquaresBishop;
 		whAttackPawn |= attackSquaresPawn;
 		whAttackKnight |= attackSquaresKnight;
-		//squaresBlackAttacks |= attackSquaresEnPassant;
+
 		checkForCheckBlack();
 	}
 	void updateSquaresBlackAttacks() {
@@ -480,14 +482,15 @@ public:
 		locationOfPieceAttackingKing = 0ULL;
 		pinnedPiecesBitBoard = 0ULL;
 		checkPathXRayThroughKing = 0ULL;
+		enemyPiecesThatAreDefended = 0ULL;
 		unsigned long long closestPiecesToKing = findClosestPieceToKing(numOfTrailingZeros(whKing)); //for finding pinned pieces for white
-		//printBitBoard(closestPiecesToKing);
-		blKingPiece->updateAttackSquares(blKing);
-		blPawnPiece->updateAttackSquaresBlack(blPawn);
+
+		blKingPiece->updateAttackSquares(blKing, blPieces);
+		blPawnPiece->updateAttackSquaresBlack(blPawn, blPieces);
 		blRookPiece->updateAttackSquares(blRook, whKing, closestPiecesToKing, blPieces);
 		blQueenPiece->updateAttackSquares(blQueen, whKing, closestPiecesToKing, blPieces);
 		blBishopPiece->updateAttackSquares(blBishop, whKing, closestPiecesToKing, blPieces);
-		blKnightPiece->updateAttackSquares(blKnight, whKing);
+		blKnightPiece->updateAttackSquares(blKnight, whKing, blPieces);
 
 		squaresBlackAttacks = 0ULL;
 		squaresBlackAttacks |= attackSquaresKing;
@@ -496,6 +499,7 @@ public:
 		squaresBlackAttacks |= attackSquaresBishop;
 		squaresBlackAttacks |= attackSquaresPawn;
 		squaresBlackAttacks |= attackSquaresKnight;
+
 		whKingPiece->setSquaresTheEnemyAttacks(squaresBlackAttacks);
 
 		blAttackKing = 0ULL;
@@ -526,10 +530,7 @@ public:
 			return;
 		}
 
-		if ((blAttackBishop & whKing) != 0) 	{
-			//blBishopPiece->findPathToCheck(blBishop, whKing);
-			numberOfChecks++;
-		}
+		if ((blAttackBishop & whKing) != 0) { numberOfChecks++; }
 		if ((blAttackQueen & whKing) != 0) 	{ numberOfChecks++; }
 		if ((blAttackRook & whKing) != 0) { numberOfChecks++; }
 		if ((blAttackKnight & whKing) != 0) { numberOfChecks++; }
@@ -575,26 +576,6 @@ public:
 	unsigned long long findClosestPieceToKing(const int& kingLocation) {
 		return (HorzNVerticalMoves(kingLocation) | diagNAntiDagMoves(kingLocation) & notCapturable);
 	}
-	/* //Dead code
-	void findAllPinnedPiecesWhite() {
-		unsigned long long kingLociSpreadBB = whKing;
-		int kingLocation = numOfTrailingZeros(whKing);
-		//find first instance of same color pieces in all directions
-		kingLociSpreadBB |= HorzNVerticalMoves(kingLocation) & ~notCapturable;
-		kingLociSpreadBB |= diagNAntiDagMoves(kingLocation) & ~notCapturable;
-		
-		findPinnedPiece(whQueen, whKing, (squaresBlackAttacks | whKing), kingLociSpreadBB, whPinnedPiecesBitBoard, queenPinnedLegalMoves);
-	}
-
-	void findPinnedPiece(const unsigned long long& pieceBitBoard, const unsigned long long& kingBitBoard, const unsigned long long& enemyAttackSquaresPlusKing,
-		const unsigned long long& kingLociSpreadBB, unsigned long long& pinnedPieceBitBoard, unsigned long long& legalMovesPinnedPiece) {
-
-		if ((enemyAttackSquaresPlusKing & ((pieceBitBoard | kingBitBoard) & kingLociSpreadBB)) != kingBitBoard) 	{
-
-		}
-	}
-	*/
-	
 
 	bool getIsWhiteMove() const {
 		return isWhiteMove;

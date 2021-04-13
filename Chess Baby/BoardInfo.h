@@ -80,7 +80,8 @@ struct BoardInfo {
 	//static unsigned long long queenPinnedLegalMoves; //not used
 	//static unsigned long long bishopPinnedLegalMoves; //not used
 	//static unsigned long long rookPinnedLegalMoves; //not used
-	
+	static unsigned long long enemyPiecesThatAreDefended;
+
 	static unsigned long long squaresToBlockCheckOrCapture;
 	static unsigned long long locationOfPieceAttackingKing;
 	static unsigned long long checkPathXRayThroughKing;

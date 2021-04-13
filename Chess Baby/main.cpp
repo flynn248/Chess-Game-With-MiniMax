@@ -351,6 +351,9 @@ void initializePiecePosition(const float& frstSquareCentRef) {
 		-EnPassent into check
 
 	Add a board of enemy pieces that are defending another. Can be found by negating notCapturable
+
+04/12/2021
+	Continuing to update the legal moves for pawns.
 */
 
 /* Stuff from the Chess Wiki

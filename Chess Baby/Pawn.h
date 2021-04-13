@@ -59,6 +59,28 @@ public:
 		movableSquaresForDisplay |= (pieceBitBoard >> 16) & ~bitBoard & ~(bitBoard >> 8)& RANK_4;
 		movableSquaresForDisplay &= squaresToBlockCheckOrCapture;
 	}
+	bool canWhitePawnMoveWhenPinned(const int& piecePosition, const int moveType) {
+		unsigned long long pieceBitBoard = (1ULL << piecePosition);
+		if (moveType == 0 && (diagonalMasks[(piecePosition / 8) + (piecePosition % 8)] & whKing) != 0) //if king is at a diagonal
+			return true; //Capture right. Includes potential promotion
+		else if (moveType == 1 && (antiDiagonalMasks[(piecePosition / 8) + 7 - (piecePosition % 8)] & whKing) != 0) //if king is at antiDiagonal
+			return true; //Capture left. Includes potential promotion
+		else if ((rankMasks[piecePosition / 8] & whKing) != 0) //if king is on same rank (horz)
+			return false;
+		else if (moveType == 2 && (fileMasks[piecePosition % 8] & whKing) != 0) //if king is on same file (vert)
+			return true;
+		else
+			return false;
+	}
+	bool canWhitePawnEnPassant(const int& piecePosition) {
+		unsigned long long pieceBitBoard = (1ULL << piecePosition);
+		if ((rankMasks[piecePosition / 8] & whKing) != 0) { //edge case to prevent pawn from enPassanting their king into check
+			if ((rankMasks[piecePosition / 8] & blRook) != 0 || (rankMasks[piecePosition / 8] & blQueen) != 0) {
+				std::cout << "Fuck your enPassant" << std::endl;
+				return false;
+			}
+		}
+	}
 	void singlePieceMoveableSquaresBlack(const int& piecePosition) {
 		unsigned long long pieceBitBoard = (1ULL << piecePosition);
 		movableSquaresForDisplay = 0ULL;
@@ -94,7 +116,28 @@ public:
 		movableSquaresForDisplay |= (pieceBitBoard << 16) & ~bitBoard & ~(bitBoard << 8) & RANK_5;
 		movableSquaresForDisplay &= squaresToBlockCheckOrCapture;
 	}
-
+	bool canBlackPawnMoveWhenPinned(const int& piecePosition, const int moveType) {
+		unsigned long long pieceBitBoard = (1ULL << piecePosition);
+		if (moveType == 0 && (diagonalMasks[(piecePosition / 8) + (piecePosition % 8)] & blKing) != 0) //if king is at a diagonal
+			return true; //Capture right. Includes potential promotion
+		else if (moveType == 1 && (antiDiagonalMasks[(piecePosition / 8) + 7 - (piecePosition % 8)] & blKing) != 0) //if king is at antiDiagonal
+			return true; //Capture left. Includes potential promotion
+		else if ((rankMasks[piecePosition / 8] & blKing) != 0) //if king is on same rank (horz)
+			return false;
+		else if (moveType == 2 && (fileMasks[piecePosition % 8] & blKing) != 0) //if king is on same file (vert)
+			return true;
+		else
+			return false;
+	}
+	bool canBlackPawnEnPassant(const int& piecePosition) {
+		unsigned long long pieceBitBoard = (1ULL << piecePosition);
+		if ((rankMasks[piecePosition / 8] & blKing) != 0) { //edge case to prevent pawn from enPassanting their king into check
+			if ((rankMasks[piecePosition / 8] & whRook) != 0 || (rankMasks[piecePosition / 8] & whQueen) != 0) {
+				std::cout << "Not today fucker!" << std::endl;
+				return false;
+			}
+		}
+	}
 	void updateAttackSquaresWhite(const unsigned long long& pieceBitBoard, const unsigned long long& myPieces) {
 		attackSquaresPawn = 0ULL;
 		attackSquaresPawn |= (pieceBitBoard >> 7) & notCapturable & ~FILE_A; //Capture right. Includes potential promotion
@@ -136,12 +179,19 @@ public:
 	std::unique_ptr<std::vector<uint16_t>> pawnMovesWhite(unsigned long long pieceBitBoard) {
 		std::unique_ptr<std::vector<uint16_t>> possibleMoves = std::make_unique<std::vector<uint16_t>>();
 		uint16_t mergeOfBeforeNAfterMove;
-		//attackSquaresPawn = 0ULL;
+		
 		unsigned long long PAWN_MOVES = (pieceBitBoard >> 7) & notCapturable & bitBoard & ~FILE_A & ~RANK_8 & squaresToBlockCheckOrCapture; //Capture right. Includes potential promotion
-		//attackSquaresPawn |= (pieceBitBoard >> 7) & notCapturable & ~FILE_A & ~RANK_8;
-
+		
 		while (PAWN_MOVES != 0) {
 			int attackedSquare = numOfTrailingZeros(PAWN_MOVES);
+
+			if (((1ULL << (attackedSquare + 7)) & pinnedPiecesBitBoard) != 0) 	{ //if piece is pinned
+				if (canWhitePawnMoveWhenPinned(attackedSquare + 7, 0) == false) 	{
+					PAWN_MOVES &= ~(1ULL << attackedSquare);
+					continue;
+				}
+			}
+			
 			mergeOfBeforeNAfterMove = (attackedSquare + 7); //Origional position of pawn
 			mergeOfBeforeNAfterMove |= (attackedSquare << 8);
 			possibleMoves->push_back(mergeOfBeforeNAfterMove);
@@ -150,10 +200,17 @@ public:
 		}
 
 		PAWN_MOVES = (pieceBitBoard >> 9) & notCapturable & bitBoard & ~FILE_H & ~RANK_8 & squaresToBlockCheckOrCapture; //Capture left. Includes potential promotion
-		//attackSquaresPawn |= (pieceBitBoard >> 9) & notCapturable & ~FILE_H & ~RANK_8;
-
+		
 		while (PAWN_MOVES != 0) {
 			int attackedSquare = numOfTrailingZeros(PAWN_MOVES);
+
+			if (((1ULL << (attackedSquare + 9)) & pinnedPiecesBitBoard) != 0) { //if piece is pinned
+				if (canWhitePawnMoveWhenPinned(attackedSquare + 9, 1) == false) {
+					PAWN_MOVES &= ~(1ULL << attackedSquare);
+					continue;
+				}
+			}
+
 			mergeOfBeforeNAfterMove = (attackedSquare + 9);
 			mergeOfBeforeNAfterMove |= (attackedSquare << 8);
 			possibleMoves->push_back(mergeOfBeforeNAfterMove);
@@ -165,6 +222,14 @@ public:
 
 		while (PAWN_MOVES != 0) {
 			int movedSquare = numOfTrailingZeros(PAWN_MOVES);
+
+			if (((1ULL << (movedSquare + 8)) & pinnedPiecesBitBoard) != 0) { //if piece is pinned
+				if (canWhitePawnMoveWhenPinned(movedSquare + 8, 2) == false) {
+					PAWN_MOVES &= ~(1ULL << movedSquare);
+					continue;
+				}
+			}
+
 			mergeOfBeforeNAfterMove = (movedSquare + 8);
 			mergeOfBeforeNAfterMove |= (movedSquare << 8);
 			possibleMoves->push_back(mergeOfBeforeNAfterMove);
@@ -176,6 +241,14 @@ public:
 
 		while (PAWN_MOVES != 0) {
 			int movedSquare = numOfTrailingZeros(PAWN_MOVES);
+
+			if (((1ULL << (movedSquare + 16)) & pinnedPiecesBitBoard) != 0) { //if piece is pinned
+				if (canWhitePawnMoveWhenPinned(movedSquare + 16, 2) == false) {
+					PAWN_MOVES &= ~(1ULL << movedSquare);
+					continue;
+				}
+			}
+
 			mergeOfBeforeNAfterMove = (movedSquare + 16);
 			mergeOfBeforeNAfterMove |= (movedSquare << 8);
 			mergeOfBeforeNAfterMove |= 128; //indicator bit of two square pawn push
@@ -187,10 +260,17 @@ public:
 		/***********Potential Pawn Promotion Section**************/
 
 		PAWN_MOVES = (pieceBitBoard >> 7) & notCapturable & bitBoard & ~FILE_A & RANK_8 & squaresToBlockCheckOrCapture; //Capture right. Includes potential promotion
-		//attackSquaresPawn |= (pieceBitBoard >> 7) & notCapturable & ~FILE_A & RANK_8;
-
+		
 		while (PAWN_MOVES != 0) {
 			int attackedSquare = numOfTrailingZeros(PAWN_MOVES);
+
+			if (((1ULL << (attackedSquare + 7)) & pinnedPiecesBitBoard) != 0) { //if piece is pinned
+				if (canWhitePawnMoveWhenPinned(attackedSquare + 7, 0) == false) {
+					PAWN_MOVES &= ~(1ULL << attackedSquare);
+					continue;
+				}
+			}
+
 			mergeOfBeforeNAfterMove = (attackedSquare + 7);
 			mergeOfBeforeNAfterMove |= (attackedSquare << 8);
 			mergeOfBeforeNAfterMove |= 64;
@@ -200,10 +280,17 @@ public:
 		}
 
 		PAWN_MOVES = (pieceBitBoard >> 9) & notCapturable & bitBoard & ~FILE_H & RANK_8 & squaresToBlockCheckOrCapture; //Capture left. Includes potential promotion
-		//attackSquaresPawn |= (pieceBitBoard >> 9) & notCapturable & ~FILE_H & RANK_8;
-
+		
 		while (PAWN_MOVES != 0) {
 			int attackedSquare = numOfTrailingZeros(PAWN_MOVES);
+
+			if (((1ULL << (attackedSquare + 9)) & pinnedPiecesBitBoard) != 0) { //if piece is pinned
+				if (canWhitePawnMoveWhenPinned(attackedSquare + 9, 1) == false) {
+					PAWN_MOVES &= ~(1ULL << attackedSquare);
+					continue;
+				}
+			}
+
 			mergeOfBeforeNAfterMove = (attackedSquare + 9);
 			mergeOfBeforeNAfterMove |= (attackedSquare << 8);
 			mergeOfBeforeNAfterMove |= 64;
@@ -216,6 +303,14 @@ public:
 
 		while (PAWN_MOVES != 0) {
 			int movedSquare = numOfTrailingZeros(PAWN_MOVES);
+
+			if (((1ULL << (movedSquare + 8)) & pinnedPiecesBitBoard) != 0) { //if piece is pinned
+				if (canWhitePawnMoveWhenPinned(movedSquare + 8, 2) == false) {
+					PAWN_MOVES &= ~(1ULL << movedSquare);
+					continue;
+				}
+			}
+
 			mergeOfBeforeNAfterMove = (movedSquare + 8);
 			mergeOfBeforeNAfterMove |= (movedSquare << 8);
 			mergeOfBeforeNAfterMove |= 64;
@@ -229,12 +324,19 @@ public:
 	std::unique_ptr<std::vector<uint16_t>> pawnMovesBlack(unsigned long long pieceBitBoard) {
 		std::unique_ptr<std::vector<uint16_t>> possibleMoves = std::make_unique<std::vector<uint16_t>>();
 		uint16_t mergeOfBeforeNAfterMove;
-		//attackSquaresPawn = 0ULL;
+		
 		unsigned long long PAWN_MOVES = (pieceBitBoard << 7) & notCapturable & bitBoard & ~FILE_H & ~RANK_1 & squaresToBlockCheckOrCapture; //Capture right
-		//attackSquaresPawn |= (pieceBitBoard << 7) & notCapturable & ~FILE_H & ~RANK_1;
-
+		
 		while (PAWN_MOVES != 0) {
 			int attackedSquare = numOfTrailingZeros(PAWN_MOVES);
+
+			if (((1ULL << (attackedSquare - 7)) & pinnedPiecesBitBoard) != 0) { //if piece is pinned
+				if (canBlackPawnMoveWhenPinned(attackedSquare - 7, 0) == false) {
+					PAWN_MOVES &= ~(1ULL << attackedSquare);
+					continue;
+				}
+			}
+
 			mergeOfBeforeNAfterMove = (attackedSquare - 7); //Origional position of pawn
 			mergeOfBeforeNAfterMove |= (attackedSquare << 8);
 			possibleMoves->push_back(mergeOfBeforeNAfterMove);
@@ -243,10 +345,17 @@ public:
 		}
 
 		PAWN_MOVES = (pieceBitBoard << 9) & notCapturable & bitBoard & ~FILE_A & ~RANK_1 & squaresToBlockCheckOrCapture; //Capture left
-		//attackSquaresPawn |= (pieceBitBoard << 9) & notCapturable & ~FILE_A & ~RANK_1;
-
+		
 		while (PAWN_MOVES != 0) {
 			int attackedSquare = numOfTrailingZeros(PAWN_MOVES);
+
+			if (((1ULL << (attackedSquare - 9)) & pinnedPiecesBitBoard) != 0) { //if piece is pinned
+				if (canBlackPawnMoveWhenPinned(attackedSquare - 9, 1) == false) {
+					PAWN_MOVES &= ~(1ULL << attackedSquare);
+					continue;
+				}
+			}
+
 			mergeOfBeforeNAfterMove = (attackedSquare - 9);
 			mergeOfBeforeNAfterMove |= (attackedSquare << 8);
 			possibleMoves->push_back(mergeOfBeforeNAfterMove);
@@ -258,6 +367,14 @@ public:
 
 		while (PAWN_MOVES != 0) {
 			int movedSquare = numOfTrailingZeros(PAWN_MOVES);
+
+			if (((1ULL << (movedSquare - 8)) & pinnedPiecesBitBoard) != 0) { //if piece is pinned
+				if (canBlackPawnMoveWhenPinned(movedSquare - 8, 2) == false) {
+					PAWN_MOVES &= ~(1ULL << movedSquare);
+					continue;
+				}
+			}
+
 			mergeOfBeforeNAfterMove = (movedSquare - 8);
 			mergeOfBeforeNAfterMove |= (movedSquare << 8);
 			possibleMoves->push_back(mergeOfBeforeNAfterMove);
@@ -269,11 +386,18 @@ public:
 
 		while (PAWN_MOVES != 0) {
 			int movedSquare = numOfTrailingZeros(PAWN_MOVES);
+
+			if (((1ULL << (movedSquare - 16)) & pinnedPiecesBitBoard) != 0) { //if piece is pinned
+				if (canBlackPawnMoveWhenPinned(movedSquare - 16, 2) == false) {
+					PAWN_MOVES &= ~(1ULL << movedSquare);
+					continue;
+				}
+			}
+
 			mergeOfBeforeNAfterMove = (movedSquare - 16);
 			mergeOfBeforeNAfterMove |= (movedSquare << 8);
 			mergeOfBeforeNAfterMove |= 128; //indicator bit of two square pawn push
 			possibleMoves->push_back(mergeOfBeforeNAfterMove);
-			//enPassantWhite |= (1ULL << (movedSquare - 8));
 
 			PAWN_MOVES &= ~(1ULL << movedSquare);
 		}
@@ -281,10 +405,17 @@ public:
 		/***********Potential Pawn Promotion Section**************/
 
 		PAWN_MOVES = (pieceBitBoard << 7) & notCapturable & bitBoard & ~FILE_H & RANK_1 & squaresToBlockCheckOrCapture; //Capture right with promotion
-		//attackSquaresPawn |= (pieceBitBoard << 7) & notCapturable & ~FILE_H & RANK_1;
-
+		
 		while (PAWN_MOVES != 0) {
 			int attackedSquare = numOfTrailingZeros(PAWN_MOVES);
+
+			if (((1ULL << (attackedSquare - 7)) & pinnedPiecesBitBoard) != 0) { //if piece is pinned
+				if (canBlackPawnMoveWhenPinned(attackedSquare - 7, 0) == false) {
+					PAWN_MOVES &= ~(1ULL << attackedSquare);
+					continue;
+				}
+			}
+
 			mergeOfBeforeNAfterMove = (attackedSquare - 7);
 			mergeOfBeforeNAfterMove |= (attackedSquare << 8);
 			mergeOfBeforeNAfterMove |= 64; //indicator bit
@@ -294,10 +425,17 @@ public:
 		}
 
 		PAWN_MOVES = (pieceBitBoard << 9) & notCapturable & bitBoard & ~FILE_A & RANK_1 & squaresToBlockCheckOrCapture; //Capture left with promotion
-		//attackSquaresPawn |= (pieceBitBoard << 9) & notCapturable & ~FILE_A & RANK_1;
-
+		
 		while (PAWN_MOVES != 0) {
 			int attackedSquare = numOfTrailingZeros(PAWN_MOVES);
+
+			if (((1ULL << (attackedSquare - 9)) & pinnedPiecesBitBoard) != 0) { //if piece is pinned
+				if (canBlackPawnMoveWhenPinned(attackedSquare - 9, 1) == false) {
+					PAWN_MOVES &= ~(1ULL << attackedSquare);
+					continue;
+				}
+			}
+
 			mergeOfBeforeNAfterMove = (attackedSquare - 9);
 			mergeOfBeforeNAfterMove |= (attackedSquare << 8);
 			mergeOfBeforeNAfterMove |= 64; //indicator bit
@@ -310,6 +448,14 @@ public:
 
 		while (PAWN_MOVES != 0) {
 			int movedSquare = numOfTrailingZeros(PAWN_MOVES);
+
+			if (((1ULL << (movedSquare - 8)) & pinnedPiecesBitBoard) != 0) { //if piece is pinned
+				if (canBlackPawnMoveWhenPinned(movedSquare - 8, 2) == false) {
+					PAWN_MOVES &= ~(1ULL << movedSquare);
+					continue;
+				}
+			}
+
 			mergeOfBeforeNAfterMove = (movedSquare - 8);
 			mergeOfBeforeNAfterMove |= (movedSquare << 8);
 			mergeOfBeforeNAfterMove |= 64; //indicator bit
@@ -324,12 +470,15 @@ public:
 	std::unique_ptr<std::vector<uint16_t>> ePassantSquaresWhite(uint64_t pieceBitBoard) {
 		std::unique_ptr<std::vector<uint16_t>> possibleMoves = std::make_unique<std::vector<uint16_t>>();
 		uint16_t mergeOfBeforeNAfterMove; //Before move and after move location. Enemy pawn taken can be found by adding 8 to the final location
-		//attackSquaresEnPassant = 0ULL;
+
 		unsigned long long PAWN_MOVES = (pieceBitBoard >> 7) & enPassantWhite & squaresToBlockCheckOrCapture; //enPassant right
-		//attackSquaresEnPassant |= PAWN_MOVES;
 
 		while (PAWN_MOVES != 0) {
 			int movedSquare = numOfTrailingZeros(PAWN_MOVES);
+			if (canWhitePawnEnPassant(movedSquare + 7) == false) 	{
+				PAWN_MOVES &= ~(1ULL << movedSquare);
+				continue;
+			}
 			mergeOfBeforeNAfterMove = (movedSquare + 7);
 			mergeOfBeforeNAfterMove |= (movedSquare << 8);
 			mergeOfBeforeNAfterMove |= 16384; //indicator bit of enPassant
@@ -339,10 +488,13 @@ public:
 		}
 
 		PAWN_MOVES = (pieceBitBoard >> 9) & enPassantWhite & squaresToBlockCheckOrCapture; //enPassant left
-		//attackSquaresEnPassant |= PAWN_MOVES;
 
 		while (PAWN_MOVES != 0) {
 			int movedSquare = numOfTrailingZeros(PAWN_MOVES);
+			if (canWhitePawnEnPassant(movedSquare + 9) == false) {
+				PAWN_MOVES &= ~(1ULL << movedSquare);
+				continue;
+			}
 			mergeOfBeforeNAfterMove = (movedSquare + 9);
 			mergeOfBeforeNAfterMove |= (movedSquare << 8);
 			mergeOfBeforeNAfterMove |= 16384; //indicator bit of enPassant
@@ -351,18 +503,20 @@ public:
 			PAWN_MOVES &= ~(1ULL << movedSquare);
 		}
 
-		//unsigned long long PAWN_MOVES = (pieceBitBoard << 7) & notCapturable & bitBoard & ~FILE_H; //Capture right. Includes potential promotion
 		return possibleMoves;
 	}
 	std::unique_ptr<std::vector<uint16_t>> ePassantSquaresBlack(unsigned long long pieceBitBoard) {
 		std::unique_ptr<std::vector<uint16_t>> possibleMoves = std::make_unique<std::vector<uint16_t>>();
 		uint16_t mergeOfBeforeNAfterMove; //Before move and after move location. Enemy pawn taken can be found by substracting 8 to the final location
-		//attackSquaresEnPassant = 0ULL;
+
 		unsigned long long PAWN_MOVES = (pieceBitBoard << 7) & enPassantBlack & squaresToBlockCheckOrCapture; //enPassant right
-		//attackSquaresEnPassant |= PAWN_MOVES;
 
 		while (PAWN_MOVES != 0) {
 			int movedSquare = numOfTrailingZeros(PAWN_MOVES);
+			if (canBlackPawnEnPassant(movedSquare - 7) == false) {
+				PAWN_MOVES &= ~(1ULL << movedSquare);
+				continue;
+			}
 			mergeOfBeforeNAfterMove = (movedSquare - 7);
 			mergeOfBeforeNAfterMove |= (movedSquare << 8);
 			mergeOfBeforeNAfterMove |= 16384; //indicator bit of enPassant
@@ -372,10 +526,13 @@ public:
 		}
 
 		PAWN_MOVES = (pieceBitBoard << 9) & enPassantBlack & squaresToBlockCheckOrCapture; //enPassant left
-		//attackSquaresEnPassant |= PAWN_MOVES;
 
 		while (PAWN_MOVES != 0) {
 			int movedSquare = numOfTrailingZeros(PAWN_MOVES);
+			if (canBlackPawnEnPassant(movedSquare - 9) == false) {
+				PAWN_MOVES &= ~(1ULL << movedSquare);
+				continue;
+			}
 			mergeOfBeforeNAfterMove = (movedSquare - 9);
 			mergeOfBeforeNAfterMove |= (movedSquare << 8);
 			mergeOfBeforeNAfterMove |= 16384; //indicator bit of enPassant

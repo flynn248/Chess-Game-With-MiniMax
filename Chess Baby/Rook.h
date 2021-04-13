@@ -39,7 +39,7 @@ public:
 				std::cout << "ERROR: Failed to find path from pinned piece to king!\n";
 		}
 		else {
-			if ((rankMasks[piecePosition / 8] & blKing) != 0) //if king is on same rank (horz)
+			if ((rankMasks[piecePosition / 8] & blKing) != 0)  //if king is on same rank (horz)
 				return horizontalMoves(piecePosition) & notCapturable;
 			else if ((fileMasks[piecePosition % 8] & blKing) != 0) //if king is on same file (vert)
 				return verticalMoves(piecePosition) & notCapturable;
@@ -129,7 +129,7 @@ public:
 			int rookLocation = numOfTrailingZeros(rookPiece);
 			
 			if (((1ULL << rookLocation) & pinnedPiecesBitBoard) != 0)//if piece is pinned
-				movableSquaresForDisplay = moveableSquaresWhenPinned(rookLocation);
+				allPotentialMoves = moveableSquaresWhenPinned(rookLocation);
 			else
 				allPotentialMoves = HorzNVerticalMoves(rookLocation) & notCapturable & squaresToBlockCheckOrCapture;
 
@@ -153,21 +153,3 @@ public:
 };
 
 #endif
-
-//void updateAttackSquares(unsigned long long pieceBitBoard) {
-//	unsigned long long rookPiece = pieceBitBoard;
-//	unsigned long long allPotentialMoves = 0ULL;
-//
-//	attackSquaresRook = 0ULL;
-//
-//	while (rookPiece != 0) {
-//		int rookLocation = numOfTrailingZeros(rookPiece);
-//		allPotentialMoves = HorzNVerticalMoves(rookLocation) & notCapturable;
-//		attackSquaresRook |= allPotentialMoves;
-//		unsigned long long aPotentialMove = allPotentialMoves & ~(allPotentialMoves - 1);
-//
-//		pieceBitBoard &= ~(1ULL << rookLocation);
-//		rookPiece = pieceBitBoard;
-//	}
-//
-//}

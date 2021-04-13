@@ -87,8 +87,11 @@ public:
 		while (knightPiece != 0) { //find center of knight
 			int knightLocation = numOfTrailingZeros(knightPiece);
 
-			if ((pinnedPiecesBitBoard & (1ULL << knightLocation)) != 0) //A pinned knight cannot move
+			if ((pinnedPiecesBitBoard & (1ULL << knightLocation)) != 0) { //A pinned knight cannot move
+				pieceBitBoard &= ~(1ULL << knightLocation);
+				knightPiece = pieceBitBoard & ~(pieceBitBoard - 1);
 				continue;
+			}
 
 			if (knightLocation > 18)
 				allPotentialMoves = KnightSpan << (knightLocation - 18);

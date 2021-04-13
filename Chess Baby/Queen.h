@@ -183,7 +183,7 @@ public:
 			int queenLocation = numOfTrailingZeros(queenPiece);
 
 			if (((1ULL << queenLocation) & pinnedPiecesBitBoard) != 0) //if piece is pinned
-				movableSquaresForDisplay = moveableSquaresWhenPinned(queenLocation);
+				allPotentialMoves = moveableSquaresWhenPinned(queenLocation);
 			else //if not
 				allPotentialMoves = (HorzNVerticalMoves(queenLocation) | diagNAntiDagMoves(queenLocation)) & notCapturable & squaresToBlockCheckOrCapture;
 			

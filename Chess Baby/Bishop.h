@@ -123,8 +123,6 @@ public:
 		uint16_t mergeOfBeforeNAfterMove;
 		unsigned long long bishopPiece = pieceBitBoard;
 		unsigned long long allPotentialMoves = 0ULL;
-
-		//attackSquaresBishop = 0ULL;
 		
 		while (bishopPiece != 0) {
 			int bishopLocation = numOfTrailingZeros(bishopPiece);
@@ -132,7 +130,7 @@ public:
 				allPotentialMoves = moveableSquaresWhenPinned(bishopPiece);
 			else
 				allPotentialMoves = diagNAntiDagMoves(bishopLocation) & notCapturable & squaresToBlockCheckOrCapture;
-			//attackSquaresBishop |= allPotentialMoves;
+			
 			unsigned long long aPotentialMove = allPotentialMoves & ~(allPotentialMoves - 1);
 
 			while (aPotentialMove != 0) {
@@ -153,20 +151,3 @@ public:
 };
 
 #endif
-
-//void updateAttackSquares(unsigned long long pieceBitBoard) {
-//	unsigned long long bishopPiece = pieceBitBoard;
-//	unsigned long long allPotentialMoves = 0ULL;
-//
-//	attackSquaresBishop = 0ULL;
-//
-//	while (bishopPiece != 0) {
-//		int bishopLocation = numOfTrailingZeros(bishopPiece);
-//		allPotentialMoves = diagNAntiDagMoves(bishopLocation) & notCapturable;
-//		attackSquaresBishop |= allPotentialMoves;
-//
-//		pieceBitBoard &= ~(1ULL << bishopLocation); //remove bishop from bitmap of bishops
-//		bishopPiece = pieceBitBoard; //grab next bishop on map
-//	}
-//
-//}

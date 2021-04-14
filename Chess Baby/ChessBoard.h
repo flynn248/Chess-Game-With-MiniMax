@@ -13,6 +13,7 @@
 #include "Pawn.h"
 #include "Timer.h"
 #include "BoardInfo.h"
+#include "Stack.h"
 
 class ChessBoard : public BoardInfo{
 protected:
@@ -22,7 +23,11 @@ protected:
 	bool isCheckMate = false,
 		isStaleMate = false;
 	int timesWhiteKingMoved = 0, //act like a semaphore for the black king movement. Once king is committed to moving, it cannot castle again
-		timesBlackKingMoved = 0;
+		timesWhCastledLeft = 0,
+		timesWhCastledRight = 0,
+		timesBlackKingMoved = 0,
+		timesBlCastledRight = 0,
+		timesBlCastledLeft = 0;
 
 	sf::RectangleShape board[BSIZE][BSIZE];
 	sf::RectangleShape tileSquare;
@@ -43,6 +48,8 @@ protected:
 	Knight* blKnightPiece = nullptr;
 	Bishop* blBishopPiece = nullptr;
 
+	std::unique_ptr<Stack> capturedPiecesAI;
+
 public:											  
 												  
 	ChessBoard(){
@@ -50,11 +57,12 @@ public:
 		tileWidth = 0;
 	}								  
 												  
-	ChessBoard(const float &tileWidth, sf::Color & whiteCol, sf::Color & blkCol, const float &frstSquareCentRef) {
+	ChessBoard(const float &tileWidth, sf::Color & whiteCol, sf::Color & blkCol, const float &frstSquareCentRef, const int& stackSize) {
 		this->tileWidth = tileWidth;
 		whtTileColor = whiteCol;
 		blkTileColor = blkCol;
 		isWhiteMove = true;
+		capturedPiecesAI = std::make_unique<Stack>(stackSize);
 		initializePiecePosition(frstSquareCentRef);
 	}
 												  
@@ -258,9 +266,24 @@ public:
 	void makeAIMove(uint16_t& beforeNAfterMove, bool& isItWhiteMove) {
 		int newTileIndex = (beforeNAfterMove & 16128) >> 8;
 		int initialTileIndex = beforeNAfterMove & 63;
+		bool whiteCaptured = false,
+			blackCaptured = false;
+		//create a stack for captured pieces. When undoing a move, pop from stack. When commited to a move, clear stack.
 
-		if (true) 	{
+		if (((1ULL << initialTileIndex) & whKing) != 0) {  //if white king had moved
+			timesWhiteKingMoved++;
+			whKingPiece->updateHasKingMoved();
+		}
+		else if (((1ULL << initialTileIndex) & blKing) != 0) { //if black king had moved
+			timesBlackKingMoved++;
+			blKingPiece->updateHasKingMoved();
+		}
 
+
+		if (isItWhiteMove == true) 	{ //if captured a piece
+			if (((1ULL << newTileIndex) & blPieces) != 0) 	{
+
+			}
 		}
 
 		if ((beforeNAfterMove & 49344) == 0) { //if no special moves
@@ -274,10 +297,12 @@ public:
 			if (isItWhiteMove == true) 	{
 				whPawnPiece->removeAPieceFromBoard(initialTileIndex);
 				whPawnPiece->addAPieceToBoard(newTileIndex);
+				whPawnPiece->updateBitBoardPosition();
 			}
 			else 	{
 				blPawnPiece->removeAPieceFromBoard(initialTileIndex);
 				blPawnPiece->addAPieceToBoard(newTileIndex);
+				whPawnPiece->updateBitBoardPosition();
 			}
 		}
 		else if ((beforeNAfterMove & 16384) == 16384) { //if enpassant is possible
@@ -298,8 +323,21 @@ public:
 			
 		}
 	}
-	void undoAIMove(uint16_t& beforeNAfterMove) {
+	void undoAIMove(uint16_t& beforeNAfterMove, bool& isItWhiteMove) {
+		int newTileIndex = (beforeNAfterMove & 16128) >> 8;
+		int initialTileIndex = beforeNAfterMove & 63;
 
+		if (((1ULL << newTileIndex) & whKing) != 0) {  //if white king had moved
+			timesWhiteKingMoved--;
+			if (timesWhiteKingMoved == 0)
+				whKingPiece->undoHasKingMoved();
+		}
+		else if (((1ULL << newTileIndex) & blKing) != 0) { //if black king had moved
+			timesBlackKingMoved--;
+			if (timesBlackKingMoved == 0)
+				blKingPiece->undoHasKingMoved();
+		}
+		
 	}
 
 	void addWhiteQueenToBoard(const int& index) {
@@ -309,7 +347,6 @@ public:
 	void addWhiteRookToBoard(const int& index) {
 		whRook |= (1ULL << index);
 		bitBoard |= (1ULL << index);
-		//whRookPiece->updatePositionForDisplay();
 	}
 	void addWhiteBishopToBoard(const int& index) {
 		whBishop |= (1ULL << index);

@@ -9,6 +9,7 @@
 class Piece : public BoardInfo{
 protected:	
 	int value;
+	int numPieces = 0;
 	float scale; //relative scale of the piece
 	sf::Texture texture;
 	sf::Sprite sprite;
@@ -33,7 +34,7 @@ public:
 		tileWidth = 0;
 		isWhite = false;
 	}
-	Piece(const int& val, const float& scal, const std::string& fileName, const float & x, const bool & isWhite, const std::string name, unsigned long long & bitBoardPosition) {
+	Piece(const int& val, const float& scal, const std::string& fileName, const float & x, const bool & isWhite, const std::string name, unsigned long long & bitBoardPosition, const int numPieces) {
 		value = val;
 		scale = scal;
 		dispX = x;
@@ -41,6 +42,7 @@ public:
 		this->name = name;
 		this->bitBoardPosition = &bitBoardPosition;
 		this->isWhite = isWhite;
+		this->numPieces = numPieces;
 		positionForDisplay = bitBoardPosition;
 		attackingSquare.setSize(sf::Vector2f(tileWidth, tileWidth));
 		attackingSquare.setOrigin(sf::Vector2f(tileWidth / 2.f, tileWidth / 2.f));
@@ -66,9 +68,6 @@ public:
 	void drawPiece(sf::RenderWindow& window) {
 		window.draw(sprite);
 	}
-
-	virtual void findMoveableSquares(const int& piecePosition) {}
-
 	void drawPieceAttackSquares(sf::RenderWindow& window) {
 
 		for (int i = 0; i < 8; i++) {
@@ -82,27 +81,17 @@ public:
 	}
 
 	void removeAPieceFromBoard(const int& index) {
+		numPieces--;
 		positionForDisplay &= ~(1ULL << index);
 	}
 
 	void addAPieceToBoard(const int& index) {
+		numPieces++;
 		positionForDisplay |= (1ULL << index);
-	}
-
-	sf::Vector2f getPosition() {
-		return sprite.getPosition();
-	}
-
-	sf::Sprite& getSprite() {
-		return sprite;
 	}
 
 	void setSpritePosition(sf::Vector2f position) {
 		sprite.setPosition(position);
-	}
-
-	bool getIsWhite() const {
-		return isWhite;
 	}
 
 	void updateBitBoardPosition() { 
@@ -146,15 +135,14 @@ public:
 		std::cout << std::endl;
 	}
 
-	int getValue() const {
-		return value;
-	}
-	std::string getName() const {
-		return name;
-	}
-	float getScale() const {
-		return scale;
-	}
+	sf::Vector2f getPosition() { return sprite.getPosition(); }
+	sf::Sprite& getSprite() { return sprite; }
+	std::string getName() const { return name; }
+	int getValue() const { return value; }
+	bool getIsWhite() const { return isWhite; }
+	float getScale() const { return scale; }
+	int getNumPieces() const{ return numPieces; }
+
 	void highLightAttackingSquares(sf::RenderWindow& window, unsigned long long& attackedSquares) {
 		squaresPieceAttacks = attackedSquares;
 
@@ -168,20 +156,10 @@ public:
 		}
 	}
 
-	//virtual std::unique_ptr<std::vector<uint16_t>> legalMoves() { //may need something for pawn and castling
-	//	return NULL;
-	//}
-
-	virtual std::unique_ptr<std::vector<uint16_t>> playerLegalMoves() { //Get legal moves for human player
-		return NULL;
-	}
-	virtual bool getHasNotMoved() {
-		return hasNotMoved;
-	}
-	virtual bool getDidSpecialMove() {
-		return false;
-	}
-
+	virtual void findMoveableSquares(const int& piecePosition) {}
+	virtual std::unique_ptr<std::vector<uint16_t>> playerLegalMoves() { return NULL; }
+	virtual bool getHasNotMoved() { return hasNotMoved; }
+	virtual bool getDidSpecialMove() { return false; }
 };
 #endif // !PIECE_H
 

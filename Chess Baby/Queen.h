@@ -10,8 +10,8 @@ public:
 	Queen() {
 
 	}
-	Queen(const int& val, const float& scale, const std::string& fileName, const float& posX, const bool& isWhite, const std::string name, unsigned long long& bitBoardPosition)
-		: Piece(val, scale, fileName, posX, isWhite, name, bitBoardPosition) {
+	Queen(const int& val, const float& scale, const std::string& fileName, const float& posX, const bool& isWhite, const std::string name, unsigned long long& bitBoardPosition, const int numPieces)
+		: Piece(val, scale, fileName, posX, isWhite, name, bitBoardPosition, numPieces) {
 	}
 	void draw(sf::RenderWindow& window) {
 		Piece::drawPiece(window);
@@ -165,12 +165,10 @@ public:
 	}
 
 	std::unique_ptr<std::vector<uint16_t>> playerLegalMoves() { //Get legal moves for human player
-		if (isWhite) {
+		if (isWhite) 
 			return legalMoves(whQueen);
-		}
-		else {
+		else
 			return legalMoves(blQueen);
-		}
 	}
 
 	std::unique_ptr<std::vector<uint16_t>> legalMoves(unsigned long long pieceBitBoard) { //Queen legal moves

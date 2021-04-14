@@ -11,8 +11,8 @@ public:
 	Knight() {
 
 	}
-	Knight(const int& val, const float& scale, const std::string& fileName, const float& posX, const bool& isWhite, const std::string name, unsigned long long& bitBoardPosition)
-		: Piece(val, scale, fileName, posX, isWhite, name, bitBoardPosition) {
+	Knight(const int& val, const float& scale, const std::string& fileName, const float& posX, const bool& isWhite, const std::string name, unsigned long long& bitBoardPosition, const int numPieces)
+		: Piece(val, scale, fileName, posX, isWhite, name, bitBoardPosition, numPieces) {
 	}
 	void drawPiece(sf::RenderWindow& window) {
 		Piece::drawPiece(window);

@@ -125,7 +125,7 @@ struct Player {
 						if (isThisALegalSquare(newTileIndex, clickedTileIndex)) {
 
 							if (isAnEnemyHere(newTileIndex)) { //if captured a piece
-								if (pawnPromoting) { //if also promoting
+								if (pawnPromoting) {
 									doEnemyPieceCapture(newTileIndex, clickedTileIndex);
 									doPawnPromotion(newTileIndex, clickedTileIndex, window);
 								}
@@ -137,7 +137,7 @@ struct Player {
 							}
 							else if (pawnPromoting)
 								doPawnPromotion(newTileIndex, clickedTileIndex, window);
-							else if (madeEnPassantMove) //if enPassant
+							else if (madeEnPassantMove)
 								doEnpassantMove(newTileIndex, clickedTileIndex);
 							else if (madeCastleMove)
 								doCastleMove(newTileIndex, clickedTileIndex);
@@ -432,31 +432,7 @@ struct Player {
 
 		board->updateIsWhiteMove(); //Change moves to other player
 	}
-	void updatePieces() {
 
-	}
-	/*
-void findPieceType(int value) {
-
-}
-
-void finalizeMove(sf::Event& e, sf::Vector2i& mousePos, sf::Sprite* pieceSprite, const int &x, const int& y) {
-	bool grabbedPiece = true;
-	int newX, newY;
-	bool isLegalMove = false;
-
-	newX = (mousePos.x) / 120;
-	newY = (mousePos.y) / 120;
-
-	pieceSprite->setPosition(sf::Vector2f((float)(newX * 120 + 60), (float)(newY * 120 + 60)));
-
-
-
-	if (val < 0) {
-		val *= -1;
-	}
-	*/
 };
-
 
 #endif

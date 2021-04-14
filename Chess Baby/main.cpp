@@ -362,6 +362,7 @@ void initializePiecePosition(const float& frstSquareCentRef) {
 	Fixed king movement
 	Fixed pawn movement
 	Fixed bishop pin movement
+	Fixed rook pin movement
 
 	Game should be ready to implement the MiniMax algorithm
 */

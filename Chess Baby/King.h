@@ -22,7 +22,7 @@ public:
 	void drawPiece(sf::RenderWindow& window) { // dead code. Not needed as of yet
 		Piece::drawPiece(window);
 	}
-
+	void undoHasKingMoved() { hasKingMoved = false; }
 	void findMoveableSquares(const int& piecePosition) {
 		singlePieceMoveableSquares(piecePosition);
 		

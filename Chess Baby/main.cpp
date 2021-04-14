@@ -32,6 +32,7 @@ int main() {
 	float windowWidth = 960; //x and y of window
 	sf::Color whtTileColor = sf::Color(211.f,211.f,211.f); //change the color of the tiles easily
 	sf::Color blkTileColor = sf::Color::Black;
+	const int depthAI = 2; //set the depth the AI will search till
 	const float frstSquareCentRef = windowWidth / 8 / 2;
 	int mouseX, mouseY;
 	
@@ -39,10 +40,7 @@ int main() {
 	sf::RenderWindow window(sf::VideoMode(windowWidth, windowWidth), "Chess AI Implementation");
 	
 	//std::cout << (posX - 60)/120 << "   " << (posY-60)/120 << std::endl;
-		
-
-	ChessBoard *board = new ChessBoard(windowWidth / 8, whtTileColor, blkTileColor, frstSquareCentRef);
-
+	ChessBoard *board = new ChessBoard(windowWidth / 8, whtTileColor, blkTileColor, frstSquareCentRef, depthAI);
 	Player player(board);
 
 	while (window.isOpen()) {
@@ -61,7 +59,6 @@ int main() {
 			}
 			else if (e.type == sf::Event::MouseButtonPressed) {
 				if (e.mouseButton.button == sf::Mouse::Left) {
-					//std::cout << "x: " << (e.mouseButton.x )/120 << " y: " << (e.mouseButton.y) /120 << std::endl;
 					mouseX = e.mouseButton.x / 120;
 					mouseY = e.mouseButton.y / 120;
 					if (board->isPieceHere(mouseX, mouseY)) {
@@ -74,7 +71,6 @@ int main() {
 		window.clear();
 		board->drawBoard(window);
 		window.display();
-		//std::cout << boardInfoCount << std::endl;
 	}
 	
 	delete board;
@@ -365,6 +361,10 @@ void initializePiecePosition(const float& frstSquareCentRef) {
 	Fixed rook pin movement
 
 	Game should be ready to implement the MiniMax algorithm
+
+04/14/2021
+	Adding the make move and undo move for AI.
+	Added a stack class to facilitate the addition or removal of pieces from the board from AI moves.
 */
 
 /* Stuff from the Chess Wiki

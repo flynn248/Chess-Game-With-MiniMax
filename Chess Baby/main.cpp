@@ -1,6 +1,6 @@
 //Developed by Shane Flynn
 //Chess game with an AI using Alpha Beta pruning on a minimax algortihm
-//Last edited 04/11/2021
+//Last edited 04/15/2021
 
 /* Things to Ponder
 
@@ -372,6 +372,11 @@ void initializePiecePosition(const float& frstSquareCentRef) {
 			Hoping the end result will be worth it.
 
 	Fixed pawn attacking squares, again.
+	Fixed pawn attacking squares, once again. Missed a plus sign that should have been a minus sign.
+
+	Added move logic for AI making a white move.
+	Added logic to handle the making and eventual unmaking of any type of move.
+	Modified Player.h to fit the new set up
 */
 
 /* Stuff from the Chess Wiki

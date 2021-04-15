@@ -29,7 +29,7 @@ struct Player {
 		if ((board->bitBoard & (1ULL << clickedTileIndex)) == 0) { //if no piece was clicked
 			return;
 		}
-		std::cout << board->getBlackPawnPiece()->getNumPieces() << " " << board->getWhitePawnPiece()->getNumPieces() << std::endl;
+		std::cout << board->getBlackRookPiece()->getNumPieces() << " " << board->getWhiteRookPiece()->getNumPieces() << std::endl;
 		if (board->getIsWhiteMove()) { //white to move
 			if ((board->blPieces & (1ULL << clickedTileIndex)) != 0) { //if piece is not white
 				return;
@@ -202,12 +202,12 @@ struct Player {
 	void doEnpassantMove(const int& newTileIndex, const int& clickedTileIndex) {
 		if (grabbedPiece->getIsWhite()) {
 			board->removeCapturedPiece(newTileIndex + 8);
-			board->removeCapturedPiece(clickedTileIndex);
+			grabbedPiece->removeAPieceFromBoard(clickedTileIndex);
 			grabbedPiece->addAPieceToBoard(newTileIndex);
 		}
 		else {
 			board->removeCapturedPiece(newTileIndex - 8);
-			board->removeCapturedPiece(clickedTileIndex);
+			grabbedPiece->removeAPieceFromBoard(clickedTileIndex);
 			grabbedPiece->addAPieceToBoard(newTileIndex);
 		}
 	}
@@ -409,10 +409,16 @@ struct Player {
 			board->updateSquaresWhiteAttacks();
 			board->enPassantWhite = 0ULL;
 			
-			if ((board->whRook & 0x8000000000000000) != 0x8000000000000000) //if right rook moved
+			if ((board->whRook & 0x8000000000000000) != 0x8000000000000000) { //if right rook moved
 				board->castleRooks[0] = -1;
-			if ((board->whRook & 0x100000000000000) != 0x100000000000000) //if left rook moved
+				if (board->getWhenWhRightRookMoved() != 0)
+					board->updateWhenWhRightRookMoved();
+			}
+			if ((board->whRook & 0x100000000000000) != 0x100000000000000) { //if left rook moved
 				board->castleRooks[1] = -1;
+				if (board->getWhenWhLeftRookMoved() != 0)
+					board->updateWhenWhLeftRookMoved();
+			}
 			if (King *king = dynamic_cast<King*>(grabbedPiece)) 	{
 				king->updateHasKingMoved();
 			}
@@ -421,10 +427,17 @@ struct Player {
 			board->updateSquaresBlackAttacks();
 			board->enPassantBlack = 0ULL;
 
-			if ((board->blRook & 128) != 128) //if right rook moved
+			if ((board->blRook & 128) != 128) { //if right rook moved
 				board->castleRooks[2] = -1;
-			if ((board->blRook & 1) != 1) //if left rook moved
+				if (board->getWhenBlRightRookMoved() != 0)
+					board->updateWhenBlRightRookMoved();
+			}
+			if ((board->blRook & 1) != 1) { //if left rook moved
 				board->castleRooks[3] = -1;
+
+				if (board->getWhenBlLeftRookMoved() != 0)
+					board->updateWhenBlLeftRookMoved();
+			}
 			if (King* king = dynamic_cast<King*>(grabbedPiece)) {
 				king->updateHasKingMoved();
 			}

@@ -377,6 +377,9 @@ void initializePiecePosition(const float& frstSquareCentRef) {
 	Added move logic for AI making a white move.
 	Added logic to handle the making and eventual unmaking of any type of move.
 	Modified Player.h to fit the new set up
+
+	Ready to start the undo move process for the AI.
+		Following step will be the implementation of move generation in the algorithm.
 */
 
 /* Stuff from the Chess Wiki

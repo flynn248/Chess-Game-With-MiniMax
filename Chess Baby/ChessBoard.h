@@ -267,8 +267,8 @@ public:
 		return whitePiecesValue + blackPiecesValue;
 	}
 
-private:
-	void makeAIMoveWhite(uint16_t& beforeNAfterMove, bool& isItWhiteMove, const int& currDepth) {
+private: //stuff for AI only
+	void makeAIMoveWhite(uint16_t& beforeNAfterMove, const int& currDepth) {
 		int newTileIndex = (beforeNAfterMove & 16128) >> 8;
 		int initialTileIndex = beforeNAfterMove & 63;
 
@@ -333,15 +333,14 @@ private:
 		updateBitBoard();
 		updateSquaresWhiteAttacks();
 	}
-	/*
-	void makeAIMoveBlack(uint16_t& beforeNAfterMove, bool& isItWhiteMove, const int& currDepth) {
+	void makeAIMoveBlack(uint16_t& beforeNAfterMove, const int& currDepth) {
 		int newTileIndex = (beforeNAfterMove & 16128) >> 8;
 		int initialTileIndex = beforeNAfterMove & 63;
 
-		if (((1ULL << initialTileIndex) & blKing) != 0) { //if black king had moved
-			timesBlackKingMoved++;
-			blKingPiece->updateHasKingMoved();
-		}
+		//if (((1ULL << initialTileIndex) & blKing) != 0) { //if black king had moved
+		//	timesBlackKingMoved++;
+		//	blKingPiece->updateHasKingMoved();
+		//}
 
 		if (((1ULL << newTileIndex) & whPieces) != 0) { //if captured a piece
 			if (((1ULL << newTileIndex) & whPawn) != 0) {
@@ -369,40 +368,40 @@ private:
 		}
 
 		if ((beforeNAfterMove & 49344) == 0) { //if no special moves
-
+			makeMoveBlackPieceAI(initialTileIndex, newTileIndex);
 		}
 		else if ((beforeNAfterMove & 64) == 64) { //Pawn promotion
 			blPawnPiece->removePieceBitBoard(initialTileIndex);
-			addBlackQueenToBoard(newTileIndex);
+			addWhiteQueenToBoard(newTileIndex);
 		}
 		else if ((beforeNAfterMove & 128) == 128) { //pawn moved two squares
 			blPawnPiece->removePieceBitBoard(initialTileIndex);
 			blPawnPiece->addPieceBitBoard(newTileIndex);
-			blPawnPiece->updateBitBoardPosition();
 		}
-
 		else if ((beforeNAfterMove & 16384) == 16384) { //if enpassant
-			madeEnPassantMove = true;
-
+			whPawnPiece->removePieceBitBoard(newTileIndex - 8);
+			blPawnPiece->removePieceBitBoard(initialTileIndex);
+			blPawnPiece->addPieceBitBoard(newTileIndex);
 		}
 		else { //castling
-			if (isItWhiteMove == true) {
-				whKingPiece->removePieceBitBoard(60);
-				if (true) {
+			if (initialTileIndex == 7) //castled king side
+				blKing = 1ULL << 6;
+			else
+				blKing = 1ULL << 2;
 
-				}
-				whKingPiece->addPieceBitBoard(newTileIndex)
-			}
-			madeCastleMove = true;
-			rookBeforeCastle = (move & 63);
-			rookAfterCastle = (move & 16128) >> 8;
-
+			timesBlackKingMoved++;
+			blKingPiece->updateHasKingMoved();
+			blRookPiece->removePieceBitBoard(initialTileIndex);
+			blRookPiece->addPieceBitBoard(newTileIndex);
 		}
+
+		updateBitBoard();
+		updateSquaresBlackAttacks();
 	}
 
-		*/
 	void makeMoveWhitePieceAI(const int& initialTileIndex, const int& newTileIndex) {
 		if (((1ULL << initialTileIndex) & whKing) != 0) {
+			timesWhiteKingMoved++;
 			whKingPiece->removePieceBitBoard(initialTileIndex);
 			whKingPiece->addPieceBitBoard(newTileIndex);
 		}
@@ -439,6 +438,7 @@ private:
 	}
 	void makeMoveBlackPieceAI(const int& initialTileIndex, const int& newTileIndex) {
 		if (((1ULL << initialTileIndex) & blKing) != 0) {
+			timesBlackKingMoved++;
 			blKingPiece->removePieceBitBoard(initialTileIndex);
 			blKingPiece->addPieceBitBoard(newTileIndex);
 		}
@@ -476,14 +476,10 @@ private:
 	}
 public:
 	void makeAIMove(uint16_t& beforeNAfterMove, bool& isItWhiteMove, const int& currDepth) {
-
-		bool whiteCaptured = false,
-			blackCaptured = false;
-
-		//if (isItWhiteMove == true)
-			//makeAIMoveWhite(beforeNAfterMove, isItWhiteMove, currDepth);
-		//else
-			//makeAIMoveBlack(beforeNAfterMove, isItWhiteMove, currDepth);		
+		if (isItWhiteMove == true)
+			makeAIMoveWhite(beforeNAfterMove, currDepth);
+		else
+			makeAIMoveBlack(beforeNAfterMove, currDepth);		
 	}
 	void undoAIMove(uint16_t& beforeNAfterMove, bool& isItWhiteMove, const int& currDepth) {
 		int newTileIndex = (beforeNAfterMove & 16128) >> 8;

@@ -1,5 +1,6 @@
 #include "SavedGameState.h"
 #include "ChessBoard.h"
+#include "Timer.h"
 
 #ifndef MINIMAX_H
 #define MINIMAX_H
@@ -21,7 +22,7 @@ class MiniMax	{
 		
 		int bestScore;
 		uint16_t bestMove;
-
+		board->makeAIMove(bestMove, isWhiteMove, currDepth);
 
 	}
 };

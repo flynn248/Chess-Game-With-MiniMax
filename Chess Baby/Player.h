@@ -26,6 +26,13 @@ struct Player {
 		sf::Sprite pieceSprite;
 		grabbedPiece = nullptr;
 
+		uint16_t move = 8368;
+		int d = 1;
+		bool color = board->getIsWhiteMove();
+		//board->makeAIMove(move, color, d);
+		//board->undoAIMove(move, color, d);
+		//board->commitAIMove(move);
+
 		if ((board->bitBoard & (1ULL << clickedTileIndex)) == 0) { //if no piece was clicked
 			return;
 		}
@@ -421,7 +428,9 @@ struct Player {
 			}
 			if (King *king = dynamic_cast<King*>(grabbedPiece)) 	{
 				king->updateHasKingMoved();
+				board->updateTimesWhiteKingMoved();
 			}
+			board->updateWhMoveCounter();
 		}
 		else 	{
 			board->updateSquaresBlackAttacks();
@@ -440,9 +449,10 @@ struct Player {
 			}
 			if (King* king = dynamic_cast<King*>(grabbedPiece)) {
 				king->updateHasKingMoved();
+				board->updateTimesBackKingMoved();
 			}
+			board->updateBlMoveCounter();
 		}
-
 		board->updateIsWhiteMove(); //Change moves to other player
 	}
 

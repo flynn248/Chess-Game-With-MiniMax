@@ -162,8 +162,8 @@ public:
 		}
 
 		attackSquaresPawn = 0ULL;
-		attackSquaresPawn |= (pieceBitBoard >> 9) & notCapturable & ~FILE_H; //Capture left. Includes potential promotion
 		attackSquaresPawn |= (pieceBitBoard >> 7) & notCapturable & ~FILE_A; //Capture right. Includes potential promotion
+		attackSquaresPawn |= (pieceBitBoard >> 9) & notCapturable & ~FILE_H; //Capture left. Includes potential promotion
 
 		enemyPiecesThatAreDefended |= (pieceBitBoard >> 7) & myPieces & ~FILE_A;
 		enemyPiecesThatAreDefended |= (pieceBitBoard >> 9) & myPieces & ~FILE_H;
@@ -174,20 +174,20 @@ public:
 			while (PAWN_MOVES != 0) {
 				int attackedSquare = numOfTrailingZeros(PAWN_MOVES);
 				if (((1ULL << attackedSquare) & whKing & ~FILE_H) != 0) {
-					locationOfPieceAttackingKing |= (1ULL << (attackedSquare + 7));
-					squaresToBlockCheckOrCapture |= (1ULL << (attackedSquare + 7));
+					locationOfPieceAttackingKing |= (1ULL << (attackedSquare - 7));
+					squaresToBlockCheckOrCapture |= (1ULL << (attackedSquare - 7));
 				}
 				PAWN_MOVES &= ~(1ULL << attackedSquare);
 			}
 		}
 
 		if (((pieceBitBoard << 9) & whKing & ~FILE_A) != 0) {//if piece is attacking king to the left
-			unsigned long long PAWN_MOVES = (pieceBitBoard << 7);
+			unsigned long long PAWN_MOVES = (pieceBitBoard << 9);
 			while (PAWN_MOVES != 0) {
 				int attackedSquare = numOfTrailingZeros(PAWN_MOVES);
 				if (((1ULL << (attackedSquare)) & whKing & ~FILE_A) != 0) {
-					locationOfPieceAttackingKing |= (1ULL << (attackedSquare + 9));
-					squaresToBlockCheckOrCapture |= (1ULL << (attackedSquare + 9));
+					locationOfPieceAttackingKing |= (1ULL << (attackedSquare - 9));
+					squaresToBlockCheckOrCapture |= (1ULL << (attackedSquare - 9));
 				}
 				PAWN_MOVES &= ~(1ULL << attackedSquare);
 			}

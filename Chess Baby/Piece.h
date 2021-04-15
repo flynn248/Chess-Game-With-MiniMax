@@ -81,12 +81,20 @@ public:
 	}
 
 	void removeAPieceFromBoard(const int& index) {
-		numPieces--;
+		//numPieces--;
 		positionForDisplay &= ~(1ULL << index);
 	}
+	void removePieceBitBoard(const int& index) {
+		numPieces--;
+		*bitBoardPosition &= ~(1ULL << index);
+	}
 
-	void addAPieceToBoard(const int& index) {
+	void addPieceBitBoard(const int& index) {
 		numPieces++;
+		*bitBoardPosition |= (1ULL << index);
+	}
+	void addAPieceToBoard(const int& index) {
+		//numPieces++;
 		positionForDisplay |= (1ULL << index);
 	}
 

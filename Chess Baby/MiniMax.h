@@ -5,8 +5,14 @@
 #define MINIMAX_H
 
 class MiniMax	{
-	ChessBoard* board = nullptr;
-	int maxDepth = 2;
+	std::shared_ptr<ChessBoard> board;
+	//ChessBoard* board = nullptr;
+	int maxDepth;
+
+	MiniMax(std::shared_ptr<ChessBoard>& board, const int& maxDepth) {
+		this->maxDepth = maxDepth;
+		this->board = board;
+	}
 
 	SavedGameState& miniMaxAlgo(int currDepth, SavedGameState& savedState, bool isWhiteMove) {
 		if (currDepth == maxDepth) 	{

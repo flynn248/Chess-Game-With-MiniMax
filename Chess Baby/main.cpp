@@ -40,7 +40,8 @@ int main() {
 	sf::RenderWindow window(sf::VideoMode(windowWidth, windowWidth), "Chess AI Implementation");
 	
 	//std::cout << (posX - 60)/120 << "   " << (posY-60)/120 << std::endl;
-	ChessBoard *board = new ChessBoard(windowWidth / 8, whtTileColor, blkTileColor, frstSquareCentRef, depthAI);
+	std::shared_ptr<ChessBoard> board = std::make_shared<ChessBoard>(windowWidth / 8, whtTileColor, blkTileColor, frstSquareCentRef, depthAI);
+	//ChessBoard *board = new ChessBoard(windowWidth / 8, whtTileColor, blkTileColor, frstSquareCentRef, depthAI);
 	Player player(board);
 
 	while (window.isOpen()) {
@@ -73,7 +74,7 @@ int main() {
 		window.display();
 	}
 	
-	delete board;
+
 	return 0;
 }
 /*
@@ -365,6 +366,12 @@ void initializePiecePosition(const float& frstSquareCentRef) {
 04/14/2021
 	Adding the make move and undo move for AI.
 	Added a stack class to facilitate the addition or removal of pieces from the board from AI moves.
+	Fixed pawn movement "feature" that was due to a lack of implementing the legal features for the pawn when finding attacking squares that hit the king.
+	Attempting to add counter for total number of pieces on the board for each type and color.
+		Requiring a bit of redesign for the player class and method of removing a captured piece to make it work.
+			Hoping the end result will be worth it.
+
+	Fixed pawn attacking squares, again.
 */
 
 /* Stuff from the Chess Wiki

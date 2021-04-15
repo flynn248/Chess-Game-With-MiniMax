@@ -2,11 +2,13 @@
 #include "SFML/Graphics.hpp"
 #include "ChessBoard.h"
 #include <iostream>
+#include <memory>
 #ifndef PLAYER_H
 #define PLAYER_H
 
 struct Player {
-	ChessBoard* board = nullptr;
+	std::shared_ptr<ChessBoard> board;
+	//ChessBoard* board = nullptr;
 	Piece* grabbedPiece = nullptr;
 	bool madeEnPassantMove = false;
 	bool madeCastleMove = false;
@@ -15,7 +17,7 @@ struct Player {
 	int rookBeforeCastle = -1;
 	int rookAfterCastle = -1;
 	//Have a vector of possible moves. When a piece is grabbed, update the vector which in turn updates the hilighted squares. Then when placed, check the vector if legal. Clear vector before grabbing another piece.
-	Player(ChessBoard* board) {
+	Player(std::shared_ptr<ChessBoard>& board) {
 		this->board = board;
 	}
 
@@ -27,7 +29,7 @@ struct Player {
 		if ((board->bitBoard & (1ULL << clickedTileIndex)) == 0) { //if no piece was clicked
 			return;
 		}
-
+		std::cout << board->getBlackPawnPiece()->getNumPieces() << " " << board->getWhitePawnPiece()->getNumPieces() << std::endl;
 		if (board->getIsWhiteMove()) { //white to move
 			if ((board->blPieces & (1ULL << clickedTileIndex)) != 0) { //if piece is not white
 				return;
@@ -91,11 +93,9 @@ struct Player {
 		}
 
 		if (grabbedPiece->getIsWhite()) {
-			//board->checkForCheckWhite();
 			board->notCapturable = ~(board->whPieces | board->blKing); //avoid illegal capture of black king
 		}
 		else {
-			//board->checkForCheckBlack();
 			board->notCapturable = ~(board->blPieces | board->whKing); //avoid illegal capture of white king
 		}
 

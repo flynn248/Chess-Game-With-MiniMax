@@ -88,7 +88,6 @@ public:
 			if ((rankMasks[rookLocation / 8] & kingBitBoard) != 0) { //if enemy king is in attack path
 				if (((uneditedAttackPath & ~myPieces) & enemyKingLociSpread) != 0) { //if one enemy piece is on path of attack to king
 					pinnedPiecesBitBoard |= (uneditedAttackPath & ~myPieces) & enemyKingLociSpread;
-					std::cout << "You a bitch\n";
 				}
 			}
 

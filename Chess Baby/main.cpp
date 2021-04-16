@@ -27,12 +27,13 @@ Have a 1D array for the pieces on the board. The index of the piece would just b
 #include "ChessBoard.h"
 #include "StaticMemberInitialization.h"
 #include "Player.h"
+#include "MiniMax.h"
 
 int main() {
 	float windowWidth = 960; //x and y of window
 	sf::Color whtTileColor = sf::Color(211.f,211.f,211.f); //change the color of the tiles easily
 	sf::Color blkTileColor = sf::Color::Black;
-	const int depthAI = 2; //set the depth the AI will search till
+	const int depthAI = 3; //set the depth the AI will search till
 	const float frstSquareCentRef = windowWidth / 8 / 2;
 	int mouseX, mouseY;
 	
@@ -42,7 +43,9 @@ int main() {
 	//std::cout << (posX - 60)/120 << "   " << (posY-60)/120 << std::endl;
 	std::shared_ptr<ChessBoard> board = std::make_shared<ChessBoard>(windowWidth / 8, whtTileColor, blkTileColor, frstSquareCentRef, depthAI);
 	//ChessBoard *board = new ChessBoard(windowWidth / 8, whtTileColor, blkTileColor, frstSquareCentRef, depthAI);
+	//board->notCapturable = ~(board->whPieces | board->blKing);
 	Player player(board);
+	MiniMax allKnowingAI(board, depthAI);
 
 	while (window.isOpen()) {
 
@@ -53,7 +56,14 @@ int main() {
 		if (board->getIsStaleMate() == true)
 			std::cout << "The Stale Has Been Mated\n";
 		
-
+		if (board->getIsWhiteMove() == false) 	{
+			uint16_t commitmentIsHard;
+			{
+				Timer time;
+				commitmentIsHard = std::get<1>(allKnowingAI.miniMaxAlgo(0, false));
+			}
+			board->commitAIMove(commitmentIsHard);
+		}
 		while (window.pollEvent(e)) {
 			if (e.type == sf::Event::Closed) {
 				window.close();
@@ -380,6 +390,11 @@ void initializePiecePosition(const float& frstSquareCentRef) {
 
 	Ready to start the undo move process for the AI.
 		Following step will be the implementation of move generation in the algorithm.
+
+04/15/2021
+	Fully added undo logic for black and white moves.
+	Added element inside of stack class to take care of saving an enPassant bit board
+
 */
 
 /* Stuff from the Chess Wiki

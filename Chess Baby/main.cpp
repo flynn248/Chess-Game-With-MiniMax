@@ -33,20 +33,73 @@ int main() {
 	float windowWidth = 960; //x and y of window
 	sf::Color whtTileColor = sf::Color(211.f,211.f,211.f); //change the color of the tiles easily
 	sf::Color blkTileColor = sf::Color::Black;
-	const int depthAI = 3; //set the depth the AI will search till
 	const float frstSquareCentRef = windowWidth / 8 / 2;
 	int mouseX, mouseY;
+	const int depthAI = 3; //set the depth the AI will search till
 	
-	long long cake = 0L;
 	sf::RenderWindow window(sf::VideoMode(windowWidth, windowWidth), "Chess AI Implementation");
 	
 	//std::cout << (posX - 60)/120 << "   " << (posY-60)/120 << std::endl;
 	std::shared_ptr<ChessBoard> board = std::make_shared<ChessBoard>(windowWidth / 8, whtTileColor, blkTileColor, frstSquareCentRef, depthAI);
-	//ChessBoard *board = new ChessBoard(windowWidth / 8, whtTileColor, blkTileColor, frstSquareCentRef, depthAI);
-	//board->notCapturable = ~(board->whPieces | board->blKing);
+
 	Player player(board);
 	MiniMax allKnowingAI(board, depthAI);
 
+	/*
+	//board->notCapturable = ~(board->whPieces | board->blKing);
+	//uint16_t move = 8882;//w
+	//bool whiteMove = board->getIsWhiteMove();
+
+	//move = 11019;
+	//whiteMove = !whiteMove;//b
+	//board->makeAIMove(move, whiteMove, 0);
+	//board->printBitBoard(board->blPawn);
+	//
+	//whiteMove = !whiteMove;
+	//auto moves = board->pawnMovesWhite();
+	//for (auto& mo : *moves) {
+	//	board->makeAIMove(mo, whiteMove, 0);
+	//	board->printBitBoard(board->blPawn);
+	//	board->undoAIMove(mo, whiteMove, 0);
+	//	board->printBitBoard(board->blPawn);
+	//}
+	board->makeAIMove(move, whiteMove, 0);
+	board->printBitBoard(board->bitBoard);
+	
+	move = 7051; //b
+	whiteMove = !whiteMove;
+	board->makeAIMove(move, whiteMove, 0);
+	board->printBitBoard(board->bitBoard);
+
+	move = 6946;//w
+	whiteMove = !whiteMove;
+	board->makeAIMove(move, whiteMove, 0);
+	board->printBitBoard(board->blPawn);
+
+	move = 7051; //b
+	whiteMove = !whiteMove;
+	board->makeAIMove(move, whiteMove, 0);
+	board->printBitBoard(board->bitBoard);
+
+	move = 6690; //w
+	whiteMove = !whiteMove;
+	board->makeAIMove(move, whiteMove, 0);
+	board->printBitBoard(board->blPawn);
+
+	board->undoAIMove(move, whiteMove, 0);
+	board->printBitBoard(board->blPawn);
+
+	move = 7051;
+	whiteMove = !whiteMove;
+	board->undoAIMove(move, whiteMove, 0);
+	board->printBitBoard(board->blPawn);
+
+	move = 8882;
+	whiteMove = !whiteMove;
+	board->undoAIMove(move, whiteMove, 0);
+	board->printBitBoard(board->blPawn);
+	*/
+	
 	while (window.isOpen()) {
 
 		sf::Event e;
@@ -57,6 +110,8 @@ int main() {
 			std::cout << "The Stale Has Been Mated\n";
 		
 		if (board->getIsWhiteMove() == false) 	{
+
+			
 			uint16_t commitmentIsHard;
 			{
 				Timer time;
@@ -84,7 +139,8 @@ int main() {
 		window.display();
 	}
 	
-
+	
+	
 	return 0;
 }
 /*
@@ -395,6 +451,20 @@ void initializePiecePosition(const float& frstSquareCentRef) {
 	Fully added undo logic for black and white moves.
 	Added element inside of stack class to take care of saving an enPassant bit board
 
+04/16/2021
+	Everything is broken.
+		-King is moving inside of other pieces and moving erradically.
+		-EnPassant may not be working when black moves
+		-Somehow the AI is finding checkmate when it cannot be
+		-Checks seem to sometimes trick the AI into thinking it is mate
+		-The queen is buggy as heck
+		-The AI move selector needs work
+		-The evaluation of the board needs to be revamped to force AI to make non illegal moves
+		-Somehow the AI is making illegal moves with pieces
+		-The signifier bit for some moves are all turned on which should not be possible.
+
+	On the plus side
+		-One round where the AI did moderately okay at not breaking the game, it did moderately well.
 */
 
 /* Stuff from the Chess Wiki

@@ -239,10 +239,11 @@ public:
 		return false;
 	}
 
-	int evaluateBoardValue() const {
+	int evaluateBoardValue(const bool& isItWhiteMove) const {
 		int whitePiecesValue = 0,
 			blackPiecesValue = 0;
 
+	
 		whitePiecesValue += whKingPiece->getNumPieces() * whKingPiece->getValue();
 		whitePiecesValue += whPawnPiece->getNumPieces() * whPawnPiece->getValue();
 		whitePiecesValue += whRookPiece->getNumPieces() * whRookPiece->getValue();
@@ -250,12 +251,20 @@ public:
 		whitePiecesValue += whKnightPiece->getNumPieces() * whKnightPiece->getValue();
 		whitePiecesValue += whBishopPiece->getNumPieces() * whBishopPiece->getValue();
 
+		if ((blPawn & 402653184) != 0) 	{
+			blackPiecesValue -= 100;
+		}
+		
+		
 		blackPiecesValue += blKingPiece->getNumPieces() * blKingPiece->getValue();
 		blackPiecesValue += blPawnPiece->getNumPieces() * blPawnPiece->getValue();
 		blackPiecesValue += blRookPiece->getNumPieces() * blRookPiece->getValue();
 		blackPiecesValue += blQueenPiece->getNumPieces() * blQueenPiece->getValue();
 		blackPiecesValue += blKnightPiece->getNumPieces() * blKnightPiece->getValue();
 		blackPiecesValue += blBishopPiece->getNumPieces() * blBishopPiece->getValue();
+
+		
+		
 		//Add values for check, checkmate, and stalemate.
 		//Check = + 100
 		//Checkmate = + 99999
@@ -338,7 +347,7 @@ private: //stuff for AI only
 			whRookPiece->removePieceBitBoard(initialTileIndex);
 			whRookPiece->addPieceBitBoard(newTileIndex);
 		}
-
+		whMoveCounter++;
 		updateBitBoard();
 		updateSquaresWhiteAttacks();
 	}
@@ -414,7 +423,7 @@ private: //stuff for AI only
 			blRookPiece->removePieceBitBoard(initialTileIndex);
 			blRookPiece->addPieceBitBoard(newTileIndex);
 		}
-
+		blMoveCounter++;
 		updateBitBoard();
 		updateSquaresBlackAttacks();
 	}
@@ -471,7 +480,7 @@ private: //stuff for AI only
 		}
 
 		updateBitBoard();
-		updateSquaresWhiteAttacks();
+		updateSquaresBlackAttacks();
 	}
 	void undoAIMoveBlack(uint16_t& beforeNAfterMove, const int& currDepth) {
 		int newTileIndex = (beforeNAfterMove & 16128) >> 8;
@@ -525,7 +534,7 @@ private: //stuff for AI only
 		}
 
 		updateBitBoard();
-		updateSquaresBlackAttacks();
+		updateSquaresWhiteAttacks();
 	}
 
 	void undoMoveWhitePieceAI(const int& initialTileIndex, const int& newTileIndex) {
@@ -679,7 +688,7 @@ private: //stuff for AI only
 		}
 	}
 public:
-	void makeAIMove(uint16_t& beforeNAfterMove, bool& isItWhiteMove, const int& currDepth) {
+	void makeAIMove(uint16_t beforeNAfterMove, bool isItWhiteMove, const int currDepth) {
 		if (isItWhiteMove == true) {
 			makeAIMoveWhite(beforeNAfterMove, currDepth);
 			enPassantWhite = 0ULL;
@@ -689,14 +698,14 @@ public:
 			enPassantBlack = 0ULL;
 		}
 	}
-	void undoAIMove(uint16_t& beforeNAfterMove, bool& isItWhiteMove, const int& currDepth) {
+	void undoAIMove(uint16_t beforeNAfterMove, bool isItWhiteMove, const int currDepth) {
 		if (isItWhiteMove == true)
 			undoAIMoveWhite(beforeNAfterMove, currDepth);
 		else
 			undoAIMoveBlack(beforeNAfterMove, currDepth);
 	}
 	void commitAIMove(uint16_t& beforeNAfterMove) {
-		int dummyDepth = -1;
+		int dummyDepth = 0;
 
 		if (isWhiteMove == true) {
 			makeAIMoveWhite(beforeNAfterMove, dummyDepth);

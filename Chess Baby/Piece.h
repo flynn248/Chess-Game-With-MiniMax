@@ -124,7 +124,7 @@ public:
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
 				if (std::bitset<1>(positionForDisplay >> (i * 8 + j)) == 1) {
-					std::cout << name << "  ";
+					std::cout << name << " ";
 				} 
 				
 			}

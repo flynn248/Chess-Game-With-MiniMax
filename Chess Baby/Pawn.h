@@ -53,7 +53,7 @@ public:
 				movableSquaresForDisplay ^= (pieceBitBoard >> 9) & enPassantWhite;
 			}
 		}
-
+		
 		movableSquaresForDisplay |= (pieceBitBoard >> 8) & ~bitBoard;
 		movableSquaresForDisplay |= (pieceBitBoard >> 16) & ~bitBoard & ~(bitBoard >> 8)& RANK_4;
 		movableSquaresForDisplay &= squaresToBlockCheckOrCapture;

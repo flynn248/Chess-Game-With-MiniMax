@@ -3,89 +3,82 @@
 
 struct BoardInfo {
 	static unsigned long long bitBoard;
-	static unsigned long long whPawn;
-	static unsigned long long whRook;
-	static unsigned long long whBishop;
-	static unsigned long long whKnight;
-	static unsigned long long whQueen;
-	static unsigned long long whKing;
 	static unsigned long long whPieces;
-									  
-	static unsigned long long blPawn;
-	static unsigned long long blRook;
-	static unsigned long long blBishop;
-	static unsigned long long blKnight;
-	static unsigned long long blQueen;
-	static unsigned long long blKing;
 	static unsigned long long blPieces;
 
-	static unsigned long long KingSpan;
-	static unsigned long long KnightSpan;
-
-	static unsigned long long notCapturable;
-	static unsigned long long FILE_A;
-	static unsigned long long FILE_H;
-	static unsigned long long FILE_AB;
-	static unsigned long long FILE_GH;
-	static unsigned long long RANK_1;
-	static unsigned long long RANK_4;
-	static unsigned long long RANK_5;
-	static unsigned long long RANK_8;
-	static unsigned long long CENTRE;
-	static unsigned long long EXTENDED_CENTRE;
-	static unsigned long long KING_SIDE;
-	static unsigned long long QUEEN_SIDE;
-
-	static int castleRooks[4];
+	static unsigned long long whKing;
+	static unsigned long long whRook;
+	static unsigned long long whPawn;
+	static unsigned long long whQueen;
+	static unsigned long long whKnight;
+	static unsigned long long whBishop;
+									  
+	static unsigned long long blKing;
+	static unsigned long long blRook;
+	static unsigned long long blPawn;
+	static unsigned long long blQueen;
+	static unsigned long long blKnight;
+	static unsigned long long blBishop;
 
 	static unsigned long long enPassantWhite; //spots white can enPassant
 	static unsigned long long enPassantBlack; //spots black can enPassant
 
+	static unsigned long long attackedSquares;
 	static unsigned long long squaresWhiteAttacks;
 	static unsigned long long squaresBlackAttacks;
-	static unsigned long long attackedSquares;
 											 
-	static unsigned long long whAttackBishop;
-	static unsigned long long whAttackKnight;
-	static unsigned long long whAttackQueen;
 	static unsigned long long whAttackKing;
 	static unsigned long long whAttackRook;
 	static unsigned long long whAttackPawn;
+	static unsigned long long whAttackQueen;
+	static unsigned long long whAttackKnight;
+	static unsigned long long whAttackBishop;
 											
-	static unsigned long long blAttackBishop;
-	static unsigned long long blAttackKnight;
-	static unsigned long long blAttackQueen;
 	static unsigned long long blAttackKing;
 	static unsigned long long blAttackRook;
 	static unsigned long long blAttackPawn;
+	static unsigned long long blAttackQueen;
+	static unsigned long long blAttackKnight;
+	static unsigned long long blAttackBishop;
 
-	static unsigned long long attackSquaresBishop;
-	static unsigned long long attackSquaresKnight;
-	static unsigned long long attackSquaresQueen;
 	static unsigned long long attackSquaresKing;
 	static unsigned long long attackSquaresRook;
 	static unsigned long long attackSquaresPawn;
+	static unsigned long long attackSquaresQueen;
+	static unsigned long long attackSquaresKnight;
+	static unsigned long long attackSquaresBishop;
 	static unsigned long long attackSquaresEnPassant;
 
-	static unsigned long long antiDiagonalMasks[15]; //Top right to bottom left
-	static unsigned long long diagonalMasks[15]; //Top left to bottom right
-	static unsigned long long fileMasks[8]; //File A to file H
-	static unsigned long long rankMasks[8]; //Rank 1 to rank 8
-
-	//static unsigned long long whPinnedPiecesBitBoard; //not used
-	//static unsigned long long blPinnedPiecesBitBoard; //not used
+	static unsigned long long notCapturable;
 	static unsigned long long pinnedPiecesBitBoard;
-
-	//static unsigned long long pawnPinnedLegalMoves; //not used
-	//static unsigned long long queenPinnedLegalMoves; //not used
-	//static unsigned long long bishopPinnedLegalMoves; //not used
-	//static unsigned long long rookPinnedLegalMoves; //not used
-	static unsigned long long enemyPiecesThatAreDefended;
-
-	static unsigned long long squaresToBlockCheckOrCapture;
-	static unsigned long long locationOfPieceAttackingKing;
 	static unsigned long long checkPathXRayThroughKing;
+	static unsigned long long enemyPiecesThatAreDefended;
+	static unsigned long long locationOfPieceAttackingKing;
+	static unsigned long long squaresToBlockCheckOrCapture;
+
+	static int castleRooks[4];
+
 	static int numberOfChecks;
+
+	static const unsigned long long KingSpan;
+	static const unsigned long long KnightSpan;
+	static const unsigned long long FILE_A;
+	static const unsigned long long FILE_H;
+	static const unsigned long long FILE_AB;
+	static const unsigned long long FILE_GH;
+	static const unsigned long long RANK_1;
+	static const unsigned long long RANK_4;
+	static const unsigned long long RANK_5;
+	static const unsigned long long RANK_8;
+	static const unsigned long long CENTRE;
+	static const unsigned long long EXTENDED_CENTRE;
+	static const unsigned long long KING_SIDE;
+	static const unsigned long long QUEEN_SIDE;
+
+	static const unsigned long long fileMasks[8]; //File A to file H
+	static const unsigned long long rankMasks[8]; //Rank 1 to rank 8
+	static const unsigned long long diagonalMasks[15]; //Top left to bottom right
+	static const unsigned long long antiDiagonalMasks[15]; //Top right to bottom left
 
 	static void setStartPosition() { //Set start position of pieces on the bitBoard
 	//Index of new bit defined by (row * 8 + col)
@@ -222,3 +215,10 @@ struct BoardInfo {
 	}
 };
 #endif // !BOARDINFO_H
+
+	//static unsigned long long whPinnedPiecesBitBoard; //not used
+	//static unsigned long long blPinnedPiecesBitBoard; //not used
+	//static unsigned long long pawnPinnedLegalMoves; //not used
+	//static unsigned long long queenPinnedLegalMoves; //not used
+	//static unsigned long long bishopPinnedLegalMoves; //not used
+	//static unsigned long long rookPinnedLegalMoves; //not used

@@ -7,8 +7,8 @@
 class King : public Piece {
 private:
 	unsigned long long squaresTheEnemyAttacks = 0ULL;
-	bool hasLeftRookMoved,
-		hasRightRookMoved;
+	//bool hasLeftRookMoved,
+	//	hasRightRookMoved;
 	bool hasKingMoved;
 	unsigned long long spotsToRightRook = 0ULL;
 	unsigned long long spotsToLeftRook = 0ULL;
@@ -108,6 +108,11 @@ public:
 		attackSquaresKing = 0ULL;
 		attackSquaresKing |= allPotentialMoves;
 	}
+
+	void setHasKingMoved(bool& hkm) { hasKingMoved = hkm; }
+	bool getHasKingMoved() const { return hasKingMoved; }
+	unsigned long long getSquaresTheEnemyAttacks() const { return squaresTheEnemyAttacks; }
+
 
 	std::unique_ptr<std::vector<uint16_t>> playerLegalMoves() {
 		std::unique_ptr<std::vector<uint16_t>> allPossibleMoves = std::make_unique<std::vector<uint16_t>>(),

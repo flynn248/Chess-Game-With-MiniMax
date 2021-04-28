@@ -1,4 +1,5 @@
 #include "SavedGameState.h"
+#include "AllLegalMoves.h"
 #include "ChessBoard.h"
 #include "Timer.h"
 #include <tuple>
@@ -21,7 +22,7 @@ public:
 	std::tuple<int, uint16_t> miniMaxAlgo(int currDepth, bool isWhiteMove) {
 		int bestScore = 0;
 		uint16_t bestMove = 0;
-		SavedGameState svdState;
+		AllLegalMoves moves;
 		if (board->getIsCheckMate() || currDepth == maxDepth || board->getIsStaleMate()) 	{
 			bestScore = board->evaluateBoardValue(isWhiteMove);
 			bestMove = NULL;
@@ -32,14 +33,15 @@ public:
 			bestScore = INT_MIN;
 		else
 			bestScore = INT_MAX;
-		
-		getAllPossibleMoves(isWhiteMove, svdState);
+		SGS savedState(board);
+		getAllPossibleMoves(isWhiteMove, moves);
 		for (int i = 0; i < 8 ; i++) 		{
 
-			for (auto j = svdState.allMoves->at(i)->begin(); j != svdState.allMoves->at(i)->end(); j++) 		{
+			for (auto j = moves.allMoves->at(i)->begin(); j != moves.allMoves->at(i)->end(); j++) 		{
 				board->makeAIMove(*j, isWhiteMove, currDepth);
 				std::tuple<int, uint16_t> loss_move = miniMaxAlgo(currDepth + 1, !isWhiteMove);
-				board->undoAIMove(*j, isWhiteMove, currDepth);
+				savedState.loadSavedState(board);
+				//board->undoAIMove(*j, isWhiteMove, currDepth);
 				
 				//if (std::get<0>(move_loss) == 0) 	{ //no move found
 				//	bestMove = *j;
@@ -63,10 +65,11 @@ public:
 		return std::make_tuple(bestScore, bestMove);
 	}
 private:
+	/*
 	std::tuple<int, uint16_t> miniMiniMaxAlgo(int currDepth, bool isWhiteMove, uint16_t currMove) {
 		int bestScore;
 		uint16_t bestMove;
-		SavedGameState svdState;
+		AllLegalMoves moves;
 		if (currDepth == maxDepth) {
 			bestScore = board->evaluateBoardValue(isWhiteMove);
 			bestMove = currMove;
@@ -78,10 +81,10 @@ private:
 		else
 			bestScore = INT_MIN;
 		int w = 0;
-		getAllPossibleMoves(isWhiteMove, svdState);
+		getAllPossibleMoves(isWhiteMove, moves);
 		for (int i = 0; i < 8; i++, w++) {
 
-			for (auto j = svdState.allMoves->at(i)->begin(); j != svdState.allMoves->at(i)->end(); j++) {
+			for (auto j = moves.allMoves->at(i)->begin(); j != moves.allMoves->at(i)->end(); j++) {
 				board->makeAIMove(*j, isWhiteMove, currDepth);
 				if (*j == 256) {
 					std::cout << "Breaking code\n";
@@ -109,15 +112,16 @@ private:
 
 		return std::make_tuple(bestScore, bestMove);
 	}
+	*/
 
 
-	void getAllPossibleMoves(const bool & isWhiteMove, SavedGameState& svdState) {
+	void getAllPossibleMoves(const bool & isWhiteMove, AllLegalMoves& moves) {
 		if (isWhiteMove) 	{
-			getFirstHalfOfMovesWhite(svdState);
-			getSecondHalfOfMovesWhite(svdState);
+			getFirstHalfOfMovesWhite(moves);
+			getSecondHalfOfMovesWhite(moves);
 
-			//moveThreads.push_back(std::thread(&MiniMax::getFirstHalfOfMovesWhite, this, std::ref(svdState)));
-			//moveThreads.push_back(std::thread(&MiniMax::getSecondHalfOfMovesWhite, this, std::ref(svdState)));
+			//moveThreads.push_back(std::thread(&MiniMax::getFirstHalfOfMovesWhite, this, std::ref(moves)));
+			//moveThreads.push_back(std::thread(&MiniMax::getSecondHalfOfMovesWhite, this, std::ref(moves)));
 			//
 			//for (auto &th : moveThreads) {
 			//	th.join();
@@ -125,11 +129,11 @@ private:
 			//moveThreads.clear();
 		}
 		else {
-			getFirstHalfOfMovesBlack(svdState);
-			getSecondHalfOfMovesBlack(svdState);
+			getFirstHalfOfMovesBlack(moves);
+			getSecondHalfOfMovesBlack(moves);
 			
-			//moveThreads.push_back(std::thread(&MiniMax::getFirstHalfOfMovesBlack, this, std::ref(svdState)));
-			//moveThreads.push_back(std::thread(&MiniMax::getSecondHalfOfMovesBlack, this, std::ref(svdState)));
+			//moveThreads.push_back(std::thread(&MiniMax::getFirstHalfOfMovesBlack, this, std::ref(moves)));
+			//moveThreads.push_back(std::thread(&MiniMax::getSecondHalfOfMovesBlack, this, std::ref(moves)));
 			//
 			//for (auto& th : moveThreads) {
 			//	th.join();
@@ -137,32 +141,32 @@ private:
 			//moveThreads.clear();
 		}
 	}
-	void getFirstHalfOfMovesWhite(SavedGameState& svdState) {
-		svdState.allMoves->at(1) = board->queenMovesWhite();
-		svdState.allMoves->at(2) = board->rookMovesWhite();
-		svdState.allMoves->at(3) = board->bishopMovesWhite();
+	void getFirstHalfOfMovesWhite(AllLegalMoves& moves) {
+		moves.allMoves->at(1) = board->queenMovesWhite();
+		moves.allMoves->at(2) = board->rookMovesWhite();
+		moves.allMoves->at(3) = board->bishopMovesWhite();
 		
-		svdState.allMoves->at(0) = board->kingMovesWhite();
-		svdState.allMoves->at(4) = board->knightMovesWhite();
-		svdState.allMoves->at(5) = board->pawnMovesWhite();
-		svdState.allMoves->at(6) = board->castlingMovesWhite();
-		svdState.allMoves->at(7) = board->enPassantMovesWhite();
+		moves.allMoves->at(0) = board->kingMovesWhite();
+		moves.allMoves->at(4) = board->knightMovesWhite();
+		moves.allMoves->at(5) = board->pawnMovesWhite();
+		moves.allMoves->at(6) = board->castlingMovesWhite();
+		moves.allMoves->at(7) = board->enPassantMovesWhite();
 	}
-	void getSecondHalfOfMovesWhite(SavedGameState& svdState) {
+	void getSecondHalfOfMovesWhite(AllLegalMoves& moves) {
 	}
 
-	void getFirstHalfOfMovesBlack(SavedGameState& svdState) {
-		svdState.allMoves->at(1) = board->queenMovesBlack();
-		svdState.allMoves->at(2) = board->rookMovesBlack();
-		svdState.allMoves->at(3) = board->bishopMovesBlack();
+	void getFirstHalfOfMovesBlack(AllLegalMoves& moves) {
+		moves.allMoves->at(1) = board->queenMovesBlack();
+		moves.allMoves->at(2) = board->rookMovesBlack();
+		moves.allMoves->at(3) = board->bishopMovesBlack();
 		
-		svdState.allMoves->at(0) = board->kingMovesBlack();
-		svdState.allMoves->at(4) = board->knightMovesBlack();
-		svdState.allMoves->at(5) = board->pawnMovesBlack();
-		svdState.allMoves->at(6) = board->castlingMovesBlack();
-		svdState.allMoves->at(7) = board->enPassantMovesBlack();
+		moves.allMoves->at(0) = board->kingMovesBlack();
+		moves.allMoves->at(4) = board->knightMovesBlack();
+		moves.allMoves->at(5) = board->pawnMovesBlack();
+		moves.allMoves->at(6) = board->castlingMovesBlack();
+		moves.allMoves->at(7) = board->enPassantMovesBlack();
 	}
-	void getSecondHalfOfMovesBlack(SavedGameState& svdState) {
+	void getSecondHalfOfMovesBlack(AllLegalMoves& moves) {
 	}
 public:
 	int moveGenerationTest(int depth, bool isWhiteMove, int currDepth) {
@@ -170,11 +174,11 @@ public:
 			return 1;
 		}
 		
-		SavedGameState svdState;
+		AllLegalMoves moves;
 		int numPosition = 0;
-		getAllPossibleMoves(isWhiteMove, svdState);
+		getAllPossibleMoves(isWhiteMove, moves);
 		for (int i = 0; i < 8; i++) {
-			for (auto j = svdState.allMoves->at(i)->begin(); j != svdState.allMoves->at(i)->end(); j++) {
+			for (auto j = moves.allMoves->at(i)->begin(); j != moves.allMoves->at(i)->end(); j++) {
 				std::cout << ((*j & 16128) >> 8) << " " << (*j & 63) << std::endl;
 				//board->makeAIMove(*j, isWhiteMove, currDepth);
 				//numPosition += moveGenerationTest(depth - 1, !isWhiteMove, currDepth - 1);

@@ -150,7 +150,7 @@ public:
 	bool getIsWhite() const { return isWhite; }
 	float getScale() const { return scale; }
 	int getNumPieces() const{ return numPieces; }
-
+	void setNumPieces(const int& np) { numPieces = np; }
 	void highLightAttackingSquares(sf::RenderWindow& window, unsigned long long& attackedSquares) {
 		squaresPieceAttacks = attackedSquares;
 

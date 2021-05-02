@@ -1,9 +1,10 @@
 #ifndef ROOK_H
 #define ROOK_H
 #include "Piece.h"
+#include "SlidingPiecesMoves.h"
 #include <string>
 
-class Rook : public Piece {
+class Rook : public Piece, private SlidingPiecesMoves {
 private:
 	
 
@@ -30,23 +31,10 @@ public:
 	}
 
 	unsigned long long moveableSquaresWhenPinned(const int& piecePosition) {
-		if (isWhite) {
-			if ((rankMasks[piecePosition / 8] & whKing) != 0) //if king is on same rank (horz)
-				return horizontalMoves(piecePosition) & notCapturable;
-			else if ((fileMasks[piecePosition % 8] & whKing) != 0) //if king is on same file (vert)
-				return verticalMoves(piecePosition) & notCapturable;
-			else
-				return 0ULL;
+		if (isWhite) 	{
+			return moveSqPinnedHorzVert(piecePosition, whKing);
 		}
-		else {
-			if ((rankMasks[piecePosition / 8] & blKing) != 0)  //if king is on same rank (horz)
-				return horizontalMoves(piecePosition) & notCapturable;
-			else if ((fileMasks[piecePosition % 8] & blKing) != 0) //if king is on same file (vert)
-				return verticalMoves(piecePosition) & notCapturable;
-			else
-				return 0ULL;
-		}
-		std::cout << "ERROR: Failed to find path from pinned piece to king!\n";
+		return moveSqPinnedHorzVert(piecePosition, blKing);
 	}
 
 	void updateAttackSquares(unsigned long long pieceBitBoard, unsigned long long kingBitBoard, unsigned long long& enemyKingLociSpread, unsigned long long& myPieces) {

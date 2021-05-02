@@ -6,7 +6,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-struct Player {
+class Player {
 	std::shared_ptr<ChessBoard> board;
 	//ChessBoard* board = nullptr;
 	Piece* grabbedPiece = nullptr;
@@ -17,6 +17,7 @@ struct Player {
 	int rookBeforeCastle = -1;
 	int rookAfterCastle = -1;
 	//Have a vector of possible moves. When a piece is grabbed, update the vector which in turn updates the hilighted squares. Then when placed, check the vector if legal. Clear vector before grabbing another piece.
+public:
 	Player(std::shared_ptr<ChessBoard>& board) {
 		this->board = board;
 	}
@@ -26,17 +27,10 @@ struct Player {
 		sf::Sprite pieceSprite;
 		grabbedPiece = nullptr;
 
-		uint16_t move = 8368;
-		int d = 1;
-		bool color = board->getIsWhiteMove();
-		//board->makeAIMove(move, color, d);
-		//board->undoAIMove(move, color, d);
-		//board->commitAIMove(move);
-
 		if ((board->bitBoard & (1ULL << clickedTileIndex)) == 0) { //if no piece was clicked
 			return;
 		}
-		std::cout << board->getBlackRookPiece()->getNumPieces() << " " << board->getWhiteRookPiece()->getNumPieces() << std::endl;
+		//std::cout << board->getBlackRookPiece()->getNumPieces() << " " << board->getWhiteRookPiece()->getNumPieces() << std::endl;
 		if (board->getIsWhiteMove()) { //white to move
 			if ((board->blPieces & (1ULL << clickedTileIndex)) != 0) { //if piece is not white
 				return;
@@ -170,7 +164,7 @@ struct Player {
 			}
 		}
 	}
-
+private:
 	void doEnemyPieceCapture(const int& newTileIndex, const int& clickedTileIndex) {
 		board->removeCapturedPiece(newTileIndex);
 		grabbedPiece->removeAPieceFromBoard(clickedTileIndex);
@@ -204,7 +198,7 @@ struct Player {
 				board->addBlackQueenToBoard(newTileIndex);
 		}
 		board->removeCapturedPiece(clickedTileIndex);
-		board->updateDisplayOfPieces();
+		//board->updateDisplayOfPieces();
 	}
 	void doEnpassantMove(const int& newTileIndex, const int& clickedTileIndex) {
 		if (grabbedPiece->getIsWhite()) {

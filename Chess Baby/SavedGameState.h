@@ -6,8 +6,7 @@
 
 class SGS 				{
 private:
-	//In retrospect, could have saved time by keeping the same name as in the board and just use this
-	//Oops
+
 	unsigned long long cpyBitBoard = 0ULL;
 	unsigned long long cpyWhPieces = 0ULL;
 	unsigned long long cpyBlPieces = 0ULL;
@@ -73,11 +72,27 @@ private:
 
 	unsigned long long squaresTheEnemyAttacks = 0ULL;
 
+	int whKingNumP = 0;
+	int whRookNumP = 0;
+	int whPawnNumP = 0;
+	int whQueenNumP = 0;
+	int whKnightNumP = 0;
+	int whBishopNumP = 0;
+	
+	int blKingNumP = 0;
+	int blRookNumP = 0;
+	int blPawnNumP = 0;
+	int blQueenNumP = 0;
+	int blKnightNumP = 0;
+	int blBishopNumP = 0;
+
 public:
+	SGS();
 	SGS(std::shared_ptr<ChessBoard>&);
+	void saveCurrentState(std::shared_ptr<ChessBoard>&);
 	void loadSavedState(std::shared_ptr<ChessBoard>&);
 };
-
+SGS::SGS(){}
 SGS::SGS(std::shared_ptr<ChessBoard>& board) {
 	cpyBitBoard = board->bitBoard;
 	cpyWhPieces = board->whPieces;
@@ -145,10 +160,113 @@ SGS::SGS(std::shared_ptr<ChessBoard>& board) {
 	if (isWhiteMove) {
 		hasKingMoved = board->getWhiteKingPiece()->getHasKingMoved();
 		squaresTheEnemyAttacks = board->getWhiteKingPiece()->getSquaresTheEnemyAttacks();
+
+		whKingNumP = board->getWhiteKingPiece()->getNumPieces();
+		whRookNumP = board->getWhiteRookPiece()->getNumPieces();
+		whPawnNumP = board->getWhitePawnPiece()->getNumPieces();
+		whQueenNumP = board->getWhiteQueenPiece()->getNumPieces();
+		whKnightNumP = board->getWhiteKnightPiece()->getNumPieces();
+		whBishopNumP = board->getWhiteBishopPiece()->getNumPieces();
 	}
 	else {
 		hasKingMoved = board->getBlackKingPiece()->getHasKingMoved();
+
 		squaresTheEnemyAttacks = board->getBlackKingPiece()->getSquaresTheEnemyAttacks();
+		blKingNumP = board->getBlackKingPiece()->getNumPieces();
+		blRookNumP = board->getBlackRookPiece()->getNumPieces();
+		blPawnNumP = board->getBlackPawnPiece()->getNumPieces();
+		blQueenNumP = board->getBlackQueenPiece()->getNumPieces();
+		blKnightNumP = board->getBlackKnightPiece()->getNumPieces();
+		blBishopNumP = board->getBlackBishopPiece()->getNumPieces();
+	}
+
+}
+
+void SGS::saveCurrentState(std::shared_ptr<ChessBoard>& board) {
+	cpyBitBoard = board->bitBoard;
+	cpyWhPieces = board->whPieces;
+	cpyBlPieces = board->blPieces;
+
+	cpyWhKing = board->whKing;
+	cpyWhRook = board->whRook;
+	cpyWhPawn = board->whPawn;
+	cpyWhQueen = board->whQueen;
+	cpyWhKnight = board->whKnight;
+	cpyWhBishop = board->whBishop;
+
+	cpyBlKing = board->blKing;
+	cpyBlRook = board->blRook;
+	cpyBlPawn = board->blPawn;
+	cpyBlQueen = board->blQueen;
+	cpyBlKnight = board->blKnight;
+	cpyBlBishop = board->blBishop;
+
+	cpyEnPassantWhite = board->enPassantWhite;
+	cpyEnPassantBlack = board->enPassantBlack;
+
+	cpyAttackedSquares = board->attackedSquares;
+	cpySquaresWhiteAttacks = board->squaresWhiteAttacks;
+	cpySquaresBlackAttacks = board->squaresBlackAttacks;
+
+	cpyWhAttackKing = board->whAttackKing;
+	cpyWhAttackRook = board->whAttackRook;
+	cpyWhAttackPawn = board->whAttackPawn;
+	cpyWhAttackQueen = board->whAttackQueen;
+	cpyWhAttackKnight = board->whAttackKnight;
+	cpyWhAttackBishop = board->whAttackBishop;
+
+	cpyBlAttackKing = board->blAttackKing;
+	cpyBlAttackRook = board->blAttackRook;
+	cpyBlAttackPawn = board->blAttackPawn;
+	cpyBlAttackQueen = board->blAttackQueen;
+	cpyBlAttackKnight = board->blAttackKnight;
+	cpyBlAttackBishop = board->blAttackBishop;
+
+	cpyAttackSquaresKing = board->attackSquaresKing;
+	cpyAttackSquaresRook = board->attackSquaresRook;
+	cpyAttackSquaresPawn = board->attackSquaresPawn;
+	cpyAttackSquaresQueen = board->attackSquaresQueen;
+	cpyAttackSquaresKnight = board->attackSquaresKnight;
+	cpyAttackSquaresBishop = board->attackSquaresBishop;
+	cpyAttackSquaresEnPassant = board->attackSquaresEnPassant;
+
+	cpyNotCapturable = board->notCapturable;
+	cpyPinnedPiecesBitBoard = board->pinnedPiecesBitBoard;
+	cpyCheckPathXRayThroughKing = board->checkPathXRayThroughKing;
+	cpyEnemyPiecesThatAreDefended = board->enemyPiecesThatAreDefended;
+	cpyLocationOfPieceAttackingKing = board->locationOfPieceAttackingKing;
+	cpySquaresToBlockCheckOrCapture = board->squaresToBlockCheckOrCapture;
+
+	for (int i = 0; i < 4; i++) {
+		cpyCastleRooks[i] = board->castleRooks[i];
+	}
+
+	cpyNumberOfChecks = board->numberOfChecks;
+
+	isCheckMate = board->getIsCheckMate();
+	isStaleMate = board->getIsStaleMate();
+	isWhiteMove = board->getIsWhiteMove();
+	if (isWhiteMove) {
+		hasKingMoved = board->getWhiteKingPiece()->getHasKingMoved();
+		squaresTheEnemyAttacks = board->getWhiteKingPiece()->getSquaresTheEnemyAttacks();
+		
+		whKingNumP = board->getWhiteKingPiece()->getNumPieces();
+		whRookNumP = board->getWhiteRookPiece()->getNumPieces();
+		whPawnNumP = board->getWhitePawnPiece()->getNumPieces();
+		whQueenNumP = board->getWhiteQueenPiece()->getNumPieces();
+		whKnightNumP = board->getWhiteKnightPiece()->getNumPieces();
+		whBishopNumP = board->getWhiteBishopPiece()->getNumPieces();
+	}
+	else {
+		hasKingMoved = board->getBlackKingPiece()->getHasKingMoved();
+		
+		squaresTheEnemyAttacks = board->getBlackKingPiece()->getSquaresTheEnemyAttacks();
+		blKingNumP = board->getBlackKingPiece()->getNumPieces();
+		blRookNumP = board->getBlackRookPiece()->getNumPieces();
+		blPawnNumP = board->getBlackPawnPiece()->getNumPieces();
+		blQueenNumP = board->getBlackQueenPiece()->getNumPieces();
+		blKnightNumP = board->getBlackKnightPiece()->getNumPieces();
+		blBishopNumP = board->getBlackBishopPiece()->getNumPieces();
 	}
 
 }
@@ -221,10 +339,24 @@ void SGS::loadSavedState(std::shared_ptr<ChessBoard>& board) {
 	if (isWhiteMove) {
 		board->getWhiteKingPiece()->setHasKingMoved(hasKingMoved);
 		board->getWhiteKingPiece()->setSquaresTheEnemyAttacks(squaresTheEnemyAttacks);
+
+		board->getWhiteKingPiece()->setNumPieces(whKingNumP);
+		board->getWhiteRookPiece()->setNumPieces(whRookNumP);
+		board->getWhitePawnPiece()->setNumPieces(whPawnNumP);
+		board->getWhiteQueenPiece()->setNumPieces(whQueenNumP);
+		board->getWhiteKnightPiece()->setNumPieces(whKnightNumP);
+		board->getWhiteBishopPiece()->setNumPieces(whBishopNumP);
 	}
 	else {
 		board->getBlackKingPiece()->setHasKingMoved(hasKingMoved);
 		board->getBlackKingPiece()->setSquaresTheEnemyAttacks(squaresTheEnemyAttacks);
+
+		board->getBlackKingPiece()->setNumPieces(blKingNumP);
+		board->getBlackRookPiece()->setNumPieces(blRookNumP);
+		board->getBlackPawnPiece()->setNumPieces(blPawnNumP);
+		board->getBlackQueenPiece()->setNumPieces(blQueenNumP);
+		board->getBlackKnightPiece()->setNumPieces(blKnightNumP);
+		board->getBlackBishopPiece()->setNumPieces(blBishopNumP);
 	}
 }
 

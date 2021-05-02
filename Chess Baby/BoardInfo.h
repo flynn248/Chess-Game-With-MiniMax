@@ -112,7 +112,6 @@ struct BoardInfo {
 		bitBoard |= blQueen;
 		blPieces |= bitBoard ^ whPieces;
 	}
-
 	static unsigned long long HorzNVerticalMoves(const int& square) { //Returns all horizontal and vertical moves for a piece
 		unsigned long long binSqare = 1ULL << square;
 		unsigned long long horizontalMoves = (bitBoard - 2 * binSqare) ^ reverseBits(reverseBits(bitBoard) - 2 * reverseBits(binSqare));

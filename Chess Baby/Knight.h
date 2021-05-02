@@ -52,9 +52,12 @@ public:
 				allPotentialMoves = KnightSpan >> (18 - knightLocation);
 
 			if (knightLocation % 8 < 4)  //prevent magical looping of knight to other side of board
-				allPotentialMoves &= ~FILE_GH & notCapturable;
+				allPotentialMoves &= ~FILE_GH;
 			else
-				allPotentialMoves &= ~FILE_AB & notCapturable;
+				allPotentialMoves &= ~FILE_AB;
+
+			enemyPiecesThatAreDefended |= allPotentialMoves & myPieces;
+			allPotentialMoves &= notCapturable;
 
 			if ((allPotentialMoves & kingBitBoard) != 0) { //knight attack cannot be blocked. Only move away or capture
 				squaresToBlockCheckOrCapture |= 1ULL << knightLocation;
@@ -62,7 +65,6 @@ public:
 			}
 
 			attackSquaresKnight |= allPotentialMoves;
-			enemyPiecesThatAreDefended |= allPotentialMoves & myPieces;
 
 			pieceBitBoard &= ~(1ULL << knightLocation);
 			knightPiece = pieceBitBoard & ~(pieceBitBoard - 1);

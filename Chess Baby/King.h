@@ -46,9 +46,9 @@ public:
 			pieceAttackingKing = locationOfPieceAttackingKing;
 		
 		if (piecePosition % 8 < 4)  //prevent magical looping of king to other side of board
-			movableSquaresForDisplay &= ~FILE_GH & notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing & ~enemyPiecesThatAreDefended | pieceAttackingKing;
+			movableSquaresForDisplay &= (notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing & ~enemyPiecesThatAreDefended | pieceAttackingKing) & ~FILE_GH;
 		else
-			movableSquaresForDisplay &= ~FILE_AB & notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing & ~enemyPiecesThatAreDefended | pieceAttackingKing;
+			movableSquaresForDisplay &= (notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing & ~enemyPiecesThatAreDefended | pieceAttackingKing) & ~FILE_AB;
 
 	}
 	void singlePieceCastleSquaresWhite() {
@@ -153,9 +153,9 @@ public:
 				pieceAttackingKing = locationOfPieceAttackingKing;
 
 			if (kingLocation % 8 < 4)  //prevent magical looping of king to other side of board
-				allPotentialMoves &= ~FILE_GH & notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing & ~enemyPiecesThatAreDefended | pieceAttackingKing;
+				allPotentialMoves &= (notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing & ~enemyPiecesThatAreDefended | pieceAttackingKing) & ~FILE_GH;
 			else
-				allPotentialMoves &= ~FILE_AB & notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing & ~enemyPiecesThatAreDefended | pieceAttackingKing;
+				allPotentialMoves &= (notCapturable & ~squaresTheEnemyAttacks & ~checkPathXRayThroughKing & ~enemyPiecesThatAreDefended | pieceAttackingKing) & ~FILE_AB;
 
 			unsigned long long aPotentialMove = allPotentialMoves & ~(allPotentialMoves - 1);
 			while (aPotentialMove != 0) {

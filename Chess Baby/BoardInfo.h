@@ -164,6 +164,8 @@ public:
 		/*
 			Faster bit swapping techniques was found here.
 			http://graphics.stanford.edu/~seander/bithacks.html#BitReverseObvious
+			Stackoverflow page where the above link was found. Other potentially faster methods discussed in the link
+			https://stackoverflow.com/questions/746171/efficient-algorithm-for-bit-reversal-from-msb-lsb-to-lsb-msb-in-c
 		*/
 
 		//Process was broken into two parts for each half of the 64-bit variable
@@ -180,7 +182,7 @@ public:
 		// swap 2-byte long pairs
 		v = (v >> 16) | (v << 16);
 
-		v2 = origBits >> 32; 
+		v2 = origBits >> 32; //now doing back 32 bits
 
 		v2 = ((v2 >> 1) & 0x55555555) | ((v2 & 0x55555555) << 1);
 		v2 = ((v2 >> 2) & 0x33333333) | ((v2 & 0x33333333) << 2);
@@ -213,39 +215,36 @@ public:
 
 	static int numOfTrailingZeros(unsigned long long bitMap) { //potentially change this idea to instead keep a vector of each piece location on their bitMap
 				//binary search method
-		unsigned long long v = 0ULL;
-		v |= bitMap;
-
 		int d;     // d will be the number of zero bits on the right,
-							// so if v is 1101000 (base 2), then d will be 3
-		// NOTE: if 0 == v, then d = 31.
-		if (v & 0x1) {
-			// special dase for odd v (assumed to happen half of the time)
+							// so if bitMap is 1101000 (base 2), then d will be 3
+		// NOTE: if 0 == bitMap, then d = 31.
+		if (bitMap & 0x1) {
+			// special dase for odd bitMap (assumed to happen half of the time)
 			return 0;
 		}
 		else {
 			d = 1;
-			if ((v & 0xffffffff) == 0) {
-				v >>= 32;
+			if ((bitMap & 0xffffffff) == 0) {
+				bitMap >>= 32;
 				d += 32;
 			}
-			if ((v & 0xffff) == 0) {
-				v >>= 16;
+			if ((bitMap & 0xffff) == 0) {
+				bitMap >>= 16;
 				d += 16;
 			}
-			if ((v & 0xff) == 0) {
-				v >>= 8;
+			if ((bitMap & 0xff) == 0) {
+				bitMap >>= 8;
 				d += 8;
 			}
-			if ((v & 0xf) == 0) {
-				v >>= 4;
+			if ((bitMap & 0xf) == 0) {
+				bitMap >>= 4;
 				d += 4;
 			}
-			if ((v & 0x3) == 0) {
-				v >>= 2;
+			if ((bitMap & 0x3) == 0) {
+				bitMap >>= 2;
 				d += 2;
 			}
-			d -= v & 0x1;
+			d -= bitMap & 0x1;
 		}
 
 

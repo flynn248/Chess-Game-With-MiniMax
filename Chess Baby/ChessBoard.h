@@ -233,9 +233,9 @@ public:
 		if ((blPawn & 402653184) != 0) 	{
 			blackPiecesValue -= 100;
 		}
-		//if ((whQueen & 402653184) != 0) {
-		//	blackPiecesValue -= 10000;
-		//}
+		if ((blQueen & 402653184) != 0) {
+			blackPiecesValue -= 10000;
+		}
 		
 		blackPiecesValue += blKingPiece->getNumPieces() * blKingPiece->getValue();
 		blackPiecesValue += blPawnPiece->getNumPieces() * blPawnPiece->getValue();
@@ -697,7 +697,7 @@ public:
 	void updateWhenBlLeftRookMoved() { whenBlLeftRookMoved = blMoveCounter; }
 	void updateTimesWhiteKingMoved() { timesWhiteKingMoved++; }
 	void updateTimesBackKingMoved() { timesBlackKingMoved++; }
-
+	 
 	void updateWhMoveCounter() { whMoveCounter++; }
 	void updateBlMoveCounter() { blMoveCounter++; }
 

@@ -1,4 +1,3 @@
-#include <tuple>
 #include <thread>
 #include <iostream>
 #include "Timer.h"
@@ -33,7 +32,7 @@ public:
 		//std::cout << "MiniMax looked at: " << numLeaves << " leaves.\n";
 		return move;
 	}
-private:
+private: /******PRIVATE******/
 	uint16_t miniMaxSetUp(bool isWhiteMove) {
 		int prevEval = 0;
 		uint16_t bestMove = 0;
@@ -44,7 +43,7 @@ private:
 		for (int i = 0; i < 8; i++) {
 			for (auto j = moves.allMoves->at(i)->begin(); j != moves.allMoves->at(i)->end(); j++) {
 				board->makeAIMove(*j, isWhiteMove, 0);
-				int eval = miniMaxAlgo(1, INT_MIN, INT_MAX, isWhiteMove);
+				int eval = miniMaxAlgo(1, INT_MIN, INT_MAX, !isWhiteMove);
 				savedGame.loadSavedState(board);
 				if (isWhiteMove) {
 					if (eval >= prevEval) {
@@ -60,6 +59,15 @@ private:
 				}
 			}
 		}
+		
+		if (bestMove == 0) 	{ //if no move was selected. Pick first one
+			for (int i = 0; i < 8; i++) 		{
+				for (auto j = moves.allMoves->at(i)->begin(); j != moves.allMoves->at(i)->end(); j++) 		{
+					return *j;
+				}
+			}
+		}
+
 		return bestMove;
 	}
 	int miniMaxAlgo(int depth, int alpha, int beta, bool isWhiteMove) {

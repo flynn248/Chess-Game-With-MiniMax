@@ -13,13 +13,18 @@
 int main(int argc, char* argv[]) {
 	bool willThread = false,
 		 willAI = false;
-	std::string useThread = argv[1],
-		useAI = argv[2];
-	if (useThread == "true" || useThread == "True") 	{ //use threading with AI. Testing purposes
-		willThread = true;
-	}
-	if (useAI == "true" || useAI == "True") { //use AI. Testing purposes
+	if (argc == 0) 	{ //default run
 		willAI = true;
+	}
+	else 	{
+		std::string useThread = argv[1],
+			useAI = argv[2];
+		if (useThread == "true" || useThread == "True") 	{ //use threading with AI. Testing purposes
+			willThread = true;
+		}
+		if (useAI == "true" || useAI == "True") { //use AI. Testing purposes
+			willAI = true;
+		}
 	}
 	const int depthAI = 4; //set the depth the AI will search till
 	float windowWidth = 960; //x and y of window

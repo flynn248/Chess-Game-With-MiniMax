@@ -361,4 +361,3 @@ void SGS::loadSavedState(std::shared_ptr<ChessBoard>& board) {
 }
 
 #endif // !SAVEDGAMESTATE
-

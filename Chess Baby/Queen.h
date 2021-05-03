@@ -6,37 +6,12 @@
 
 class Queen : public Piece, private SlidingPiecesMoves {
 
-
-public:
-	Queen() {
-
-	}
-	Queen(const int& val, const float& scale, const std::string& fileName, const float& posX, const bool& isWhite, const std::string name, unsigned long long& bitBoardPosition, const int numPieces)
-		: Piece(val, scale, fileName, posX, isWhite, name, bitBoardPosition, numPieces) {
-	}
-	void draw(sf::RenderWindow& window) {
-		Piece::drawPiece(window);
-	}
-
-	void findMoveableSquares(const int& piecePosition) {
-		singlePieceMoveableSquares(piecePosition);
-	}
 	void singlePieceMoveableSquares(const int& piecePosition) {
 		movableSquaresForDisplay = 0ULL;
 		if (((1ULL << piecePosition) & pinnedPiecesBitBoard) != 0) //if piece is pinned
-			movableSquaresForDisplay = moveableSquaresWhenPinned(piecePosition);
+			movableSquaresForDisplay = moveableSquaresWhenPinned(piecePosition) & squaresToBlockCheckOrCapture;
 		else //if not
 			movableSquaresForDisplay = (HorzNVerticalMoves(piecePosition) | diagNAntiDagMoves(piecePosition)) & notCapturable & squaresToBlockCheckOrCapture;
-	}
-
-	void updateAttackSquares(unsigned long long pieceBitBoard, unsigned long long kingBitBoard, unsigned long long& enemyKingLociSpread, unsigned long long& myPieces) {
-		attackSquaresQueen = 0ULL;
-		//updateAttackSqHrzVert(pieceLocation, numPieces, kingBitBoard, enemyKingLociSpread, myPieces, attackSquaresQueen);
-		//updateAttackSqDiagAntiDi(pieceLocation, numPieces, kingBitBoard, enemyKingLociSpread, myPieces, attackSquaresQueen);
-		updateAttackSqHrzVertBB(pieceBitBoard, kingBitBoard, enemyKingLociSpread, myPieces, attackSquaresQueen);
-		updateAttackSqDiagAntiDiBB(pieceBitBoard, kingBitBoard, enemyKingLociSpread, myPieces, attackSquaresQueen);
-
-		
 	}
 
 	unsigned long long moveableSquaresWhenPinned(const int& piecePosition) {
@@ -46,6 +21,24 @@ public:
 		return moveSqPinnedHzVtDiAnD(piecePosition, blKing);
 
 		//std::cout << "ERROR: Failed to find path from pinned piece to king!\n";
+	}
+public:
+	Queen() {}
+	Queen(const int& val, const float& scale, const std::string& fileName, const float& posX, const bool& isWhite, const std::string name, unsigned long long& bitBoardPosition, const int numPieces)
+		: Piece(val, scale, fileName, posX, isWhite, name, bitBoardPosition, numPieces) {
+	}
+	void draw(sf::RenderWindow& window) { Piece::drawPiece(window); }
+
+	void findMoveableSquares(const int& piecePosition) { singlePieceMoveableSquares(piecePosition); }
+
+	void updateAttackSquares(unsigned long long pieceBitBoard, unsigned long long kingBitBoard, unsigned long long& enemyKingLociSpread, unsigned long long& myPieces) {
+		attackSquaresQueen = 0ULL;
+		//updateAttackSqHrzVert(pieceLocation, numPieces, kingBitBoard, enemyKingLociSpread, myPieces, attackSquaresQueen);
+		//updateAttackSqDiagAntiDi(pieceLocation, numPieces, kingBitBoard, enemyKingLociSpread, myPieces, attackSquaresQueen);
+		updateAttackSqHrzVertBB(pieceBitBoard, kingBitBoard, enemyKingLociSpread, myPieces, attackSquaresQueen);
+		updateAttackSqDiagAntiDiBB(pieceBitBoard, kingBitBoard, enemyKingLociSpread, myPieces, attackSquaresQueen);
+
+		
 	}
 
 	std::unique_ptr<std::vector<uint16_t>> playerLegalMoves() { //Get legal moves for human player

@@ -3,7 +3,6 @@
 #include <SFML/Graphics.hpp>
 #include <bitset>
 #include <vector>
-//#include <time.h>
 #include <memory>
 #include "King.h"
 #include "Queen.h"
@@ -233,9 +232,9 @@ public:
 		if ((blPawn & 402653184) != 0) 	{
 			blackPiecesValue -= 100;
 		}
-		//if ((whQueen & 402653184) != 0) {
-		//	blackPiecesValue -= 10000;
-		//}
+		if ((blQueen & 402653184) != 0) {
+			blackPiecesValue -= 10000;
+		}
 		
 		blackPiecesValue += blKingPiece->getNumPieces() * blKingPiece->getValue();
 		blackPiecesValue += blPawnPiece->getNumPieces() * blPawnPiece->getValue();
@@ -257,8 +256,8 @@ public:
 
 private: //stuff for AI only
 	void makeAIMoveWhite(uint16_t& beforeNAfterMove, const int& currDepth) {
-		int newTileIndex = (beforeNAfterMove & 16128) >> 8;
-		int initialTileIndex = beforeNAfterMove & 63;
+		unsigned char newTileIndex = (beforeNAfterMove & 16128) >> 8;
+		unsigned char initialTileIndex = beforeNAfterMove & 63;
 
 		if (((1ULL << newTileIndex) & blPieces) != 0) { //if captured a piece
 			try {
@@ -337,8 +336,8 @@ private: //stuff for AI only
 		updateSquaresWhiteAttacks();
 	}
 	void makeAIMoveBlack(uint16_t& beforeNAfterMove, const int& currDepth) {
-		int newTileIndex = (beforeNAfterMove & 16128) >> 8;
-		int initialTileIndex = beforeNAfterMove & 63;
+		unsigned char newTileIndex = (beforeNAfterMove & 16128) >> 8;
+		unsigned char initialTileIndex = beforeNAfterMove & 63;
 
 		if (((1ULL << newTileIndex) & whPieces) != 0) { //if captured a piece
 			try {
@@ -635,7 +634,7 @@ public:
 		whAttackQueen = 0ULL;
 		whAttackKnight = 0ULL;
 		whAttackBishop = 0ULL;
-
+		
 		whAttackKing |= attackSquaresKing;
 		whAttackQueen |= attackSquaresQueen;
 		whAttackRook |= attackSquaresRook;
@@ -697,7 +696,7 @@ public:
 	void updateWhenBlLeftRookMoved() { whenBlLeftRookMoved = blMoveCounter; }
 	void updateTimesWhiteKingMoved() { timesWhiteKingMoved++; }
 	void updateTimesBackKingMoved() { timesBlackKingMoved++; }
-
+	 
 	void updateWhMoveCounter() { whMoveCounter++; }
 	void updateBlMoveCounter() { blMoveCounter++; }
 

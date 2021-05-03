@@ -13,13 +13,18 @@
 int main(int argc, char* argv[]) {
 	bool willThread = false,
 		 willAI = false;
-	std::string useThread = argv[1],
-		useAI = argv[2];
-	if (useThread == "true" || useThread == "True") 	{ //use threading with AI. Testing purposes
-		willThread = true;
-	}
-	if (useAI == "true" || useAI == "True") { //use AI. Testing purposes
+	if (argc == 0) 	{ //default run
 		willAI = true;
+	}
+	else 	{
+		std::string useThread = argv[1],
+			useAI = argv[2];
+		if (useThread == "true" || useThread == "True") 	{ //use threading with AI. Testing purposes
+			willThread = true;
+		}
+		if (useAI == "true" || useAI == "True") { //use AI. Testing purposes
+			willAI = true;
+		}
 	}
 	const int depthAI = 4; //set the depth the AI will search till
 	float windowWidth = 960; //x and y of window
@@ -33,7 +38,7 @@ int main(int argc, char* argv[]) {
 
 	Player player(board);
 	MiniMax allKnowingAI(board, depthAI, willThread);
-	
+
 	while (window.isOpen()) {
 
 		sf::Event e;
@@ -52,12 +57,15 @@ int main(int argc, char* argv[]) {
 		}
 		if (willAI) 	{
 			if (board->getIsWhiteMove() == false) 	{	
+				revCount = 0;
 				uint16_t commitmentIsHard;
 				{ //allow timing of the algo
 					Timer time;
 					commitmentIsHard = allKnowingAI.miniMax(false);
 				}
 				board->commitAIMove(commitmentIsHard);
+				std::cout << "Reverse bits went: " << revCount << " times.\n";
+				revCount = 0;
 			}
 		}
 		while (window.pollEvent(e)) {

@@ -52,12 +52,15 @@ int main(int argc, char* argv[]) {
 		}
 		if (willAI) 	{
 			if (board->getIsWhiteMove() == false) 	{	
+				revCount = 0;
 				uint16_t commitmentIsHard;
 				{ //allow timing of the algo
 					Timer time;
 					commitmentIsHard = allKnowingAI.miniMax(false);
 				}
 				board->commitAIMove(commitmentIsHard);
+				std::cout << "Reverse bits went: " << revCount << " times.\n";
+				revCount = 0;
 			}
 		}
 		while (window.pollEvent(e)) {

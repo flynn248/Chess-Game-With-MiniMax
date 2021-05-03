@@ -635,7 +635,7 @@ public:
 		whAttackQueen = 0ULL;
 		whAttackKnight = 0ULL;
 		whAttackBishop = 0ULL;
-
+		
 		whAttackKing |= attackSquaresKing;
 		whAttackQueen |= attackSquaresQueen;
 		whAttackRook |= attackSquaresRook;

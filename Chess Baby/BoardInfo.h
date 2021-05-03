@@ -1,7 +1,11 @@
 #ifndef BOARDINFO_H
 #define BOARDINFO_H
+int revCount = 0;
 
 struct BoardInfo {
+private:
+	static unsigned int v, v2;
+public:
 	static unsigned long long bitBoard;
 	static unsigned long long whPieces;
 	static unsigned long long blPieces;
@@ -155,21 +159,56 @@ struct BoardInfo {
 			reverseBits(reverseBits(bitBoard & fileMasks[square % 8]) - (2 * reverseBits(binSqare)));
 		return (verticalMoves & fileMasks[square % 8]);
 	}
-	static unsigned long long reverseBits(const unsigned long long& origBits) { //reverse the order of the bits
+	static unsigned long long reverseBits(unsigned long long origBits) { //reverse the order of the bits
+		revCount++;
+		/*
+			Faster bit swapping techniques was found here.
+			http://graphics.stanford.edu/~seander/bithacks.html#BitReverseObvious
+		*/
+
+		//Process was broken into two parts for each half of the 64-bit variable
+		v = origBits; // 32-bit word to reverse bit order
+
+		// swap odd and even bits
+		v = ((v >> 1) & 0x55555555) | ((v & 0x55555555) << 1);
+		// swap consecutive pairs
+		v = ((v >> 2) & 0x33333333) | ((v & 0x33333333) << 2);
+		// swap nibbles ... 
+		v = ((v >> 4) & 0x0F0F0F0F) | ((v & 0x0F0F0F0F) << 4);
+		// swap bytes
+		v = ((v >> 8) & 0x00FF00FF) | ((v & 0x00FF00FF) << 8);
+		// swap 2-byte long pairs
+		v = (v >> 16) | (v << 16);
+
+		v2 = origBits >> 32; 
+
+		v2 = ((v2 >> 1) & 0x55555555) | ((v2 & 0x55555555) << 1);
+		v2 = ((v2 >> 2) & 0x33333333) | ((v2 & 0x33333333) << 2);
+		v2 = ((v2 >> 4) & 0x0F0F0F0F) | ((v2 & 0x0F0F0F0F) << 4);
+		v2 = ((v2 >> 8) & 0x00FF00FF) | ((v2 & 0x00FF00FF) << 8);
+		v2 = (v2 >> 16) | (v2 << 16);
+
+		origBits = ((unsigned long long)v) << 32;
+		origBits |= v2;
+		return origBits;
+		/* Also very efficient, but slightly slower than the above one
+		unsigned long long s = sizeof(origBits) * CHAR_BIT; // bit size; must be power of 2 
+		unsigned long long mask = ~0;
+		while ((s >>= 1) > 0) {
+			mask ^= (mask << s);
+			origBits = ((origBits >> s) & mask) | ((origBits << s) & ~mask);
+		}
+
+		return origBits;
+		*/
+
+		/* Old version
 		unsigned long long reversed = 0ULL;
-
-		//for (int i = 0; i < 32; i++) {
-		//	reversed |= ((origBits >> i) & 0b1) << (63 - i);
-		//	reversed |= ((origBits >> (63 - i)) & 0b1) << i;
-		//}
-
 		for (int i = 0; i < 64; i++) { //fastest method so far
 			reversed |= ((origBits >> i) & 0b1) << (63 - i);
 		}
-
-
-		//std::cout << "Reversed: " << std::bitset<64>(reversed) << std::endl;
 		return reversed;
+		*/
 	}
 
 	static int numOfTrailingZeros(unsigned long long bitMap) { //potentially change this idea to instead keep a vector of each piece location on their bitMap
@@ -215,9 +254,6 @@ struct BoardInfo {
 };
 #endif // !BOARDINFO_H
 
-	//static unsigned long long whPinnedPiecesBitBoard; //not used
-	//static unsigned long long blPinnedPiecesBitBoard; //not used
-	//static unsigned long long pawnPinnedLegalMoves; //not used
-	//static unsigned long long queenPinnedLegalMoves; //not used
-	//static unsigned long long bishopPinnedLegalMoves; //not used
-	//static unsigned long long rookPinnedLegalMoves; //not used
+
+
+

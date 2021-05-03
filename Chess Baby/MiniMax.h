@@ -28,9 +28,9 @@ public:
 		}
 	}
 	uint16_t miniMax(bool isWhiteMove) {
-		numLeaves = 0;
+		//numLeaves = 0;
 		uint16_t move = miniMaxSetUp(isWhiteMove);
-		std::cout << "MiniMax looked at: " << numLeaves << " leaves.\n";
+		//std::cout << "MiniMax looked at: " << numLeaves << " leaves.\n";
 		return move;
 	}
 private:
@@ -58,10 +58,8 @@ private:
 						prevEval = eval;
 					}
 				}
-
 			}
 		}
-
 		return bestMove;
 	}
 	int miniMaxAlgo(int depth, int alpha, int beta, bool isWhiteMove) {
@@ -165,81 +163,6 @@ private:
 		moves.allMoves->at(6) = board->castlingMovesBlack();
 		moves.allMoves->at(7) = board->enPassantMovesBlack();
 	}
-public:
-	int moveGenerationTest(int depth, bool isWhiteMove, int currDepth) {
-		if (depth == 0) 	{
-			return 1;
-		}
-		
-		AllLegalMoves moves;
-		int numPosition = 0;
-		getAllPossibleMoves(isWhiteMove, moves);
-		for (int i = 0; i < 8; i++) {
-			for (auto j = moves.allMoves->at(i)->begin(); j != moves.allMoves->at(i)->end(); j++) {
-				std::cout << ((*j & 16128) >> 8) << " " << (*j & 63) << std::endl;
-				//board->makeAIMove(*j, isWhiteMove, currDepth);
-				//numPosition += moveGenerationTest(depth - 1, !isWhiteMove, currDepth - 1);
-				//board->undoAIMove(*j, isWhiteMove, currDepth);
-			}
-		}
-	}
 };
 
 #endif
-	/*
-	std::tuple<int, uint16_t> miniMaxAlgo(int currDepth, bool isWhiteMove, int alpha, int beta) {
-		int bestScore = 0;
-		uint16_t bestMove = 0;
-		AllLegalMoves moves;
-		numMoves++;
-		if (board->getIsCheckMate() || currDepth == maxDepth || board->getIsStaleMate()) 	{
-			bestScore = board->evaluateBoardValue(isWhiteMove);
-			bestMove = NULL;
-			return std::make_tuple(bestScore, bestMove);
-		}
-		
-		if (isWhiteMove == true)
-			bestScore = INT_MIN;
-		else
-			bestScore = INT_MAX;
-		SGS savedState(board);
-		getAllPossibleMoves(isWhiteMove, moves);
-		for (int i = 0; i < 8 ; i++) 		{
-
-			for (auto j = moves.allMoves->at(i)->begin(); j != moves.allMoves->at(i)->end(); j++) 		{
-				board->makeAIMove(*j, isWhiteMove, currDepth);
-				std::tuple<int, uint16_t> loss_move = miniMaxAlgo(currDepth + 1, !isWhiteMove, alpha, beta);
-				savedState.loadSavedState(board);
-				
-				//if (std::get<0>(move_loss) == 0) 	{ //no move found
-				//	bestMove = *j;
-				//}
-
-				if (isWhiteMove) 	{
-					bestScore = std::min(bestScore, (int)std::get<0>(loss_move));
-					beta = std::min(beta, bestScore);
-					if (beta <= alpha) 	{
-						break;
-					}
-					bestMove = *j;
-					if (std::get<0>(loss_move) > bestScore) 	{
-						bestScore = std::get<0>(loss_move);
-					}
-				}
-				else 	{
-					bestScore = std::max(bestScore, (int)std::get<0>(loss_move));
-					alpha = std::max(alpha, bestScore);
-					if (beta <= alpha) 	{
-						break;
-					}
-					bestMove = *j;
-					if (std::get<0>(loss_move) < bestScore) {
-						bestScore = std::get<0>(loss_move);
-					}
-				}
-			}
-		}
-
-		return std::make_tuple(bestScore, bestMove);
-	}
-	*/

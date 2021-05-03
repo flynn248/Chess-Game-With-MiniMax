@@ -38,6 +38,18 @@ int main(int argc, char* argv[]) {
 
 	Player player(board);
 	MiniMax allKnowingAI(board, depthAI, willThread);
+<<<<<<< HEAD
+=======
+	char cake = '4';
+	std::cout << std::endl;
+	std::cout << sizeof(cake) << std::endl;
+	std::cout << sizeof(unsigned long int) <<std::endl;
+	std::cout << sizeof(unsigned long long) << std::endl;
+	std::cout << sizeof(uint16_t) << std::endl;
+	std::cout << sizeof(uint64_t) << std::endl;
+
+
+>>>>>>> main
 
 	while (window.isOpen()) {
 

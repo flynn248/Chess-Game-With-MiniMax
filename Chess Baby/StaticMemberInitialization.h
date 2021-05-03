@@ -73,6 +73,9 @@ const unsigned long long BoardInfo::EXTENDED_CENTRE = 0x3C3C3C3C0000ULL;
 const unsigned long long BoardInfo::KING_SIDE = 0xF0F0F0F0F0F0F0F0ULL;
 const unsigned long long BoardInfo::QUEEN_SIDE = 0xF0F0F0F0F0F0F0FULL;
 
+unsigned int BoardInfo::v = 0;
+unsigned int BoardInfo::v2 = 0;
+
 const unsigned long long BoardInfo::fileMasks[8] = //File A to file H
 { 0x101010101010101ULL, 0x202020202020202ULL, 0x404040404040404ULL, 0x808080808080808ULL,
   0x1010101010101010ULL, 0x2020202020202020ULL, 0x4040404040404040ULL, 0x8080808080808080ULL };
@@ -86,14 +89,3 @@ const unsigned long long BoardInfo::antiDiagonalMasks[15] = //Top right to botto
 { 0x80ULL, 0x8040ULL, 0x804020ULL, 0x80402010ULL, 0x8040201008ULL, 0x804020100804ULL, 0x80402010080402ULL,
 	  0x8040201008040201ULL, 0x4020100804020100ULL, 0x2010080402010000ULL, 0x1008040201000000ULL,
 	  0x804020100000000ULL, 0x402010000000000ULL, 0x201000000000000ULL, 0x100000000000000ULL };
-
-
-
-
-
-//unsigned long long BoardInfo::whPinnedPiecesBitBoard = 0ULL;
-//unsigned long long BoardInfo::blPinnedPiecesBitBoard = 0ULL;
-//unsigned long long BoardInfo::queenPinnedLegalMoves = 0ULL;
-//unsigned long long BoardInfo::bishopPinnedLegalMoves = 0ULL;
-//unsigned long long BoardInfo::rookPinnedLegalMoves = 0ULL;
-//unsigned long long BoardInfo::pawnPinnedLegalMoves = 0ULL;

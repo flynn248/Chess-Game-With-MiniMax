@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <string>
+#include <vector>
 #include <bitset>
 #include "BoardInfo.h"
 
@@ -24,7 +25,17 @@ protected:
 	unsigned long long squaresPieceAttacks;
 	unsigned long long movableSquaresForDisplay;
 	sf::RectangleShape attackingSquare;
+	//std::vector<int> pieceLocation;
 	
+	//void fillPieceLocVector(unsigned long long pieceBitBoard) {
+	//	unsigned long long piece = pieceBitBoard;
+	//	while (piece != 0) {
+	//		int location = numOfTrailingZeros(piece);
+	//		pieceLocation.push_back(location);
+	//		pieceBitBoard &= ~(1ULL << location);
+	//		piece = pieceBitBoard;
+	//	}
+	//}
 public:
 	Piece() {
 		value = 0;
@@ -47,6 +58,8 @@ public:
 		attackingSquare.setSize(sf::Vector2f(tileWidth, tileWidth));
 		attackingSquare.setOrigin(sf::Vector2f(tileWidth / 2.f, tileWidth / 2.f));
 		attackingSquare.setFillColor(sf::Color(172, 47, 255, 100));
+		
+		//fillPieceLocVector(bitBoardPosition);
 
 		if (!setUpSprite(fileName)) {
 			std::cout << "Failed loading image!" << std::endl;
@@ -81,20 +94,30 @@ public:
 	}
 
 	void removeAPieceFromBoard(const int& index) {
-		//numPieces--;
+		//removePieceVect(index);
 		positionForDisplay &= ~(1ULL << index);
 	}
 	void removePieceBitBoard(const int& index) {
 		numPieces--;
 		*bitBoardPosition &= ~(1ULL << index);
+		//removePieceVect(index);
 	}
+	//void removePieceVect(const int& index) {
+	//	for (auto it = pieceLocation.begin(); it != pieceLocation.end(); it++) 		{
+	//		if (*it == index) 	{
+	//			pieceLocation.erase(it);
+	//			break;
+	//		}
+	//	}
+	//}
 
 	void addPieceBitBoard(const int& index) {
 		numPieces++;
+		//pieceLocation.push_back(index);
 		*bitBoardPosition |= (1ULL << index);
 	}
 	void addAPieceToBoard(const int& index) {
-		//numPieces++;
+		//pieceLocation.push_back(index);
 		positionForDisplay |= (1ULL << index);
 	}
 
@@ -150,6 +173,7 @@ public:
 	bool getIsWhite() const { return isWhite; }
 	float getScale() const { return scale; }
 	int getNumPieces() const{ return numPieces; }
+	//std::vector<int> getPieceLocation() const { return pieceLocation; }
 	void setNumPieces(const int& np) { numPieces = np; }
 	void highLightAttackingSquares(sf::RenderWindow& window, unsigned long long& attackedSquares) {
 		squaresPieceAttacks = attackedSquares;

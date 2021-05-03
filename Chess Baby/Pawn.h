@@ -4,60 +4,6 @@
 #include <string>
 
 class Pawn : public Piece {
-
-
-public:
-	Pawn() {
-
-	}
-	Pawn(const int& val, const float& scale, const std::string& fileName, const float& posX, const bool& isWhite, const std::string name, unsigned long long& bitBoardPosition, const int numPieces)
-		: Piece(val, scale, fileName, posX, isWhite, name, bitBoardPosition, numPieces) {
-	}
-	void drawPiece(sf::RenderWindow& window) {
-		Piece::drawPiece(window);
-	}
-
-	void findMoveableSquares(const int& piecePosition) {
-		if (isWhite)
-			singlePieceMoveableSquaresWhite(piecePosition);
-		else
-			singlePieceMoveableSquaresBlack(piecePosition);
-	}
-
-	void singlePieceMoveableSquaresWhite(const int& piecePosition) {
-		unsigned long long pieceBitBoard = (1ULL << piecePosition);
-		movableSquaresForDisplay = 0ULL;
-		if ((pieceBitBoard & pinnedPiecesBitBoard) != 0) 	{ //if pawn is pinned
-			if ((diagonalMasks[(piecePosition / 8) + (piecePosition % 8)] & whKing) != 0) //if king is at a diagonal
-				movableSquaresForDisplay |= (pieceBitBoard >> 7) & bitBoard & notCapturable & ~FILE_A; //Capture right. Includes potential promotion
-			else if ((antiDiagonalMasks[(piecePosition / 8) + 7 - (piecePosition % 8)] & whKing) != 0) //if king is at antiDiagonal
-				movableSquaresForDisplay |= (pieceBitBoard >> 9) & bitBoard & notCapturable & ~FILE_H; //Capture left. Includes potential promotion
-			else if ((rankMasks[piecePosition / 8] & whKing) != 0) //if king is on same rank (horz)
-				return;
-			else if ((fileMasks[piecePosition % 8] & whKing) != 0) { //if king is on same file (vert)
-				movableSquaresForDisplay |= (pieceBitBoard >> 8) & ~bitBoard & notCapturable;
-				movableSquaresForDisplay |= (pieceBitBoard >> 16) & ~bitBoard & ~(bitBoard >> 8) & RANK_4 & notCapturable;
-			}
-			else
-				std::cout << "ERROR: Failed to find path from pinned piece to king!\n";
-			return;
-		}
-		movableSquaresForDisplay |= (pieceBitBoard >> 7) & bitBoard & notCapturable & ~FILE_A; //Capture right. Includes potential promotion
-		movableSquaresForDisplay |= (pieceBitBoard >> 9) & bitBoard & notCapturable & ~FILE_H; //Capture left. Includes potential promotion
-		movableSquaresForDisplay |= (pieceBitBoard >> 7) & enPassantWhite; //enPassant right
-		movableSquaresForDisplay |= (pieceBitBoard >> 9) & enPassantWhite; //enPassant left
-
-		if ((rankMasks[piecePosition / 8] & whKing) != 0) { //edge case to prevent pawn from enPassanting their king into check
-			if ((rankMasks[piecePosition / 8] & blRook) != 0 || (rankMasks[piecePosition / 8] & blQueen) != 0) {
-				movableSquaresForDisplay ^= (pieceBitBoard >> 7) & enPassantWhite;
-				movableSquaresForDisplay ^= (pieceBitBoard >> 9) & enPassantWhite;
-			}
-		}
-		
-		movableSquaresForDisplay |= (pieceBitBoard >> 8) & ~bitBoard;
-		movableSquaresForDisplay |= (pieceBitBoard >> 16) & ~bitBoard & ~(bitBoard >> 8)& RANK_4;
-		movableSquaresForDisplay &= squaresToBlockCheckOrCapture;
-	}
 	bool canWhitePawnMoveWhenPinned(const int& piecePosition, const int moveType) {
 		unsigned long long pieceBitBoard = (1ULL << piecePosition);
 		if (moveType == 0 && (diagonalMasks[(piecePosition / 8) + (piecePosition % 8)] & whKing) != 0) //if king is at a diagonal
@@ -80,40 +26,7 @@ public:
 		}
 		return true;
 	}
-	void singlePieceMoveableSquaresBlack(const int& piecePosition) {
-		unsigned long long pieceBitBoard = (1ULL << piecePosition);
-		movableSquaresForDisplay = 0ULL;
-		if ((pieceBitBoard & pinnedPiecesBitBoard) != 0) { //if pawn is pinned
-			if ((diagonalMasks[(piecePosition / 8) + (piecePosition % 8)] & blKing) != 0) //if king is at a diagonal
-				movableSquaresForDisplay |= (pieceBitBoard << 7) & bitBoard & notCapturable & ~FILE_H; //Capture right. Includes potential promotion
-			else if ((antiDiagonalMasks[(piecePosition / 8) + 7 - (piecePosition % 8)] & blKing) != 0) //if king is at antiDiagonal
-				movableSquaresForDisplay |= (pieceBitBoard << 9) & bitBoard & notCapturable & ~FILE_A; //Capture left. Includes potential promotion
-			else if ((rankMasks[piecePosition / 8] & blKing) != 0) //if king is on same rank (horz)
-				return;
-			else if ((fileMasks[piecePosition % 8] & blKing) != 0) { //if king is on same file (vert)
-				movableSquaresForDisplay |= (pieceBitBoard << 8) & ~bitBoard;
-				movableSquaresForDisplay |= (pieceBitBoard << 16) & ~bitBoard & ~(bitBoard << 8) & RANK_5;
-			}
-			else
-				std::cout << "ERROR: Failed to find path from pinned piece to king!\n";
-			return;
-		}
-		movableSquaresForDisplay |= (pieceBitBoard << 7) & bitBoard & notCapturable & ~FILE_H; //Capture right. Includes potential promotion
-		movableSquaresForDisplay |= (pieceBitBoard << 9) & bitBoard & notCapturable & ~FILE_A; //Capture left. Includes potential promotion
-		movableSquaresForDisplay |= (pieceBitBoard << 7) & enPassantBlack; //enPassant right
-		movableSquaresForDisplay |= (pieceBitBoard << 9) & enPassantBlack; //enPassant left
-		
-		if ((rankMasks[piecePosition / 8] & blKing) != 0 ) 	{ //edge case to prevent pawn from enPassanting their king into check
-			if ((rankMasks[piecePosition / 8] & whRook) != 0 || (rankMasks[piecePosition / 8] & whQueen) != 0) 	{
-				movableSquaresForDisplay ^= (pieceBitBoard << 7) & enPassantBlack;
-				movableSquaresForDisplay ^= (pieceBitBoard << 9) & enPassantBlack;
-			}
-		}
-		
-		movableSquaresForDisplay |= (pieceBitBoard << 8) & ~bitBoard;
-		movableSquaresForDisplay |= (pieceBitBoard << 16) & ~bitBoard & ~(bitBoard << 8) & RANK_5;
-		movableSquaresForDisplay &= squaresToBlockCheckOrCapture;
-	}
+
 	bool canBlackPawnMoveWhenPinned(const int& piecePosition, const int moveType) {
 		unsigned long long pieceBitBoard = (1ULL << piecePosition);
 		if (moveType == 0 && (diagonalMasks[(piecePosition / 8) + (piecePosition % 8)] & blKing) != 0) //if king is at a diagonal
@@ -136,6 +49,89 @@ public:
 		}
 		return true;
 	}
+
+	void singlePieceMoveableSquaresWhite(const int& piecePosition) {
+		unsigned long long pieceBitBoard = (1ULL << piecePosition);
+		movableSquaresForDisplay = 0ULL;
+		if ((pieceBitBoard & pinnedPiecesBitBoard) != 0) 	{ //if pawn is pinned
+			if ((diagonalMasks[(piecePosition / 8) + (piecePosition % 8)] & whKing) != 0) //if king is at a diagonal
+				movableSquaresForDisplay |= (pieceBitBoard >> 7) & bitBoard & notCapturable & ~FILE_A; //Capture right. Includes potential promotion
+			else if ((antiDiagonalMasks[(piecePosition / 8) + 7 - (piecePosition % 8)] & whKing) != 0) //if king is at antiDiagonal
+				movableSquaresForDisplay |= (pieceBitBoard >> 9) & bitBoard & notCapturable & ~FILE_H; //Capture left. Includes potential promotion
+			else if ((rankMasks[piecePosition / 8] & whKing) != 0) //if king is on same rank (horz)
+				return;
+			else if ((fileMasks[piecePosition % 8] & whKing) != 0) { //if king is on same file (vert)
+				movableSquaresForDisplay |= (pieceBitBoard >> 8) & ~bitBoard & notCapturable;
+				movableSquaresForDisplay |= (pieceBitBoard >> 16) & ~bitBoard & ~(bitBoard >> 8) & RANK_4 & notCapturable;
+			}
+			else
+				std::cout << "ERROR: Failed to find path from pinned piece to king!\n";
+			return;
+		}
+		movableSquaresForDisplay |= (pieceBitBoard >> 7) & bitBoard & notCapturable & ~FILE_A; //Capture right. Includes potential promotion
+		movableSquaresForDisplay |= (pieceBitBoard >> 9) & bitBoard & notCapturable & ~FILE_H; //Capture left. Includes potential promotion
+		movableSquaresForDisplay |= (pieceBitBoard >> 7) & enPassantWhite & ~FILE_A; //enPassant right
+		movableSquaresForDisplay |= (pieceBitBoard >> 9) & enPassantWhite & ~FILE_H; //enPassant left
+
+		if ((rankMasks[piecePosition / 8] & whKing) != 0) { //edge case to prevent pawn from enPassanting their king into check
+			if ((rankMasks[piecePosition / 8] & blRook) != 0 || (rankMasks[piecePosition / 8] & blQueen) != 0) {
+				movableSquaresForDisplay ^= (pieceBitBoard >> 7) & enPassantWhite & ~FILE_A;
+				movableSquaresForDisplay ^= (pieceBitBoard >> 9) & enPassantWhite & ~FILE_H;
+			}
+		}
+		
+		movableSquaresForDisplay |= (pieceBitBoard >> 8) & ~bitBoard;
+		movableSquaresForDisplay |= (pieceBitBoard >> 16) & ~bitBoard & ~(bitBoard >> 8)& RANK_4;
+		movableSquaresForDisplay &= squaresToBlockCheckOrCapture;
+	}
+	void singlePieceMoveableSquaresBlack(const int& piecePosition) {
+		unsigned long long pieceBitBoard = (1ULL << piecePosition);
+		movableSquaresForDisplay = 0ULL;
+		if ((pieceBitBoard & pinnedPiecesBitBoard) != 0) { //if pawn is pinned
+			if ((diagonalMasks[(piecePosition / 8) + (piecePosition % 8)] & blKing) != 0) //if king is at a diagonal
+				movableSquaresForDisplay |= (pieceBitBoard << 7) & bitBoard & notCapturable & ~FILE_H; //Capture right. Includes potential promotion
+			else if ((antiDiagonalMasks[(piecePosition / 8) + 7 - (piecePosition % 8)] & blKing) != 0) //if king is at antiDiagonal
+				movableSquaresForDisplay |= (pieceBitBoard << 9) & bitBoard & notCapturable & ~FILE_A; //Capture left. Includes potential promotion
+			else if ((rankMasks[piecePosition / 8] & blKing) != 0) //if king is on same rank (horz)
+				return;
+			else if ((fileMasks[piecePosition % 8] & blKing) != 0) { //if king is on same file (vert)
+				movableSquaresForDisplay |= (pieceBitBoard << 8) & ~bitBoard;
+				movableSquaresForDisplay |= (pieceBitBoard << 16) & ~bitBoard & ~(bitBoard << 8) & RANK_5;
+			}
+			else
+				std::cout << "ERROR: Failed to find path from pinned piece to king!\n";
+			return;
+		}
+		movableSquaresForDisplay |= (pieceBitBoard << 7) & bitBoard & notCapturable & ~FILE_H; //Capture right. Includes potential promotion
+		movableSquaresForDisplay |= (pieceBitBoard << 9) & bitBoard & notCapturable & ~FILE_A; //Capture left. Includes potential promotion
+		movableSquaresForDisplay |= (pieceBitBoard << 7) & enPassantBlack & ~FILE_H; //enPassant right
+		movableSquaresForDisplay |= (pieceBitBoard << 9) & enPassantBlack & ~FILE_A; //enPassant left
+		
+		if ((rankMasks[piecePosition / 8] & blKing) != 0 ) 	{ //edge case to prevent pawn from enPassanting their king into check
+			if ((rankMasks[piecePosition / 8] & whRook) != 0 || (rankMasks[piecePosition / 8] & whQueen) != 0) 	{
+				movableSquaresForDisplay ^= (pieceBitBoard << 7) & enPassantBlack & ~FILE_H;
+				movableSquaresForDisplay ^= (pieceBitBoard << 9) & enPassantBlack & ~FILE_A;
+			}
+		}
+		
+		movableSquaresForDisplay |= (pieceBitBoard << 8) & ~bitBoard;
+		movableSquaresForDisplay |= (pieceBitBoard << 16) & ~bitBoard & ~(bitBoard << 8) & RANK_5;
+		movableSquaresForDisplay &= squaresToBlockCheckOrCapture;
+	}
+public:
+	Pawn() {}
+	Pawn(const int& val, const float& scale, const std::string& fileName, const float& posX, const bool& isWhite, const std::string name, unsigned long long& bitBoardPosition, const int numPieces)
+		: Piece(val, scale, fileName, posX, isWhite, name, bitBoardPosition, numPieces) {
+	}
+	void drawPiece(sf::RenderWindow& window) { Piece::drawPiece(window); }
+
+	void findMoveableSquares(const int& piecePosition) {
+		if (isWhite)
+			singlePieceMoveableSquaresWhite(piecePosition);
+		else
+			singlePieceMoveableSquaresBlack(piecePosition);
+	}
+
 	void updateAttackSquaresWhite(const unsigned long long& pieceBitBoard, const unsigned long long& myPieces) {
 		if (((pieceBitBoard >> 7) & blKing & ~FILE_A) != 0) 	{//if piece is attacking king to the right
 			unsigned long long PAWN_MOVES = (pieceBitBoard >> 7);
@@ -517,7 +513,7 @@ public:
 		std::unique_ptr<std::vector<uint16_t>> possibleMoves = std::make_unique<std::vector<uint16_t>>();
 		uint16_t mergeOfBeforeNAfterMove; //Before move and after move location. Enemy pawn taken can be found by adding 8 to the final location
 
-		unsigned long long PAWN_MOVES = (pieceBitBoard >> 7) & enPassantWhite & squaresToBlockCheckOrCapture; //enPassant right
+		unsigned long long PAWN_MOVES = (pieceBitBoard >> 7) & enPassantWhite & squaresToBlockCheckOrCapture & ~FILE_A; //enPassant right
 
 		while (PAWN_MOVES != 0) {
 			int movedSquare = numOfTrailingZeros(PAWN_MOVES);
@@ -533,7 +529,7 @@ public:
 			PAWN_MOVES &= ~(1ULL << movedSquare);
 		}
 
-		PAWN_MOVES = (pieceBitBoard >> 9) & enPassantWhite & squaresToBlockCheckOrCapture; //enPassant left
+		PAWN_MOVES = (pieceBitBoard >> 9) & enPassantWhite & squaresToBlockCheckOrCapture & ~FILE_H; //enPassant left
 
 		while (PAWN_MOVES != 0) {
 			int movedSquare = numOfTrailingZeros(PAWN_MOVES);
@@ -555,8 +551,8 @@ public:
 		std::unique_ptr<std::vector<uint16_t>> possibleMoves = std::make_unique<std::vector<uint16_t>>();
 		uint16_t mergeOfBeforeNAfterMove; //Before move and after move location. Enemy pawn taken can be found by substracting 8 to the final location
 
-		unsigned long long PAWN_MOVES = (pieceBitBoard << 7) & enPassantBlack & squaresToBlockCheckOrCapture; //enPassant right
-
+		unsigned long long PAWN_MOVES = (pieceBitBoard << 7) & enPassantBlack & squaresToBlockCheckOrCapture & ~FILE_H; //enPassant right
+		
 		while (PAWN_MOVES != 0) {
 			int movedSquare = numOfTrailingZeros(PAWN_MOVES);
 			if (canBlackPawnEnPassant(movedSquare - 7) == false) {
@@ -571,7 +567,7 @@ public:
 			PAWN_MOVES &= ~(1ULL << movedSquare);
 		}
 
-		PAWN_MOVES = (pieceBitBoard << 9) & enPassantBlack & squaresToBlockCheckOrCapture; //enPassant left
+		PAWN_MOVES = (pieceBitBoard << 9) & enPassantBlack & squaresToBlockCheckOrCapture & ~FILE_A; //enPassant left
 
 		while (PAWN_MOVES != 0) {
 			int movedSquare = numOfTrailingZeros(PAWN_MOVES);

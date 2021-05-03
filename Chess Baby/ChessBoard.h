@@ -257,8 +257,8 @@ public:
 
 private: //stuff for AI only
 	void makeAIMoveWhite(uint16_t& beforeNAfterMove, const int& currDepth) {
-		int newTileIndex = (beforeNAfterMove & 16128) >> 8;
-		int initialTileIndex = beforeNAfterMove & 63;
+		unsigned char newTileIndex = (beforeNAfterMove & 16128) >> 8;
+		unsigned char initialTileIndex = beforeNAfterMove & 63;
 
 		if (((1ULL << newTileIndex) & blPieces) != 0) { //if captured a piece
 			try {
@@ -337,8 +337,8 @@ private: //stuff for AI only
 		updateSquaresWhiteAttacks();
 	}
 	void makeAIMoveBlack(uint16_t& beforeNAfterMove, const int& currDepth) {
-		int newTileIndex = (beforeNAfterMove & 16128) >> 8;
-		int initialTileIndex = beforeNAfterMove & 63;
+		unsigned char newTileIndex = (beforeNAfterMove & 16128) >> 8;
+		unsigned char initialTileIndex = beforeNAfterMove & 63;
 
 		if (((1ULL << newTileIndex) & whPieces) != 0) { //if captured a piece
 			try {

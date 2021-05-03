@@ -263,7 +263,7 @@ private: //stuff for AI only
 			try {
 				if (((1ULL << newTileIndex) & blPawn) != 0) {
 					blPawnPiece->removePieceBitBoard(newTileIndex);
-					//capturedPiecesAI->push(blPawnPiece, currDepth);
+					//capturedPiecesAI->push(blPawnPiece, currDepth)
 				}
 				else if (((1ULL << newTileIndex) & blBishop) != 0) {
 					blBishopPiece->removePieceBitBoard(newTileIndex);

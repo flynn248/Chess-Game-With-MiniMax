@@ -160,26 +160,24 @@ SGS::SGS(std::shared_ptr<ChessBoard>& board) {
 	if (isWhiteMove) {
 		hasKingMoved = board->getWhiteKingPiece()->getHasKingMoved();
 		squaresTheEnemyAttacks = board->getWhiteKingPiece()->getSquaresTheEnemyAttacks();
-
-		whKingNumP = board->getWhiteKingPiece()->getNumPieces();
-		whRookNumP = board->getWhiteRookPiece()->getNumPieces();
-		whPawnNumP = board->getWhitePawnPiece()->getNumPieces();
-		whQueenNumP = board->getWhiteQueenPiece()->getNumPieces();
-		whKnightNumP = board->getWhiteKnightPiece()->getNumPieces();
-		whBishopNumP = board->getWhiteBishopPiece()->getNumPieces();
 	}
 	else {
 		hasKingMoved = board->getBlackKingPiece()->getHasKingMoved();
-
 		squaresTheEnemyAttacks = board->getBlackKingPiece()->getSquaresTheEnemyAttacks();
-		blKingNumP = board->getBlackKingPiece()->getNumPieces();
-		blRookNumP = board->getBlackRookPiece()->getNumPieces();
-		blPawnNumP = board->getBlackPawnPiece()->getNumPieces();
-		blQueenNumP = board->getBlackQueenPiece()->getNumPieces();
-		blKnightNumP = board->getBlackKnightPiece()->getNumPieces();
-		blBishopNumP = board->getBlackBishopPiece()->getNumPieces();
 	}
+	whKingNumP = board->getWhiteKingPiece()->getNumPieces();
+	whRookNumP = board->getWhiteRookPiece()->getNumPieces();
+	whPawnNumP = board->getWhitePawnPiece()->getNumPieces();
+	whQueenNumP = board->getWhiteQueenPiece()->getNumPieces();
+	whKnightNumP = board->getWhiteKnightPiece()->getNumPieces();
+	whBishopNumP = board->getWhiteBishopPiece()->getNumPieces();
 
+	blKingNumP = board->getBlackKingPiece()->getNumPieces();
+	blRookNumP = board->getBlackRookPiece()->getNumPieces();
+	blPawnNumP = board->getBlackPawnPiece()->getNumPieces();
+	blQueenNumP = board->getBlackQueenPiece()->getNumPieces();
+	blKnightNumP = board->getBlackKnightPiece()->getNumPieces();
+	blBishopNumP = board->getBlackBishopPiece()->getNumPieces();
 }
 
 void SGS::saveCurrentState(std::shared_ptr<ChessBoard>& board) {
@@ -339,25 +337,24 @@ void SGS::loadSavedState(std::shared_ptr<ChessBoard>& board) {
 	if (isWhiteMove) {
 		board->getWhiteKingPiece()->setHasKingMoved(hasKingMoved);
 		board->getWhiteKingPiece()->setSquaresTheEnemyAttacks(squaresTheEnemyAttacks);
-
-		board->getWhiteKingPiece()->setNumPieces(whKingNumP);
-		board->getWhiteRookPiece()->setNumPieces(whRookNumP);
-		board->getWhitePawnPiece()->setNumPieces(whPawnNumP);
-		board->getWhiteQueenPiece()->setNumPieces(whQueenNumP);
-		board->getWhiteKnightPiece()->setNumPieces(whKnightNumP);
-		board->getWhiteBishopPiece()->setNumPieces(whBishopNumP);
 	}
 	else {
 		board->getBlackKingPiece()->setHasKingMoved(hasKingMoved);
 		board->getBlackKingPiece()->setSquaresTheEnemyAttacks(squaresTheEnemyAttacks);
-
-		board->getBlackKingPiece()->setNumPieces(blKingNumP);
-		board->getBlackRookPiece()->setNumPieces(blRookNumP);
-		board->getBlackPawnPiece()->setNumPieces(blPawnNumP);
-		board->getBlackQueenPiece()->setNumPieces(blQueenNumP);
-		board->getBlackKnightPiece()->setNumPieces(blKnightNumP);
-		board->getBlackBishopPiece()->setNumPieces(blBishopNumP);
 	}
+	board->getWhiteKingPiece()->setNumPieces(whKingNumP);
+	board->getWhiteRookPiece()->setNumPieces(whRookNumP);
+	board->getWhitePawnPiece()->setNumPieces(whPawnNumP);
+	board->getWhiteQueenPiece()->setNumPieces(whQueenNumP);
+	board->getWhiteKnightPiece()->setNumPieces(whKnightNumP);
+	board->getWhiteBishopPiece()->setNumPieces(whBishopNumP);
+
+	board->getBlackKingPiece()->setNumPieces(blKingNumP);
+	board->getBlackRookPiece()->setNumPieces(blRookNumP);
+	board->getBlackPawnPiece()->setNumPieces(blPawnNumP);
+	board->getBlackQueenPiece()->setNumPieces(blQueenNumP);
+	board->getBlackKnightPiece()->setNumPieces(blKnightNumP);
+	board->getBlackBishopPiece()->setNumPieces(blBishopNumP);
 }
 
 #endif // !SAVEDGAMESTATE

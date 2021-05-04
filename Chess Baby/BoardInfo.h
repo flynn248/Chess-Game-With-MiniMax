@@ -6,6 +6,7 @@ struct BoardInfo {
 private:
 	static unsigned int v, v2;
 public:
+	static char pieceIndexBoard[64];
 	static unsigned long long bitBoard;
 	static unsigned long long whPieces;
 	static unsigned long long blPieces;
@@ -115,6 +116,10 @@ public:
 		bitBoard |= blKing;
 		bitBoard |= blQueen;
 		blPieces |= bitBoard ^ whPieces;
+
+		for (int i = 0; i < 64; i++) 		{
+			pieceIndexBoard[i] = -1;
+		}
 	}
 	static unsigned long long HorzNVerticalMoves(const int& square) { //Returns all horizontal and vertical moves for a piece
 		unsigned long long binSqare = 1ULL << square;
@@ -169,7 +174,7 @@ public:
 		*/
 
 		//Process was broken into two parts for each half of the 64-bit variable
-		v = origBits; // 32-bit word to reverse bit order
+		v = (unsigned int)origBits; // 32-bit word to reverse bit order
 
 		// swap odd and even bits
 		v = ((v >> 1) & 0x55555555) | ((v & 0x55555555) << 1);

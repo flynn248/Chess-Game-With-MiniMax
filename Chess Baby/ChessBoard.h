@@ -289,9 +289,7 @@ public:
 		evaluatePlacementBlack(blKnight, blackPiecesValue, blKnightWeightOp);
 		evaluatePlacementBlack(blBishop, blackPiecesValue, blBishopWeightOp);
 
-		if (blackPiecesValue + whitePiecesValue <= -32700) 	{
-			std::cout << "Black + white: " << blackPiecesValue + whitePiecesValue << std::endl;
-		}
+
 		//Add values for check, checkmate, and stalemate.
 		//Check = + 100
 		//Checkmate = + 99999

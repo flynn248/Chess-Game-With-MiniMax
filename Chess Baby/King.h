@@ -9,7 +9,7 @@ private:
 	unsigned long long squaresTheEnemyAttacks = 0ULL;
 	//bool hasLeftRookMoved,
 	//	hasRightRookMoved;
-	bool hasKingMoved;
+	bool hasKingMoved = false;
 	unsigned long long spotsToRightRook = 0ULL;
 	unsigned long long spotsToLeftRook = 0ULL;
 public:

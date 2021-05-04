@@ -29,27 +29,15 @@ int main(int argc, char* argv[]) {
 	const int depthAI = 4; //set the depth the AI will search till
 	float windowWidth = 960; //x and y of window
 	sf::Color blkTileColor = sf::Color::Black;
-	sf::Color whtTileColor = sf::Color(211.f,211.f,211.f); //change the color of the tiles easily
+	sf::Color whtTileColor = sf::Color((sf::Uint8)211, (sf::Uint8)211, (sf::Uint8)211); //change the color of the tiles easily
 	
 	const float frstSquareCentRef = windowWidth / 8 / 2;
 	int mouseX, mouseY;
-	sf::RenderWindow window(sf::VideoMode(windowWidth, windowWidth), "Chess AI Implementation");
+	sf::RenderWindow window(sf::VideoMode((uint16_t)windowWidth, (uint16_t)windowWidth), "Chess AI Implementation");
 	std::shared_ptr<ChessBoard> board = std::make_shared<ChessBoard>(windowWidth / 8, whtTileColor, blkTileColor, frstSquareCentRef, depthAI);
 
 	Player player(board);
 	MiniMax allKnowingAI(board, depthAI, willThread);
-<<<<<<< HEAD
-=======
-	char cake = '4';
-	std::cout << std::endl;
-	std::cout << sizeof(cake) << std::endl;
-	std::cout << sizeof(unsigned long int) <<std::endl;
-	std::cout << sizeof(unsigned long long) << std::endl;
-	std::cout << sizeof(uint16_t) << std::endl;
-	std::cout << sizeof(uint64_t) << std::endl;
-
-
->>>>>>> main
 
 	while (window.isOpen()) {
 
@@ -76,7 +64,7 @@ int main(int argc, char* argv[]) {
 					commitmentIsHard = allKnowingAI.miniMax(false);
 				}
 				board->commitAIMove(commitmentIsHard);
-				std::cout << "Reverse bits went: " << revCount << " times.\n";
+				//std::cout << "Reverse bits went: " << revCount << " times.\n";
 				revCount = 0;
 			}
 		}

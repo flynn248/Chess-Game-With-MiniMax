@@ -7,7 +7,7 @@
 #include <bitset>
 #include "BoardInfo.h"
 
-class Piece : public BoardInfo{
+class Piece : protected BoardInfo{
 protected:	
 	int value;
 	int numPieces = 0;
@@ -25,25 +25,29 @@ protected:
 	unsigned long long squaresPieceAttacks;
 	unsigned long long movableSquaresForDisplay;
 	sf::RectangleShape attackingSquare;
-	//std::vector<int> pieceLocation;
+	std::vector<unsigned char> pieceLocation;
 	
-	//void fillPieceLocVector(unsigned long long pieceBitBoard) {
-	//	unsigned long long piece = pieceBitBoard;
-	//	while (piece != 0) {
-	//		int location = numOfTrailingZeros(piece);
-	//		pieceLocation.push_back(location);
-	//		pieceBitBoard &= ~(1ULL << location);
-	//		piece = pieceBitBoard;
-	//	}
-	//}
+	void fillPieceLocVector(unsigned long long pieceBitBoard) {
+		unsigned long long piece = pieceBitBoard;
+		while (piece != 0) {
+			int location = numOfTrailingZeros(piece);
+			pieceIndexBoard[location] = (unsigned char)pieceLocation.size();
+			pieceLocation.push_back(location);
+			pieceBitBoard &= ~(1ULL << location);
+			piece = pieceBitBoard;
+		}
+	}
 public:
 	Piece() {
 		value = 0;
 		scale = 0;
 		dispX = 0;
-		bitBoardPosition = 0ULL;
 		tileWidth = 0;
 		isWhite = false;
+		bitBoardPosition = 0ULL;
+		positionForDisplay = 0ULL;
+		squaresPieceAttacks = 0ULL;
+		movableSquaresForDisplay = 0ULL;
 	}
 	Piece(const int& val, const float& scal, const std::string& fileName, const float & x, const bool & isWhite, const std::string name, unsigned long long & bitBoardPosition, const int numPieces) {
 		value = val;
@@ -58,9 +62,10 @@ public:
 		attackingSquare.setSize(sf::Vector2f(tileWidth, tileWidth));
 		attackingSquare.setOrigin(sf::Vector2f(tileWidth / 2.f, tileWidth / 2.f));
 		attackingSquare.setFillColor(sf::Color(172, 47, 255, 100));
-		
-		//fillPieceLocVector(bitBoardPosition);
 
+		pieceLocation.reserve(8);
+		fillPieceLocVector(bitBoardPosition);
+		
 		if (!setUpSprite(fileName)) {
 			std::cout << "Failed loading image!" << std::endl;
 		}
@@ -93,14 +98,20 @@ public:
 		}
 	}
 
-	void removeAPieceFromBoard(const int& index) {
-		//removePieceVect(index);
+	void removeAPieceFromDisplay(const int& index) {
+		//pieceLocation.erase(pieceLocation.begin() + pieceIndexBoard[index]);
+		//pieceIndexBoard[index] = -1;
 		positionForDisplay &= ~(1ULL << index);
 	}
 	void removePieceBitBoard(const int& index) {
 		numPieces--;
+		if (numPieces < 0) 	{
+			std::cout << "Dang\n";
+		}
 		*bitBoardPosition &= ~(1ULL << index);
-		//removePieceVect(index);
+		//pieceLocation[pieceIndexBoard[index]] = -1;
+		//pieceLocation.erase(pieceLocation.begin() + pieceIndexBoard[index]);
+		//pieceIndexBoard[index] = -1;
 	}
 	//void removePieceVect(const int& index) {
 	//	for (auto it = pieceLocation.begin(); it != pieceLocation.end(); it++) 		{
@@ -113,10 +124,12 @@ public:
 
 	void addPieceBitBoard(const int& index) {
 		numPieces++;
+		//pieceIndexBoard[index] = pieceLocation.size();
 		//pieceLocation.push_back(index);
 		*bitBoardPosition |= (1ULL << index);
 	}
-	void addAPieceToBoard(const int& index) {
+	void addAPieceToDisplay(const int& index) {
+		//pieceIndexBoard[index] = pieceLocation.size();
 		//pieceLocation.push_back(index);
 		positionForDisplay |= (1ULL << index);
 	}
@@ -174,6 +187,7 @@ public:
 	float getScale() const { return scale; }
 	int getNumPieces() const{ return numPieces; }
 	//std::vector<int> getPieceLocation() const { return pieceLocation; }
+	int getLocVectSize() const { return (int)pieceLocation.size(); }
 	void setNumPieces(const int& np) { numPieces = np; }
 	void highLightAttackingSquares(sf::RenderWindow& window, unsigned long long& attackedSquares) {
 		squaresPieceAttacks = attackedSquares;

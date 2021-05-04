@@ -103,7 +103,7 @@ public:
 		bool isPieceGrabbed = true;
 		int newX, newY;
 		bool isLegalMove = false;
-		grabbedPiece->removeAPieceFromBoard(clickedTileIndex);
+		grabbedPiece->removeAPieceFromDisplay(clickedTileIndex);
 
 		while (isPieceGrabbed) {
 			sf::Event e;
@@ -143,16 +143,16 @@ public:
 							else if (madeCastleMove)
 								doCastleMove(newTileIndex, clickedTileIndex);
 							else // Normal move
-								grabbedPiece->addAPieceToBoard(newTileIndex);
+								grabbedPiece->addAPieceToDisplay(newTileIndex);
 															
 							
-							updateGameState();
+							updateGameState(clickedTileIndex, newTileIndex);
 						}
 						else //if not placed on legal square
-							grabbedPiece->addAPieceToBoard(clickedTileIndex);
+							grabbedPiece->addAPieceToDisplay(clickedTileIndex);
 					}
 					else { //if placed on same square
-						grabbedPiece->addAPieceToBoard(clickedTileIndex);
+						grabbedPiece->addAPieceToDisplay(clickedTileIndex);
 					}
 					isPieceGrabbed = false;
 				}
@@ -167,12 +167,12 @@ public:
 private:
 	void doEnemyPieceCapture(const int& newTileIndex, const int& clickedTileIndex) {
 		board->removeCapturedPiece(newTileIndex);
-		grabbedPiece->removeAPieceFromBoard(clickedTileIndex);
-		grabbedPiece->addAPieceToBoard(newTileIndex);
+		grabbedPiece->removeAPieceFromDisplay(clickedTileIndex);
+		grabbedPiece->addAPieceToDisplay(newTileIndex);
 	}
 	void doPawnPromotion(const int& newTileIndex, const int& clickedTileIndex, sf::RenderWindow& window) {
 		//do something to do with promoting a pawn
-		grabbedPiece->removeAPieceFromBoard(newTileIndex);
+		grabbedPiece->removeAPieceFromDisplay(newTileIndex);
 		
 		int choice = -1;
 		//Get a choice from user
@@ -198,22 +198,21 @@ private:
 				board->addBlackQueenToBoard(newTileIndex);
 		}
 		board->removeCapturedPiece(clickedTileIndex);
-		//board->updateDisplayOfPieces();
 	}
 	void doEnpassantMove(const int& newTileIndex, const int& clickedTileIndex) {
 		if (grabbedPiece->getIsWhite()) {
 			board->removeCapturedPiece(newTileIndex + 8);
-			grabbedPiece->removeAPieceFromBoard(clickedTileIndex);
-			grabbedPiece->addAPieceToBoard(newTileIndex);
+			grabbedPiece->removeAPieceFromDisplay(clickedTileIndex);
+			grabbedPiece->addAPieceToDisplay(newTileIndex);
 		}
 		else {
 			board->removeCapturedPiece(newTileIndex - 8);
-			grabbedPiece->removeAPieceFromBoard(clickedTileIndex);
-			grabbedPiece->addAPieceToBoard(newTileIndex);
+			grabbedPiece->removeAPieceFromDisplay(clickedTileIndex);
+			grabbedPiece->addAPieceToDisplay(newTileIndex);
 		}
 	}
 	void doPawnMovedTwoSquares(const int& newTileIndex) {
-		grabbedPiece->addAPieceToBoard(newTileIndex);
+		grabbedPiece->addAPieceToDisplay(newTileIndex);
 		
 		if (board->getIsWhiteMove())
 			board->enPassantBlack |= (1ULL << (newTileIndex + 8));
@@ -223,7 +222,9 @@ private:
 	void doCastleMove(const int& newTileIndex, const int& clickedTileIndex) {
 		//right and left rook are always relative to the white player
 		
-		grabbedPiece->addAPieceToBoard(newTileIndex);
+		grabbedPiece->addAPieceToDisplay(newTileIndex);
+		//grabbedPiece->removePieceBitBoard(clickedTileIndex);
+		//grabbedPiece->addPieceBitBoard(newTileIndex);
 		grabbedPiece->updateBitBoardPosition();
 		
 		board->updateBitBoard();
@@ -316,6 +317,8 @@ private:
 				window.display();
 			}
 		}
+
+		return -1;
 	}
 	void setUpSpriteForPawnPromotion(const std::string& fileName, sf::Texture& texture, sf::Sprite& sprite, sf::Vector2f& position) {
 		if (!texture.loadFromFile(fileName)) 	{
@@ -401,11 +404,13 @@ private:
 		return false;
 	}
 
-	void updateGameState() {
-
+	void updateGameState(const int& initialTileIndex, const int& newTileIndex) {
+		//grabbedPiece->removePieceBitBoard(initialTileIndex);
+		//grabbedPiece->addPieceBitBoard(newTileIndex);
 		grabbedPiece->updateBitBoardPosition();
 		board->updateBitBoard();
-
+		//board->printPiecesCount();
+		//board->printPiecesLocVectSize();
 		if (board->getIsWhiteMove()) 	{
 			board->updateSquaresWhiteAttacks();
 			board->enPassantWhite = 0ULL;
@@ -447,7 +452,7 @@ private:
 			}
 			board->updateBlMoveCounter();
 		}
-		board->updateIsWhiteMove(); //Change moves to other player
+		board->updateIsWhiteMove(); //Change move to other player
 	}
 
 };

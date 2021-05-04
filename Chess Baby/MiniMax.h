@@ -35,6 +35,10 @@ public:
 private: /******PRIVATE******/
 	uint16_t miniMaxSetUp(bool isWhiteMove) {
 		int prevEval = 0;
+		if (isWhiteMove)
+			prevEval = INT_MIN;
+		else
+			prevEval = INT_MAX;
 		uint16_t bestMove = 0;
 		AllLegalMoves moves;
 		SGS savedGame(board);
@@ -150,6 +154,10 @@ private: /******PRIVATE******/
 		moves.allMoves->at(2) = board->rookMovesWhite();
 		moves.allMoves->at(3) = board->bishopMovesWhite();
 		
+		
+		//moves.allMoves->at(1) = std::make_unique<std::vector<uint16_t>>();
+		//moves.allMoves->at(2) = std::make_unique<std::vector<uint16_t>>();
+		//moves.allMoves->at(3) = std::make_unique<std::vector<uint16_t>>();
 	}
 	void getSecondHalfOfMovesWhite(AllLegalMoves& moves) {
 		moves.allMoves->at(0) = board->kingMovesWhite();
@@ -157,12 +165,24 @@ private: /******PRIVATE******/
 		moves.allMoves->at(5) = board->pawnMovesWhite();
 		moves.allMoves->at(6) = board->castlingMovesWhite();
 		moves.allMoves->at(7) = board->enPassantMovesWhite();
+
+
+
+		//moves.allMoves->at(0) = std::make_unique<std::vector<uint16_t>>();
+		//moves.allMoves->at(4) = std::make_unique<std::vector<uint16_t>>();
+		//moves.allMoves->at(5) = std::make_unique<std::vector<uint16_t>>();
+		//moves.allMoves->at(6) = std::make_unique<std::vector<uint16_t>>();
+		//moves.allMoves->at(7) = std::make_unique<std::vector<uint16_t>>();
 	}
 
 	void getFirstHalfOfMovesBlack(AllLegalMoves& moves) {
 		moves.allMoves->at(1) = board->queenMovesBlack();
 		moves.allMoves->at(2) = board->rookMovesBlack();
 		moves.allMoves->at(3) = board->bishopMovesBlack();
+
+		//moves.allMoves->at(1) = std::make_unique<std::vector<uint16_t>>();
+		//moves.allMoves->at(2) = std::make_unique<std::vector<uint16_t>>();
+		//moves.allMoves->at(3) = std::make_unique<std::vector<uint16_t>>();
 	}
 	void getSecondHalfOfMovesBlack(AllLegalMoves& moves) {
 		moves.allMoves->at(0) = board->kingMovesBlack();
@@ -170,6 +190,12 @@ private: /******PRIVATE******/
 		moves.allMoves->at(5) = board->pawnMovesBlack();
 		moves.allMoves->at(6) = board->castlingMovesBlack();
 		moves.allMoves->at(7) = board->enPassantMovesBlack();
+
+
+		//moves.allMoves->at(0) = std::make_unique<std::vector<uint16_t>>();
+		//moves.allMoves->at(4) = std::make_unique<std::vector<uint16_t>>();
+		//moves.allMoves->at(6) = std::make_unique<std::vector<uint16_t>>();
+		//moves.allMoves->at(7) = std::make_unique<std::vector<uint16_t>>();
 	}
 };
 

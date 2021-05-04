@@ -1,6 +1,7 @@
 #ifndef CHESSBOARD_H
 #define CHESSBOARD_H
 #include <SFML/Graphics.hpp>
+#include <iomanip>
 #include <bitset>
 #include <vector>
 #include <memory>
@@ -12,9 +13,10 @@
 #include "Pawn.h"
 #include "Timer.h"
 #include "BoardInfo.h"
+#include "TileWeights.h"
 //#include "Stack.h"
 
-class ChessBoard : public BoardInfo{
+class ChessBoard : public BoardInfo, private TileWeights{
 protected:
 	static const int BSIZE = 8;
 	float tileWidth;
@@ -139,7 +141,7 @@ public:
 		
 		setStartPosition();
 
-		const float pieceScale = (1 - (tileWidth / (tileWidth * 8))) * 0.40;
+		const float pieceScale = (1 - (tileWidth / (tileWidth * 8))) * 0.40f;
 		float whiteYOffset = frstSquareCentRef + (tileWidth  * 7);
 
 		const int kingVal = 10000,
@@ -209,7 +211,44 @@ public:
 		}
 		std::cout << std::endl;
 	}
-												  
+	void printPiecesCount() {
+		std::cout << "Piece Counts:" << std::endl;
+
+		std::cout << std::setw(6) << " " << "Kg Qn Bh Ro Kn Pn\n"
+			<< "White  "
+			<< whKingPiece->getNumPieces() << "  "
+			<< whQueenPiece->getNumPieces() << "  "
+			<< whBishopPiece->getNumPieces() << "  "
+			<< whRookPiece->getNumPieces() << "  "
+			<< whKnightPiece->getNumPieces() << "  "
+			<< whPawnPiece->getNumPieces() << std::endl
+			<< "Black  "
+			<< blKingPiece->getNumPieces() << "  "
+			<< blQueenPiece->getNumPieces() << "  "
+			<< blBishopPiece->getNumPieces() << "  "
+			<< blRookPiece->getNumPieces() << "  "
+			<< blKnightPiece->getNumPieces() << "  "
+			<< blPawnPiece->getNumPieces() << std::endl;
+	}
+	void printPiecesLocVectSize() {
+		std::cout << "Piece Location Vector Size:" << std::endl;
+
+		std::cout << std::setw(6) << " " << "Kg Qn Bh Ro Kn Pn\n"
+			<< "White  "
+			<< whKingPiece->getLocVectSize() << "  "
+			<< whQueenPiece->getLocVectSize() << "  "
+			<< whBishopPiece->getLocVectSize() << "  "
+			<< whRookPiece->getLocVectSize() << "  "
+			<< whKnightPiece->getLocVectSize() << "  "
+			<< whPawnPiece->getLocVectSize() << std::endl
+			<< "Black  "
+			<< blKingPiece->getLocVectSize() << "  "
+			<< blQueenPiece->getLocVectSize() << "  "
+			<< blBishopPiece->getLocVectSize() << "  "
+			<< blRookPiece->getLocVectSize() << "  "
+			<< blKnightPiece->getLocVectSize() << "  "
+			<< blPawnPiece->getLocVectSize() << std::endl;
+	}
 	bool isPieceHere(const int& x, const int& y) {
 		int squareIndex = (y * 8) + x;
 		if ((bitBoard & (1ULL << squareIndex)) != 0) {
@@ -218,7 +257,7 @@ public:
 		return false;
 	}
 
-	int evaluateBoardValue(const bool& isItWhiteMove) const {
+	int evaluateBoardValue(const bool& isItWhiteMove) {
 		int whitePiecesValue = 0,
 			blackPiecesValue = 0;
 
@@ -228,13 +267,6 @@ public:
 		whitePiecesValue += whQueenPiece->getNumPieces() * whQueenPiece->getValue();
 		whitePiecesValue += whKnightPiece->getNumPieces() * whKnightPiece->getValue();
 		whitePiecesValue += whBishopPiece->getNumPieces() * whBishopPiece->getValue();
-
-		if ((blPawn & 402653184) != 0) 	{
-			blackPiecesValue -= 100;
-		}
-		if ((blQueen & 402653184) != 0) {
-			blackPiecesValue -= 10000;
-		}
 		
 		blackPiecesValue += blKingPiece->getNumPieces() * blKingPiece->getValue();
 		blackPiecesValue += blPawnPiece->getNumPieces() * blPawnPiece->getValue();
@@ -243,10 +275,23 @@ public:
 		blackPiecesValue += blKnightPiece->getNumPieces() * blKnightPiece->getValue();
 		blackPiecesValue += blBishopPiece->getNumPieces() * blBishopPiece->getValue();
 
+
+		evaluatePlacementWhite(whKing, whitePiecesValue, whKingWeightOp);
+		evaluatePlacementWhite(whPawn, whitePiecesValue, whPawnWeightOp);
+		evaluatePlacementWhite(whRook, whitePiecesValue, whRookWeightOp);
+		evaluatePlacementWhite(whQueen, whitePiecesValue, whQueenWeightOp);
+		evaluatePlacementWhite(whKnight, whitePiecesValue, whKnightWeightOp);
+
+		evaluatePlacementBlack(blKing, blackPiecesValue, blKingWeightOp);
+		evaluatePlacementBlack(blPawn, blackPiecesValue, blPawnWeightOp);
+		evaluatePlacementBlack(blRook, blackPiecesValue, blRookWeightOp);
+		evaluatePlacementBlack(blQueen, blackPiecesValue, blQueenWeightOp);
+		evaluatePlacementBlack(blKnight, blackPiecesValue, blKnightWeightOp);
+		evaluatePlacementBlack(blBishop, blackPiecesValue, blBishopWeightOp);
+
 		if (blackPiecesValue + whitePiecesValue <= -32700) 	{
 			std::cout << "Black + white: " << blackPiecesValue + whitePiecesValue << std::endl;
 		}
-		
 		//Add values for check, checkmate, and stalemate.
 		//Check = + 100
 		//Checkmate = + 99999
@@ -255,6 +300,23 @@ public:
 	}
 
 private: //stuff for AI only
+	void evaluatePlacementWhite(unsigned long long pieceBitBoard, int& piecesValue, const short* pieceWeight) {
+		unsigned char pieceIndex;
+		while (pieceBitBoard != 0) 	{
+			pieceIndex = numOfTrailingZeros(pieceBitBoard);
+			piecesValue += pieceWeight[pieceIndex];
+			pieceBitBoard &= ~(1ULL << pieceIndex);
+		}
+	}
+	void evaluatePlacementBlack(unsigned long long pieceBitBoard, int& piecesValue, const short* pieceWeight) {
+		unsigned char pieceIndex;
+		while (pieceBitBoard != 0) {
+			pieceIndex = numOfTrailingZeros(pieceBitBoard);
+			piecesValue += pieceWeight[pieceIndex];
+			pieceBitBoard &= ~(1ULL << pieceIndex);
+		}
+	}
+
 	void makeAIMoveWhite(uint16_t& beforeNAfterMove, const int& currDepth) {
 		unsigned char newTileIndex = (beforeNAfterMove & 16128) >> 8;
 		unsigned char initialTileIndex = beforeNAfterMove & 63;
@@ -395,7 +457,6 @@ private: //stuff for AI only
 			whPawnPiece->removePieceBitBoard(newTileIndex - 8);
 			blPawnPiece->removePieceBitBoard(initialTileIndex);
 			blPawnPiece->addPieceBitBoard(newTileIndex);
-			//capturedPiecesAI->pushEnPassantBoard(enPassantBlack);
 		}
 		else { //castling
 			if (initialTileIndex == 7) //castled king side
@@ -408,7 +469,7 @@ private: //stuff for AI only
 			blRookPiece->removePieceBitBoard(initialTileIndex);
 			blRookPiece->addPieceBitBoard(newTileIndex);
 		}
-		//blMoveCounter++;
+		
 		updateBitBoard();
 		updateSquaresBlackAttacks();
 	}

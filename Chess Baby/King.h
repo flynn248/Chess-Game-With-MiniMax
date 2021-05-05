@@ -60,11 +60,11 @@ public:
 			return;
 
 		if (castleRooks[0] != -1) //if right rook has not moved or been captured yet
-			if ((spotsToRightRook & ~squaresBlackAttacks & (notCapturable ^ 0x9000000000000000)) == spotsToRightRook) //if no pieces attack castling squares
+			if ((spotsToRightRook & ~squaresBlackAttacks & ~blPieces & (notCapturable ^ 0x9000000000000000)) == spotsToRightRook) //if no pieces attack castling squares
 				movableSquaresForDisplay ^= 0x4000000000000000;
 
 		if (castleRooks[1] != -1) //if left rook has not moved or been captured yet
-			if ((spotsToLeftRook & ~squaresBlackAttacks & (notCapturable ^ 0x1100000000000000)) == spotsToLeftRook) //if no pieces attack castling squares
+			if ((spotsToLeftRook & ~squaresBlackAttacks & ~blPieces & (notCapturable ^ 0x1100000000000000)) == spotsToLeftRook) //if no pieces attack castling squares
 				movableSquaresForDisplay ^= 0x400000000000000;
 	}
 	void singlePieceCastleSquaresBlack() {
@@ -76,11 +76,11 @@ public:
 		spotsToRightRook = 0xF0;
 
 		if (castleRooks[2] != -1) //if right rook, from white's perspective, has not moved or been captured yet
-			if ((spotsToRightRook & ~squaresWhiteAttacks & (notCapturable ^ 144)) == spotsToRightRook)  //if no pieces attack castling squares
+			if ((spotsToRightRook & ~squaresWhiteAttacks & ~whPieces & (notCapturable ^ 144)) == spotsToRightRook)  //if no pieces attack castling squares
 				movableSquaresForDisplay ^= 64;
 
 		if (castleRooks[3] != -1)  //if left rook has not moved or been captured yet
-			if ((spotsToLeftRook & ~squaresWhiteAttacks & (notCapturable ^ 17)) == spotsToLeftRook)  //if no pieces attack castling squares
+			if ((spotsToLeftRook & ~squaresWhiteAttacks & ~whPieces & (notCapturable ^ 17)) == spotsToLeftRook)  //if no pieces attack castling squares
 				movableSquaresForDisplay ^= 4;
 	}
 	void setSquaresTheEnemyAttacks(unsigned long long enemy) {
@@ -188,7 +188,7 @@ public:
 		spotsToRightRook = 0xF000000000000000;
 
 		if (castleRooks[0] != -1) 	{ //if right rook has not moved or been captured yet
-			if ((spotsToRightRook & ~squaresBlackAttacks & (notCapturable ^ 0x9000000000000000)) == spotsToRightRook) { //if no pieces attack castling squares
+			if ((spotsToRightRook & ~squaresBlackAttacks & ~blPieces & (notCapturable ^ 0x9000000000000000)) == spotsToRightRook) { //if no pieces attack castling squares
 				rookBeforeAndAfter = 63;
 				rookBeforeAndAfter |= (189 << 8); //189 = 10111101. First One signifies it was a castling move
 				possibleMoves->push_back(rookBeforeAndAfter);
@@ -196,7 +196,7 @@ public:
 		}
 
 		if (castleRooks[1] != -1) { //if left rook has not moved or been captured yet
-			if ((spotsToLeftRook & ~squaresBlackAttacks & (notCapturable ^ 0x1100000000000000)) == spotsToLeftRook) { //if no pieces attack castling squares
+			if ((spotsToLeftRook & ~squaresBlackAttacks & ~blPieces & (notCapturable ^ 0x1100000000000000)) == spotsToLeftRook) { //if no pieces attack castling squares
 				rookBeforeAndAfter = 56;
 				rookBeforeAndAfter |= (187 << 8);
 				possibleMoves->push_back(rookBeforeAndAfter);
@@ -219,7 +219,7 @@ public:
 		spotsToRightRook = 0xF0;
 
 		if (castleRooks[2] != -1) { //if right rook, from white's perspective, has not moved or been captured yet
-			if ((spotsToRightRook & ~squaresWhiteAttacks & (notCapturable ^ 144)) == spotsToRightRook) { //if no pieces attack castling squares
+			if ((spotsToRightRook & ~squaresWhiteAttacks & ~whPieces & (notCapturable ^ 144)) == spotsToRightRook) { //if no pieces attack castling squares
 				rookBeforeAndAfter = 7;
 				rookBeforeAndAfter |= (133 << 8);
 				possibleMoves->push_back(rookBeforeAndAfter);
@@ -227,7 +227,7 @@ public:
 		}
 		//printBitBoard(spotsToRightRook & (~squaresWhiteAttacks | notCapturable));
 		if (castleRooks[3] != -1) { //if left rook has not moved or been captured yet
-			if ((spotsToLeftRook & ~squaresWhiteAttacks & (notCapturable ^ 17)) == spotsToLeftRook) { //if no pieces attack castling squares
+			if ((spotsToLeftRook & ~squaresWhiteAttacks & ~whPieces & (notCapturable ^ 17)) == spotsToLeftRook) { //if no pieces attack castling squares
 				rookBeforeAndAfter = 0;
 				rookBeforeAndAfter |= (131 << 8);
 				possibleMoves->push_back(rookBeforeAndAfter);

@@ -262,32 +262,65 @@ public:
 			blackPiecesValue = 0;
 
 		whitePiecesValue += whKingPiece->getNumPieces() * whKingPiece->getValue();
-		whitePiecesValue += whPawnPiece->getNumPieces() * whPawnPiece->getValue();
 		whitePiecesValue += whRookPiece->getNumPieces() * whRookPiece->getValue();
+		whitePiecesValue += whPawnPiece->getNumPieces() * whPawnPiece->getValue();
 		whitePiecesValue += whQueenPiece->getNumPieces() * whQueenPiece->getValue();
 		whitePiecesValue += whKnightPiece->getNumPieces() * whKnightPiece->getValue();
 		whitePiecesValue += whBishopPiece->getNumPieces() * whBishopPiece->getValue();
 		
 		blackPiecesValue += blKingPiece->getNumPieces() * blKingPiece->getValue();
-		blackPiecesValue += blPawnPiece->getNumPieces() * blPawnPiece->getValue();
 		blackPiecesValue += blRookPiece->getNumPieces() * blRookPiece->getValue();
+		blackPiecesValue += blPawnPiece->getNumPieces() * blPawnPiece->getValue();
 		blackPiecesValue += blQueenPiece->getNumPieces() * blQueenPiece->getValue();
 		blackPiecesValue += blKnightPiece->getNumPieces() * blKnightPiece->getValue();
 		blackPiecesValue += blBishopPiece->getNumPieces() * blBishopPiece->getValue();
 
+		
+		if (moveNumber <= 10) 	{ //Opening
+			evaluatePlacementWhite(whKing, whitePiecesValue, whKingWeightOp);
+			evaluatePlacementWhite(whRook, whitePiecesValue, whRookWeightOp);
+			evaluatePlacementWhite(whPawn, whitePiecesValue, whPawnWeightOp);
+			evaluatePlacementWhite(whQueen, whitePiecesValue, whQueenWeightOp);
+			evaluatePlacementWhite(whKnight, whitePiecesValue, whKnightWeightOp);
+			evaluatePlacementWhite(whBishop, whitePiecesValue, whBishopWeightOp);
 
-		evaluatePlacementWhite(whKing, whitePiecesValue, whKingWeightOp);
-		evaluatePlacementWhite(whPawn, whitePiecesValue, whPawnWeightOp);
-		evaluatePlacementWhite(whRook, whitePiecesValue, whRookWeightOp);
-		evaluatePlacementWhite(whQueen, whitePiecesValue, whQueenWeightOp);
-		evaluatePlacementWhite(whKnight, whitePiecesValue, whKnightWeightOp);
+			evaluatePlacementBlack(blKing, blackPiecesValue, blKingWeightOp);
+			evaluatePlacementBlack(blRook, blackPiecesValue, blRookWeightOp);
+			evaluatePlacementBlack(blPawn, blackPiecesValue, blPawnWeightOp);
+			evaluatePlacementBlack(blQueen, blackPiecesValue, blQueenWeightOp);
+			evaluatePlacementBlack(blKnight, blackPiecesValue, blKnightWeightOp);
+			evaluatePlacementBlack(blBishop, blackPiecesValue, blBishopWeightOp);
+		}
+		else if (moveNumber <= 30) 	{ //Mid Game
+			evaluatePlacementWhite(whKing, whitePiecesValue, whKingWeightMi);
+			evaluatePlacementWhite(whRook, whitePiecesValue, whRookWeightMi);
+			evaluatePlacementWhite(whPawn, whitePiecesValue, whPawnWeightMi);
+			evaluatePlacementWhite(whQueen, whitePiecesValue, whQueenWeightMi);
+			evaluatePlacementWhite(whKnight, whitePiecesValue, whKnightWeightMi);
+			evaluatePlacementWhite(whBishop, whitePiecesValue, whBishopWeightMi);
 
-		evaluatePlacementBlack(blKing, blackPiecesValue, blKingWeightOp);
-		evaluatePlacementBlack(blPawn, blackPiecesValue, blPawnWeightOp);
-		evaluatePlacementBlack(blRook, blackPiecesValue, blRookWeightOp);
-		evaluatePlacementBlack(blQueen, blackPiecesValue, blQueenWeightOp);
-		evaluatePlacementBlack(blKnight, blackPiecesValue, blKnightWeightOp);
-		evaluatePlacementBlack(blBishop, blackPiecesValue, blBishopWeightOp);
+			evaluatePlacementBlack(blKing, blackPiecesValue, blKingWeightMi);
+			evaluatePlacementBlack(blRook, blackPiecesValue, blRookWeightMi);
+			evaluatePlacementBlack(blPawn, blackPiecesValue, blPawnWeightMi);
+			evaluatePlacementBlack(blQueen, blackPiecesValue, blQueenWeightMi);
+			evaluatePlacementBlack(blKnight, blackPiecesValue, blKnightWeightMi);
+			evaluatePlacementBlack(blBishop, blackPiecesValue, blBishopWeightMi);
+		}
+		else 	{ //Endgame
+			evaluatePlacementWhite(whKing, whitePiecesValue, whKingWeightEn);
+			evaluatePlacementWhite(whRook, whitePiecesValue, whRookWeightEn);
+			evaluatePlacementWhite(whPawn, whitePiecesValue, whPawnWeightEn);
+			evaluatePlacementWhite(whQueen, whitePiecesValue, whQueenWeightEn);
+			evaluatePlacementWhite(whKnight, whitePiecesValue, whKnightWeightEn);
+			evaluatePlacementWhite(whBishop, whitePiecesValue, whBishopWeightEn);
+
+			evaluatePlacementBlack(blKing, blackPiecesValue, blKingWeightEn);
+			evaluatePlacementBlack(blRook, blackPiecesValue, blRookWeightEn);
+			evaluatePlacementBlack(blPawn, blackPiecesValue, blPawnWeightEn);
+			evaluatePlacementBlack(blQueen, blackPiecesValue, blQueenWeightEn);
+			evaluatePlacementBlack(blKnight, blackPiecesValue, blKnightWeightEn);
+			evaluatePlacementBlack(blBishop, blackPiecesValue, blBishopWeightEn);
+		}
 
 
 		//Add values for check, checkmate, and stalemate.
@@ -550,6 +583,7 @@ private: //stuff for AI only
 public:
 	void makeAIMove(uint16_t beforeNAfterMove, bool isItWhiteMove, const int currDepth) {
 		if (isItWhiteMove == true) {
+			moveNumber++;
 			makeAIMoveWhite(beforeNAfterMove, currDepth);
 			enPassantWhite = 0ULL;
 		}

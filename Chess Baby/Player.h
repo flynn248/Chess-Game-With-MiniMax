@@ -405,13 +405,20 @@ private:
 	}
 
 	void updateGameState(const int& initialTileIndex, const int& newTileIndex) {
-		//grabbedPiece->removePieceBitBoard(initialTileIndex);
-		//grabbedPiece->addPieceBitBoard(newTileIndex);
 		grabbedPiece->updateBitBoardPosition();
 		board->updateBitBoard();
-		//board->printPiecesCount();
-		//board->printPiecesLocVectSize();
+		if (board->moveNumber == 1) 	{
+			std::cout << "Opening..." << std::endl;
+		}
+		else if (board->moveNumber == 11) 	{
+			std::cout << "Mid Game..." << std::endl;
+		}
+		else if(board->moveNumber == 31)	{
+			std::cout << "End Game..." << std::endl;
+		}
+		std::cout << "Move Number: " << (int)board->moveNumber << std::endl;
 		if (board->getIsWhiteMove()) 	{
+			board->moveNumber++;
 			board->updateSquaresWhiteAttacks();
 			board->enPassantWhite = 0ULL;
 			
@@ -454,7 +461,6 @@ private:
 		}
 		board->updateIsWhiteMove(); //Change move to other player
 	}
-
 };
 
 #endif

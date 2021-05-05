@@ -6,7 +6,6 @@ struct BoardInfo {
 private:
 	static unsigned int v, v2;
 public:
-	static char pieceIndexBoard[64];
 	static unsigned long long bitBoard;
 	static unsigned long long whPieces;
 	static unsigned long long blPieces;
@@ -64,6 +63,7 @@ public:
 	static int castleRooks[4];
 
 	static int numberOfChecks;
+	static unsigned char moveNumber;
 
 	static const unsigned long long KingSpan;
 	static const unsigned long long KnightSpan;
@@ -84,6 +84,8 @@ public:
 	static const unsigned long long rankMasks[8]; //Rank 1 to rank 8
 	static const unsigned long long diagonalMasks[15]; //Top left to bottom right
 	static const unsigned long long antiDiagonalMasks[15]; //Top right to bottom left
+
+	static char pieceIndexBoard[64];
 
 	static void setStartPosition() { //Set start position of pieces on the bitBoard
 	//Index of new bit defined by (row * 8 + col)
@@ -129,7 +131,6 @@ public:
 
 		return (horizontalMoves & rankMasks[square / 8]) | (verticalMoves & fileMasks[square % 8]);
 	}
-
 	static unsigned long long diagNAntiDagMoves(const int& square) {//Returns all diagonal and antiDiagonal moves for a piece
 		unsigned long long binSquare = 1ULL << square;
 		unsigned long long diagonalMoves = ((bitBoard & diagonalMasks[(square / 8) + (square % 8)]) - (2 * binSquare)) ^
@@ -164,6 +165,7 @@ public:
 			reverseBits(reverseBits(bitBoard & fileMasks[square % 8]) - (2 * reverseBits(binSqare)));
 		return (verticalMoves & fileMasks[square % 8]);
 	}
+
 	static unsigned long long reverseBits(unsigned long long origBits) { //reverse the order of the bits
 		revCount++;
 		/*

@@ -64,9 +64,10 @@ private: /******PRIVATE******/
 			}
 		}
 		
-		if (bestMove == 0) 	{ //if no move was selected. Pick first one
+		if (bestMove == 0) 	{ //if no move was selected. Pick first one. This statement ideally never runs. Means an error
 			for (int i = 0; i < 8; i++) 		{
 				for (auto j = moves.allMoves->at(i)->begin(); j != moves.allMoves->at(i)->end(); j++) 		{
+					std::cout << "FAILED TO FIND A MOVE!!!" << std::endl;
 					return *j;
 				}
 			}

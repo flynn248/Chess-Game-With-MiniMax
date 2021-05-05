@@ -64,6 +64,7 @@ private:
 	int cpyCastleRooks[4] = { 63, 56, 7, 0 };
 
 	int cpyNumberOfChecks = 0;
+	unsigned char moveNumber = 1;
 
 	bool isCheckMate = false,
 		 isStaleMate = false,
@@ -153,6 +154,7 @@ SGS::SGS(std::shared_ptr<ChessBoard>& board) {
 	}
 
 	cpyNumberOfChecks = board->numberOfChecks;
+	moveNumber = board->moveNumber;
 
 	isCheckMate = board->getIsCheckMate();
 	isStaleMate = board->getIsStaleMate();
@@ -180,7 +182,7 @@ SGS::SGS(std::shared_ptr<ChessBoard>& board) {
 	blBishopNumP = board->getBlackBishopPiece()->getNumPieces();
 }
 
-void SGS::saveCurrentState(std::shared_ptr<ChessBoard>& board) {
+void SGS::saveCurrentState(std::shared_ptr<ChessBoard>& board) { //Another method of saving the state.
 	cpyBitBoard = board->bitBoard;
 	cpyWhPieces = board->whPieces;
 	cpyBlPieces = board->blPieces;
@@ -240,6 +242,7 @@ void SGS::saveCurrentState(std::shared_ptr<ChessBoard>& board) {
 	}
 
 	cpyNumberOfChecks = board->numberOfChecks;
+	moveNumber = board->moveNumber;
 
 	isCheckMate = board->getIsCheckMate();
 	isStaleMate = board->getIsStaleMate();
@@ -329,6 +332,7 @@ void SGS::loadSavedState(std::shared_ptr<ChessBoard>& board) {
 	}
 
 	board->numberOfChecks = cpyNumberOfChecks;
+	board->moveNumber = moveNumber;
 
 	board->setIsCheckMate(isCheckMate);
 	board->setIsStaleMate(isStaleMate);

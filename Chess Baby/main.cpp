@@ -1,7 +1,7 @@
 //Developed by Shane Flynn
 //Chess game with an AI using Alpha Beta pruning on a minimax algortihm
 //Using SFML for the graphics
-//Last edited 05/02/2021
+//Last edited 05/04/2021
 
 #include <SFML/Graphics.hpp>
 #include <iostream>

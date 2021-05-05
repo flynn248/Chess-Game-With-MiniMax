@@ -13,7 +13,7 @@
 int main(int argc, char* argv[]) {
 	bool willThread = false,
 		 willAI = false;
-	if (argc == 0) 	{ //default run
+	if (argc <= 1) 	{ //default run
 		willAI = true;
 	}
 	else 	{

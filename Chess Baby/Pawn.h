@@ -220,8 +220,8 @@ public:
 
 	std::unique_ptr<std::vector<uint16_t>> pawnMovesWhite(unsigned long long pieceBitBoard) {
 		std::unique_ptr<std::vector<uint16_t>> possibleMoves = std::make_unique<std::vector<uint16_t>>();
+		possibleMoves->reserve(18);
 		uint16_t mergeOfBeforeNAfterMove;
-		
 		unsigned long long PAWN_MOVES = (pieceBitBoard >> 7) & notCapturable & bitBoard & ~FILE_A & ~RANK_8 & squaresToBlockCheckOrCapture; //Capture right. Includes potential promotion
 		
 		while (PAWN_MOVES != 0) {
@@ -365,8 +365,9 @@ public:
 	}
 	std::unique_ptr<std::vector<uint16_t>> pawnMovesBlack(unsigned long long pieceBitBoard) {
 		std::unique_ptr<std::vector<uint16_t>> possibleMoves = std::make_unique<std::vector<uint16_t>>();
+		possibleMoves->reserve(18);
+
 		uint16_t mergeOfBeforeNAfterMove;
-		
 		unsigned long long PAWN_MOVES = (pieceBitBoard << 7) & notCapturable & bitBoard & ~FILE_H & ~RANK_1 & squaresToBlockCheckOrCapture; //Capture right
 		
 		while (PAWN_MOVES != 0) {

@@ -17,25 +17,20 @@
 //#include "Stack.h"
 
 class ChessBoard : public BoardInfo, private TileWeights{
-protected:
+private:
 	static const int BSIZE = 8;
 	float tileWidth;
 	bool isWhiteMove; //true for white move, false for black
 	bool isCheckMate = false,
 		isStaleMate = false;
-	int timesWhiteKingMoved = 0, //act like a semaphore for the black king movement. Once king is committed to moving, it cannot castle again
-		whenWhRightRookMoved = 0,
-		whenWhLeftRookMoved = 0,
-		timesBlackKingMoved = 0,
-		whenBlRightRookMoved = 0,
-		whenBlLeftRookMoved = 0;
-	int whMoveCounter = 1,
-		blMoveCounter = 1;
+
 
 	sf::RectangleShape board[BSIZE][BSIZE];
-	sf::RectangleShape tileSquare;
+	sf::RectangleShape tileSquare,
+					   movedTiles;
 	sf::Color whtTileColor,
 		blkTileColor;
+		
 
 	King* whKingPiece = nullptr;
 	Pawn* whPawnPiece = nullptr;
@@ -51,7 +46,6 @@ protected:
 	Knight* blKnightPiece = nullptr;
 	Bishop* blBishopPiece = nullptr;
 
-	//std::unique_ptr<Stack> capturedPiecesAI;
 	void customStartPosition() {
 		whKing = 0;
 		whRook = 0;
@@ -96,14 +90,292 @@ protected:
 		bitBoard |= blQueen;
 		blPieces |= bitBoard ^ whPieces;
 	}
+	void initializePiecePosition(const float& frstSquareCentRef) {
+		
+		setStartPosition();
 
+		const float pieceScale = (1 - (tileWidth / (tileWidth * 8))) * 0.40f;
+		float whiteYOffset = frstSquareCentRef + (tileWidth  * 7);
+
+		const int kingVal = 10000,
+			queenVal = 900,
+			rookVal = 500,
+			knightVal = 300,
+			bishopVal = 300,
+			pawnVal = 100;
+		
+		whRookPiece = new Rook(rookVal, pieceScale, "assets/white-rook.png", frstSquareCentRef, true, "R", whRook, 2);
+		whKnightPiece = new Knight(knightVal, pieceScale, "assets/white-knight.png", frstSquareCentRef, true, "N", whKnight, 2);
+		whBishopPiece = new Bishop(bishopVal, pieceScale, "assets/white-bishop.png", frstSquareCentRef, true, "B", whBishop, 2);
+		whQueenPiece = new Queen(queenVal, pieceScale, "assets/white-queen.png", frstSquareCentRef, true, "Q", whQueen,	1);
+		whKingPiece = new King(kingVal, pieceScale, "assets/white-king.png", frstSquareCentRef, true, "K", whKing, 1);
+		whPawnPiece = new Pawn(pawnVal, pieceScale, "assets/white-pawn.png", frstSquareCentRef, true, "P", whPawn, 8);
+
+		blRookPiece = new Rook(rookVal * -1, pieceScale, "assets/black-rook.png", frstSquareCentRef, false, "r", blRook, 2);
+		blKnightPiece = new Knight(knightVal * -1, pieceScale, "assets/black-knight.png", frstSquareCentRef, false, "n", blKnight, 2);
+		blBishopPiece = new Bishop(bishopVal * -1, pieceScale, "assets/black-bishop.png", frstSquareCentRef, false, "b", blBishop, 2);
+		blQueenPiece = new Queen(queenVal * -1, pieceScale, "assets/black-queen.png", frstSquareCentRef, false, "q", blQueen, 1);
+		blKingPiece = new King(kingVal * -1, pieceScale, "assets/black-king.png", frstSquareCentRef, false, "k", blKing, 1);
+		blPawnPiece = new Pawn(pawnVal * -1, pieceScale, "assets/black-pawn.png", frstSquareCentRef, false, "p", blPawn, 8);
+	}
+
+	void drawMovedPieceLoc(sf::RenderWindow& window) {
+		for (int i = 0; i < BSIZE; i++) 		{
+			for (int j = 0; j < BSIZE; j++) 		{
+				if (std::bitset<1>(movedPieceHighlightLoc >> (i * 8 + j)) == 1) {
+					movedTiles.setPosition(sf::Vector2f((tileWidth / 2) + tileWidth * j, (tileWidth / 2) + tileWidth * i));
+					window.draw(movedTiles);
+				}
+			}
+		}
+	}
+	void drawPieces(sf::RenderWindow& window) {
+		whKingPiece->printSprite(window);
+		whPawnPiece->printSprite(window);
+		whRookPiece->printSprite(window);
+		whQueenPiece->printSprite(window);
+		whKnightPiece->printSprite(window);
+		whBishopPiece->printSprite(window);
+
+		blKingPiece->printSprite(window);
+		blPawnPiece->printSprite(window);
+		blRookPiece->printSprite(window);
+		blQueenPiece->printSprite(window);
+		blKnightPiece->printSprite(window);
+		blBishopPiece->printSprite(window);
+	}
+
+ //stuff for AI only
+	void evaluatePlacementWhite(unsigned long long pieceBitBoard, int& piecesValue, const short* pieceWeight, const short* quadrantWeight) {
+		unsigned char pieceIndex;
+		while (pieceBitBoard != 0) 	{
+			pieceIndex = numOfTrailingZeros(pieceBitBoard);
+			piecesValue += pieceWeight[pieceIndex];
+			pieceBitBoard &= ~(1ULL << pieceIndex);
+		}
+	}
+	void evaluatePlacementBlack(unsigned long long pieceBitBoard, int& piecesValue, const short* pieceWeight, const short* quadrantWeight) {
+		unsigned char pieceIndex;
+		while (pieceBitBoard != 0) {
+			pieceIndex = numOfTrailingZeros(pieceBitBoard);
+			piecesValue += pieceWeight[pieceIndex] - quadrantWeight[pieceIndex];
+			pieceBitBoard &= ~(1ULL << pieceIndex);
+		}
+	}
+	int  findEnemyKingQuadrant(unsigned long long& enemyKingBitBoard) {
+		if ((enemyKingBitBoard & 0xF0F0F0F0) != 0) { return 1; }
+		else if ((enemyKingBitBoard & 0xF0F0F0F) != 0) { return 2; }
+		else if ((enemyKingBitBoard & 0xF0F0F0F00000000) != 0) { return 3; }
+		else { return 4; }
+	}
+
+	void makeAIMoveWhite(uint16_t& beforeNAfterMove, const int& currDepth) {
+		unsigned char newTileIndex = (beforeNAfterMove & 16128) >> 8;
+		unsigned char initialTileIndex = beforeNAfterMove & 63;
+
+		if (((1ULL << newTileIndex) & blPieces) != 0) { //if captured a piece
+			try {
+				if (((1ULL << newTileIndex) & blPawn) != 0) {
+					blPawnPiece->removePieceBitBoard(newTileIndex);
+				}
+				else if (((1ULL << newTileIndex) & blBishop) != 0) {
+					blBishopPiece->removePieceBitBoard(newTileIndex);
+				}
+				else if (((1ULL << newTileIndex) & blRook) != 0) {
+					blRookPiece->removePieceBitBoard(newTileIndex);
+					if ((blRook & 128) != 128) { //if right rook moved
+						castleRooks[2] = -1;
+
+					}
+					if ((blRook & 1) != 1) { //if left rook moved
+						castleRooks[3] = -1;
+					}
+				}
+				else if (((1ULL << newTileIndex) & blQueen) != 0) {
+					blQueenPiece->removePieceBitBoard(newTileIndex);
+				}
+				else if (((1ULL << newTileIndex) & blKnight) != 0) {
+					blKnightPiece->removePieceBitBoard(newTileIndex);
+				}
+				else
+					throw std::logic_error("Error in finding the captured piece\n");
+
+			}
+			catch (const std::exception& e) {
+				std::cout << e.what();
+			}
+		}
+
+		if ((beforeNAfterMove & 49344) == 0) { //if no special moves
+			makeMoveWhitePieceAI(initialTileIndex, newTileIndex);
+		}
+		else if ((beforeNAfterMove & 64) == 64) { //Pawn promotion
+			whPawnPiece->removePieceBitBoard(initialTileIndex);
+			addWhiteQueenToBoard(newTileIndex);
+		}
+		else if ((beforeNAfterMove & 128) == 128) { //pawn moved two squares
+			whPawnPiece->removePieceBitBoard(initialTileIndex);
+			whPawnPiece->addPieceBitBoard(newTileIndex);
+			enPassantBlack |= (1ULL << (newTileIndex + 8));
+		}
+		else if ((beforeNAfterMove & 16384) == 16384) { //if enpassant
+			blPawnPiece->removePieceBitBoard(newTileIndex + 8);
+			whPawnPiece->removePieceBitBoard(initialTileIndex);
+			whPawnPiece->addPieceBitBoard(newTileIndex);
+		}
+		else { //castling
+			if (initialTileIndex == 63) //castled king side
+				whKing = 1ULL << 62;
+			else
+				whKing = 1ULL << 58;
+
+			whKingPiece->updateHasKingMoved();
+			whRookPiece->removePieceBitBoard(initialTileIndex);
+			whRookPiece->addPieceBitBoard(newTileIndex);
+		}
+		updateBitBoard();
+		updateSquaresWhiteAttacks();
+	}
+	void makeAIMoveBlack(uint16_t& beforeNAfterMove, const int& currDepth) {
+		unsigned char newTileIndex = (beforeNAfterMove & 16128) >> 8;
+		unsigned char initialTileIndex = beforeNAfterMove & 63;
+
+		if (((1ULL << newTileIndex) & whPieces) != 0) { //if captured a piece
+			try {
+				if (((1ULL << newTileIndex) & whPawn) != 0) {
+					whPawnPiece->removePieceBitBoard(newTileIndex);
+				}
+				else if (((1ULL << newTileIndex) & whBishop) != 0) {
+					whBishopPiece->removePieceBitBoard(newTileIndex);
+				}
+				else if (((1ULL << newTileIndex) & whRook) != 0) {
+					whRookPiece->removePieceBitBoard(newTileIndex);
+					if ((whRook & 0x8000000000000000) != 0x8000000000000000) { //if right rook moved
+						castleRooks[0] = -1;
+					}
+					if ((whRook & 0x100000000000000) != 0x100000000000000) { //if left rook moved
+						castleRooks[1] = -1;
+					}
+				}
+				else if (((1ULL << newTileIndex) & whQueen) != 0) {
+					whQueenPiece->removePieceBitBoard(newTileIndex);
+				}
+				else if (((1ULL << newTileIndex) & whKnight) != 0) {
+					whKnightPiece->removePieceBitBoard(newTileIndex);
+				}
+				else
+					throw std::logic_error("Error in finding the captured piece\n");
+			}
+			catch (const std::exception& e) {
+				std::cout << e.what();
+			}
+		}
+
+		if ((beforeNAfterMove & 49344) == 0) { //if no special moves
+			makeMoveBlackPieceAI(initialTileIndex, newTileIndex);
+		}
+		else if ((beforeNAfterMove & 64) == 64) { //Pawn promotion
+			blPawnPiece->removePieceBitBoard(initialTileIndex);
+			addBlackQueenToBoard(newTileIndex);
+		}
+		else if ((beforeNAfterMove & 128) == 128) { //pawn moved two squares
+			blPawnPiece->removePieceBitBoard(initialTileIndex);
+			blPawnPiece->addPieceBitBoard(newTileIndex);
+			enPassantWhite |= (1ULL << (newTileIndex - 8));
+		}
+		else if ((beforeNAfterMove & 16384) == 16384) { //if enpassant
+			whPawnPiece->removePieceBitBoard(newTileIndex - 8);
+			blPawnPiece->removePieceBitBoard(initialTileIndex);
+			blPawnPiece->addPieceBitBoard(newTileIndex);
+		}
+		else { //castling
+			if (initialTileIndex == 7) //castled king side
+				blKing = 1ULL << 6;
+			else
+				blKing = 1ULL << 2;
+
+			blKingPiece->updateHasKingMoved();
+			blRookPiece->removePieceBitBoard(initialTileIndex);
+			blRookPiece->addPieceBitBoard(newTileIndex);
+		}
+		
+		updateBitBoard();
+		updateSquaresBlackAttacks();
+	}
+
+	void makeMoveWhitePieceAI(const int& initialTileIndex, const int& newTileIndex) {
+		if (((1ULL << initialTileIndex) & whKing) != 0) {
+			whKingPiece->removePieceBitBoard(initialTileIndex);
+			whKingPiece->addPieceBitBoard(newTileIndex);
+		}
+		else if (((1ULL << initialTileIndex) & whPawn) != 0) {
+			whPawnPiece->removePieceBitBoard(initialTileIndex);
+			whPawnPiece->addPieceBitBoard(newTileIndex);
+		}
+		else if (((1ULL << initialTileIndex) & whBishop) != 0) {
+			whBishopPiece->removePieceBitBoard(initialTileIndex);
+			whBishopPiece->addPieceBitBoard(newTileIndex);
+		}
+		else if (((1ULL << initialTileIndex) & whRook) != 0) {
+			whRookPiece->removePieceBitBoard(initialTileIndex);
+			whRookPiece->addPieceBitBoard(newTileIndex);
+			if ((whRook & 0x8000000000000000) != 0x8000000000000000) { //if right rook moved
+				castleRooks[0] = -1;
+			}
+			if ((whRook & 0x100000000000000) != 0x100000000000000) { //if left rook moved
+				castleRooks[1] = -1;
+			}
+		}
+		else if (((1ULL << initialTileIndex) & whQueen) != 0) {
+			whQueenPiece->removePieceBitBoard(initialTileIndex);
+			whQueenPiece->addPieceBitBoard(newTileIndex);
+		}
+		else if (((1ULL << initialTileIndex) & whKnight) != 0) {
+			whKnightPiece->removePieceBitBoard(initialTileIndex);
+			whKnightPiece->addPieceBitBoard(newTileIndex);
+		}
+	}
+	void makeMoveBlackPieceAI(const int& initialTileIndex, const int& newTileIndex) {
+		if (((1ULL << initialTileIndex) & blKing) != 0) {
+			blKingPiece->removePieceBitBoard(initialTileIndex);
+			blKingPiece->addPieceBitBoard(newTileIndex);
+		}
+		else if (((1ULL << initialTileIndex) & blPawn) != 0) {
+			blPawnPiece->removePieceBitBoard(initialTileIndex);
+			blPawnPiece->addPieceBitBoard(newTileIndex);
+		}
+		else if (((1ULL << initialTileIndex) & blBishop) != 0) {
+			blBishopPiece->removePieceBitBoard(initialTileIndex);
+			blBishopPiece->addPieceBitBoard(newTileIndex);
+		}
+		else if (((1ULL << initialTileIndex) & blRook) != 0) {
+			blRookPiece->removePieceBitBoard(initialTileIndex);
+			blRookPiece->addPieceBitBoard(newTileIndex);
+			if ((blRook & 128) != 128) { //if right rook moved
+				castleRooks[2] = -1;
+			}
+			if ((blRook & 1) != 1) { //if left rook moved
+				castleRooks[3] = -1;
+			}
+		}
+		else if (((1ULL << initialTileIndex) & blQueen) != 0) {
+			blQueenPiece->removePieceBitBoard(initialTileIndex);
+			blQueenPiece->addPieceBitBoard(newTileIndex);
+		}
+		else if (((1ULL << initialTileIndex) & blKnight) != 0) {
+			blKnightPiece->removePieceBitBoard(initialTileIndex);
+			blKnightPiece->addPieceBitBoard(newTileIndex);
+		}
+	}
 public:											  												  
 	ChessBoard(const float &tileWidth, sf::Color & whiteCol, sf::Color & blkCol, const float &frstSquareCentRef, const int& stackSize) {
 		this->tileWidth = tileWidth;
 		whtTileColor = whiteCol;
 		blkTileColor = blkCol;
 		isWhiteMove = true;
-		//capturedPiecesAI = std::make_unique<Stack>(stackSize);
+		movedTiles.setSize(sf::Vector2f(tileWidth, tileWidth));
+		movedTiles.setOrigin(sf::Vector2f(tileWidth / 2.f, tileWidth / 2.f));
+		movedTiles.setFillColor(sf::Color(30, 30, 255, 80));
 		initializePiecePosition(frstSquareCentRef);
 	}
 												  
@@ -137,34 +409,6 @@ public:
 		blBishopPiece = nullptr;
 	}						  
 												  
-	void initializePiecePosition(const float& frstSquareCentRef) {
-		
-		setStartPosition();
-
-		const float pieceScale = (1 - (tileWidth / (tileWidth * 8))) * 0.40f;
-		float whiteYOffset = frstSquareCentRef + (tileWidth  * 7);
-
-		const int kingVal = 10000,
-			queenVal = 900,
-			rookVal = 500,
-			knightVal = 300,
-			bishopVal = 300,
-			pawnVal = 100;
-		
-		whRookPiece = new Rook(rookVal, pieceScale, "assets/white-rook.png", frstSquareCentRef, true, "R", whRook, 2);
-		whKnightPiece = new Knight(knightVal, pieceScale, "assets/white-knight.png", frstSquareCentRef, true, "N", whKnight, 2);
-		whBishopPiece = new Bishop(bishopVal, pieceScale, "assets/white-bishop.png", frstSquareCentRef, true, "B", whBishop, 2);
-		whQueenPiece = new Queen(queenVal, pieceScale, "assets/white-queen.png", frstSquareCentRef, true, "Q", whQueen,	1);
-		whKingPiece = new King(kingVal, pieceScale, "assets/white-king.png", frstSquareCentRef, true, "K", whKing, 1);
-		whPawnPiece = new Pawn(pawnVal, pieceScale, "assets/white-pawn.png", frstSquareCentRef, true, "P", whPawn, 8);
-
-		blRookPiece = new Rook(rookVal * -1, pieceScale, "assets/black-rook.png", frstSquareCentRef, false, "r", blRook, 2);
-		blKnightPiece = new Knight(knightVal * -1, pieceScale, "assets/black-knight.png", frstSquareCentRef, false, "n", blKnight, 2);
-		blBishopPiece = new Bishop(bishopVal * -1, pieceScale, "assets/black-bishop.png", frstSquareCentRef, false, "b", blBishop, 2);
-		blQueenPiece = new Queen(queenVal * -1, pieceScale, "assets/black-queen.png", frstSquareCentRef, false, "q", blQueen, 1);
-		blKingPiece = new King(kingVal * -1, pieceScale, "assets/black-king.png", frstSquareCentRef, false, "k", blKing, 1);
-		blPawnPiece = new Pawn(pawnVal * -1, pieceScale, "assets/black-pawn.png", frstSquareCentRef, false, "p", blPawn, 8);
-	}
 
 	void drawBoard(sf::RenderWindow& window) {
 		tileSquare.setSize(sf::Vector2f(tileWidth, tileWidth));
@@ -184,22 +428,8 @@ public:
 			}
 		}
 
+		drawMovedPieceLoc(window);
 		drawPieces(window);
-	}
-	void drawPieces(sf::RenderWindow& window) {
-		whKingPiece->printSprite(window);
-		whPawnPiece->printSprite(window);
-		whRookPiece->printSprite(window);
-		whQueenPiece->printSprite(window);
-		whKnightPiece->printSprite(window);
-		whBishopPiece->printSprite(window);
-
-		blKingPiece->printSprite(window);
-		blPawnPiece->printSprite(window);
-		blRookPiece->printSprite(window);
-		blQueenPiece->printSprite(window);
-		blKnightPiece->printSprite(window);
-		blBishopPiece->printSprite(window);
 	}
 	void printBitBoard(const unsigned long long & aBitBoard) {
 
@@ -257,6 +487,7 @@ public:
 		return false;
 	}
 
+	/***********AI Functions************/
 	int evaluateBoardValue(const bool& isItWhiteMove) {
 		int whitePiecesValue = 0,
 			blackPiecesValue = 0;
@@ -277,310 +508,75 @@ public:
 
 		
 		if (moveNumber <= 10) 	{ //Opening
-			evaluatePlacementWhite(whKing, whitePiecesValue, whKingWeightOp);
-			evaluatePlacementWhite(whRook, whitePiecesValue, whRookWeightOp);
-			evaluatePlacementWhite(whPawn, whitePiecesValue, whPawnWeightOp);
-			evaluatePlacementWhite(whQueen, whitePiecesValue, whQueenWeightOp);
-			evaluatePlacementWhite(whKnight, whitePiecesValue, whKnightWeightOp);
-			evaluatePlacementWhite(whBishop, whitePiecesValue, whBishopWeightOp);
+			evaluatePlacementWhite(whKing, whitePiecesValue, whKingWeightOp, emptyQuadrant);
+			evaluatePlacementWhite(whRook, whitePiecesValue, whRookWeightOp, emptyQuadrant);
+			evaluatePlacementWhite(whPawn, whitePiecesValue, whPawnWeightOp, emptyQuadrant);
+			evaluatePlacementWhite(whQueen, whitePiecesValue, whQueenWeightOp, emptyQuadrant);
+			evaluatePlacementWhite(whKnight, whitePiecesValue, whKnightWeightOp, emptyQuadrant);
+			evaluatePlacementWhite(whBishop, whitePiecesValue, whBishopWeightOp, emptyQuadrant);
 
-			evaluatePlacementBlack(blKing, blackPiecesValue, blKingWeightOp);
-			evaluatePlacementBlack(blRook, blackPiecesValue, blRookWeightOp);
-			evaluatePlacementBlack(blPawn, blackPiecesValue, blPawnWeightOp);
-			evaluatePlacementBlack(blQueen, blackPiecesValue, blQueenWeightOp);
-			evaluatePlacementBlack(blKnight, blackPiecesValue, blKnightWeightOp);
-			evaluatePlacementBlack(blBishop, blackPiecesValue, blBishopWeightOp);
+			evaluatePlacementBlack(blKing, blackPiecesValue, blKingWeightOp, emptyQuadrant);
+			evaluatePlacementBlack(blRook, blackPiecesValue, blRookWeightOp, emptyQuadrant);
+			evaluatePlacementBlack(blPawn, blackPiecesValue, blPawnWeightOp, emptyQuadrant);
+			evaluatePlacementBlack(blQueen, blackPiecesValue, blQueenWeightOp, emptyQuadrant);
+			evaluatePlacementBlack(blKnight, blackPiecesValue, blKnightWeightOp, emptyQuadrant);
+			evaluatePlacementBlack(blBishop, blackPiecesValue, blBishopWeightOp, emptyQuadrant);
 		}
 		else if (moveNumber <= 30) 	{ //Mid Game
-			evaluatePlacementWhite(whKing, whitePiecesValue, whKingWeightMi);
-			evaluatePlacementWhite(whRook, whitePiecesValue, whRookWeightMi);
-			evaluatePlacementWhite(whPawn, whitePiecesValue, whPawnWeightMi);
-			evaluatePlacementWhite(whQueen, whitePiecesValue, whQueenWeightMi);
-			evaluatePlacementWhite(whKnight, whitePiecesValue, whKnightWeightMi);
-			evaluatePlacementWhite(whBishop, whitePiecesValue, whBishopWeightMi);
+			evaluatePlacementWhite(whKing, whitePiecesValue, whKingWeightMi, emptyQuadrant);
+			evaluatePlacementWhite(whRook, whitePiecesValue, whRookWeightMi, emptyQuadrant);
+			evaluatePlacementWhite(whPawn, whitePiecesValue, whPawnWeightMi, emptyQuadrant);
+			evaluatePlacementWhite(whQueen, whitePiecesValue, whQueenWeightMi, emptyQuadrant);
+			evaluatePlacementWhite(whKnight, whitePiecesValue, whKnightWeightMi, emptyQuadrant);
+			evaluatePlacementWhite(whBishop, whitePiecesValue, whBishopWeightMi, emptyQuadrant);
 
-			evaluatePlacementBlack(blKing, blackPiecesValue, blKingWeightMi);
-			evaluatePlacementBlack(blRook, blackPiecesValue, blRookWeightMi);
-			evaluatePlacementBlack(blPawn, blackPiecesValue, blPawnWeightMi);
-			evaluatePlacementBlack(blQueen, blackPiecesValue, blQueenWeightMi);
-			evaluatePlacementBlack(blKnight, blackPiecesValue, blKnightWeightMi);
-			evaluatePlacementBlack(blBishop, blackPiecesValue, blBishopWeightMi);
+			evaluatePlacementBlack(blKing, blackPiecesValue, blKingWeightMi, emptyQuadrant);
+			evaluatePlacementBlack(blRook, blackPiecesValue, blRookWeightMi, emptyQuadrant);
+			evaluatePlacementBlack(blPawn, blackPiecesValue, blPawnWeightMi, emptyQuadrant);
+			evaluatePlacementBlack(blQueen, blackPiecesValue, blQueenWeightMi, emptyQuadrant);
+			evaluatePlacementBlack(blKnight, blackPiecesValue, blKnightWeightMi, emptyQuadrant);
+			evaluatePlacementBlack(blBishop, blackPiecesValue, blBishopWeightMi, emptyQuadrant);
 		}
 		else 	{ //Endgame
-			evaluatePlacementWhite(whKing, whitePiecesValue, whKingWeightEn);
-			evaluatePlacementWhite(whRook, whitePiecesValue, whRookWeightEn);
-			evaluatePlacementWhite(whPawn, whitePiecesValue, whPawnWeightEn);
-			evaluatePlacementWhite(whQueen, whitePiecesValue, whQueenWeightEn);
-			evaluatePlacementWhite(whKnight, whitePiecesValue, whKnightWeightEn);
-			evaluatePlacementWhite(whBishop, whitePiecesValue, whBishopWeightEn);
+			int quadrant = -1;
+			const short* quardantPtr = nullptr;
 
-			evaluatePlacementBlack(blKing, blackPiecesValue, blKingWeightEn);
-			evaluatePlacementBlack(blRook, blackPiecesValue, blRookWeightEn);
-			evaluatePlacementBlack(blPawn, blackPiecesValue, blPawnWeightEn);
-			evaluatePlacementBlack(blQueen, blackPiecesValue, blQueenWeightEn);
-			evaluatePlacementBlack(blKnight, blackPiecesValue, blKnightWeightEn);
-			evaluatePlacementBlack(blBishop, blackPiecesValue, blBishopWeightEn);
+			isItWhiteMove ? quadrant = findEnemyKingQuadrant(blKing) : quadrant = findEnemyKingQuadrant(whKing);
+
+			if (quadrant == 1) { quardantPtr = firstQuadrant; }
+			else if (quadrant == 2) { quardantPtr = secndQuadrant; }
+			else if (quadrant == 3) { quardantPtr = thirdQuadrant; }
+			else { quardantPtr = forthQuadrant; }
+
+			evaluatePlacementWhite(whKing, whitePiecesValue, whKingWeightEn, quardantPtr);
+			evaluatePlacementWhite(whRook, whitePiecesValue, whRookWeightEn, quardantPtr);
+			evaluatePlacementWhite(whPawn, whitePiecesValue, whPawnWeightEn, quardantPtr);
+			evaluatePlacementWhite(whQueen, whitePiecesValue, whQueenWeightEn, quardantPtr);
+			evaluatePlacementWhite(whKnight, whitePiecesValue, whKnightWeightEn, quardantPtr);
+			evaluatePlacementWhite(whBishop, whitePiecesValue, whBishopWeightEn, quardantPtr);
+
+			evaluatePlacementBlack(blKing, blackPiecesValue, blKingWeightEn, quardantPtr);
+			evaluatePlacementBlack(blRook, blackPiecesValue, blRookWeightEn, quardantPtr);
+			evaluatePlacementBlack(blPawn, blackPiecesValue, blPawnWeightEn, quardantPtr);
+			evaluatePlacementBlack(blQueen, blackPiecesValue, blQueenWeightEn, quardantPtr);
+			evaluatePlacementBlack(blKnight, blackPiecesValue, blKnightWeightEn, quardantPtr);
+			evaluatePlacementBlack(blBishop, blackPiecesValue, blBishopWeightEn, quardantPtr);
 		}
 
+		if (isCheckMate) 	{
+			if (isItWhiteMove) {
+				blackPiecesValue -= 999999;
+			}
+			else
+				whitePiecesValue += 999999;
+		}
+		if (isStaleMate) 	{
+			return 0;
+		}
 
-		//Add values for check, checkmate, and stalemate.
-		//Check = + 100
-		//Checkmate = + 99999
-		//Stalemate = * 0
 		return whitePiecesValue + blackPiecesValue;
 	}
 
-private: //stuff for AI only
-	void evaluatePlacementWhite(unsigned long long pieceBitBoard, int& piecesValue, const short* pieceWeight) {
-		unsigned char pieceIndex;
-		while (pieceBitBoard != 0) 	{
-			pieceIndex = numOfTrailingZeros(pieceBitBoard);
-			piecesValue += pieceWeight[pieceIndex];
-			pieceBitBoard &= ~(1ULL << pieceIndex);
-		}
-	}
-	void evaluatePlacementBlack(unsigned long long pieceBitBoard, int& piecesValue, const short* pieceWeight) {
-		unsigned char pieceIndex;
-		while (pieceBitBoard != 0) {
-			pieceIndex = numOfTrailingZeros(pieceBitBoard);
-			piecesValue += pieceWeight[pieceIndex];
-			pieceBitBoard &= ~(1ULL << pieceIndex);
-		}
-	}
-
-	void makeAIMoveWhite(uint16_t& beforeNAfterMove, const int& currDepth) {
-		unsigned char newTileIndex = (beforeNAfterMove & 16128) >> 8;
-		unsigned char initialTileIndex = beforeNAfterMove & 63;
-
-		if (((1ULL << newTileIndex) & blPieces) != 0) { //if captured a piece
-			try {
-				if (((1ULL << newTileIndex) & blPawn) != 0) {
-					blPawnPiece->removePieceBitBoard(newTileIndex);
-					//capturedPiecesAI->push(blPawnPiece, currDepth)
-				}
-				else if (((1ULL << newTileIndex) & blBishop) != 0) {
-					blBishopPiece->removePieceBitBoard(newTileIndex);
-					//capturedPiecesAI->push(blBishopPiece, currDepth);
-				}
-				else if (((1ULL << newTileIndex) & blRook) != 0) {
-					blRookPiece->removePieceBitBoard(newTileIndex);
-					//capturedPiecesAI->push(blRookPiece, currDepth);
-					if ((blRook & 128) != 128) { //if right rook moved
-						castleRooks[2] = -1;
-						if (whenBlRightRookMoved == 0)
-							whenBlRightRookMoved = whMoveCounter;
-					}
-					if ((blRook & 1) != 1) { //if left rook moved
-						castleRooks[3] = -1;
-
-						if (whenBlLeftRookMoved == 0)
-							whenBlLeftRookMoved = whMoveCounter;
-					}
-				}
-				else if (((1ULL << newTileIndex) & blQueen) != 0) {
-					blQueenPiece->removePieceBitBoard(newTileIndex);
-					//capturedPiecesAI->push(blQueenPiece, currDepth);
-				}
-				else if (((1ULL << newTileIndex) & blKnight) != 0) {
-					blKnightPiece->removePieceBitBoard(newTileIndex);
-					//capturedPiecesAI->push(blKnightPiece, currDepth);
-				}
-				else
-					throw std::logic_error("Error in finding the captured piece\n");
-
-			}
-			catch (const std::exception& e) {
-				std::cout << e.what();
-			}
-		}
-
-		if ((beforeNAfterMove & 49344) == 0) { //if no special moves
-			makeMoveWhitePieceAI(initialTileIndex, newTileIndex);
-		}
-		else if ((beforeNAfterMove & 64) == 64) { //Pawn promotion
-			whPawnPiece->removePieceBitBoard(initialTileIndex);
-			addWhiteQueenToBoard(newTileIndex);
-		}
-		else if ((beforeNAfterMove & 128) == 128) { //pawn moved two squares
-			whPawnPiece->removePieceBitBoard(initialTileIndex);
-			whPawnPiece->addPieceBitBoard(newTileIndex);
-			enPassantBlack |= (1ULL << (newTileIndex + 8));
-		}
-		else if ((beforeNAfterMove & 16384) == 16384) { //if enpassant
-			blPawnPiece->removePieceBitBoard(newTileIndex + 8);
-			whPawnPiece->removePieceBitBoard(initialTileIndex);
-			whPawnPiece->addPieceBitBoard(newTileIndex);
-
-			//capturedPiecesAI->pushEnPassantBoard(enPassantWhite);
-		}
-		else { //castling
-			if (initialTileIndex == 63) //castled king side
-				whKing = 1ULL << 62;
-			else
-				whKing = 1ULL << 58;
-
-			timesWhiteKingMoved++;
-			whKingPiece->updateHasKingMoved();
-			whRookPiece->removePieceBitBoard(initialTileIndex);
-			whRookPiece->addPieceBitBoard(newTileIndex);
-		}
-		whMoveCounter++;
-		updateBitBoard();
-		updateSquaresWhiteAttacks();
-	}
-	void makeAIMoveBlack(uint16_t& beforeNAfterMove, const int& currDepth) {
-		unsigned char newTileIndex = (beforeNAfterMove & 16128) >> 8;
-		unsigned char initialTileIndex = beforeNAfterMove & 63;
-
-		if (((1ULL << newTileIndex) & whPieces) != 0) { //if captured a piece
-			try {
-				if (((1ULL << newTileIndex) & whPawn) != 0) {
-					whPawnPiece->removePieceBitBoard(newTileIndex);
-					//capturedPiecesAI->push(whPawnPiece, currDepth);
-				}
-				else if (((1ULL << newTileIndex) & whBishop) != 0) {
-					whBishopPiece->removePieceBitBoard(newTileIndex);
-					//capturedPiecesAI->push(whBishopPiece, currDepth);
-				}
-				else if (((1ULL << newTileIndex) & whRook) != 0) {
-					whRookPiece->removePieceBitBoard(newTileIndex);
-					//capturedPiecesAI->push(whRookPiece, currDepth);
-					if ((whRook & 0x8000000000000000) != 0x8000000000000000) { //if right rook moved
-						castleRooks[0] = -1;
-						if (whenWhRightRookMoved == 0)
-							whenWhRightRookMoved = blMoveCounter;
-					}
-					if ((whRook & 0x100000000000000) != 0x100000000000000) { //if left rook moved
-						castleRooks[1] = -1;
-						if (whenWhLeftRookMoved == 0)
-							whenWhLeftRookMoved = blMoveCounter;
-					}
-				}
-				else if (((1ULL << newTileIndex) & whQueen) != 0) {
-					whQueenPiece->removePieceBitBoard(newTileIndex);
-					//capturedPiecesAI->push(whQueenPiece, currDepth);
-				}
-				else if (((1ULL << newTileIndex) & whKnight) != 0) {
-					whKnightPiece->removePieceBitBoard(newTileIndex);
-					//capturedPiecesAI->push(whKnightPiece, currDepth);
-				}
-				else
-					throw std::logic_error("Error in finding the captured piece\n");
-			}
-			catch (const std::exception& e) {
-				std::cout << e.what();
-			}
-		}
-
-		if ((beforeNAfterMove & 49344) == 0) { //if no special moves
-			makeMoveBlackPieceAI(initialTileIndex, newTileIndex);
-		}
-		else if ((beforeNAfterMove & 64) == 64) { //Pawn promotion
-			blPawnPiece->removePieceBitBoard(initialTileIndex);
-			addBlackQueenToBoard(newTileIndex);
-		}
-		else if ((beforeNAfterMove & 128) == 128) { //pawn moved two squares
-			blPawnPiece->removePieceBitBoard(initialTileIndex);
-			blPawnPiece->addPieceBitBoard(newTileIndex);
-			enPassantWhite |= (1ULL << (newTileIndex - 8));
-		}
-		else if ((beforeNAfterMove & 16384) == 16384) { //if enpassant
-			whPawnPiece->removePieceBitBoard(newTileIndex - 8);
-			blPawnPiece->removePieceBitBoard(initialTileIndex);
-			blPawnPiece->addPieceBitBoard(newTileIndex);
-		}
-		else { //castling
-			if (initialTileIndex == 7) //castled king side
-				blKing = 1ULL << 6;
-			else
-				blKing = 1ULL << 2;
-
-			timesBlackKingMoved++;
-			blKingPiece->updateHasKingMoved();
-			blRookPiece->removePieceBitBoard(initialTileIndex);
-			blRookPiece->addPieceBitBoard(newTileIndex);
-		}
-		
-		updateBitBoard();
-		updateSquaresBlackAttacks();
-	}
-
-	void makeMoveWhitePieceAI(const int& initialTileIndex, const int& newTileIndex) {
-		if (((1ULL << initialTileIndex) & whKing) != 0) {
-			timesWhiteKingMoved++;
-			whKingPiece->removePieceBitBoard(initialTileIndex);
-			whKingPiece->addPieceBitBoard(newTileIndex);
-		}
-		else if (((1ULL << initialTileIndex) & whPawn) != 0) {
-			whPawnPiece->removePieceBitBoard(initialTileIndex);
-			whPawnPiece->addPieceBitBoard(newTileIndex);
-		}
-		else if (((1ULL << initialTileIndex) & whBishop) != 0) {
-			whBishopPiece->removePieceBitBoard(initialTileIndex);
-			whBishopPiece->addPieceBitBoard(newTileIndex);
-		}
-		else if (((1ULL << initialTileIndex) & whRook) != 0) {
-			whRookPiece->removePieceBitBoard(initialTileIndex);
-			whRookPiece->addPieceBitBoard(newTileIndex);
-			if ((whRook & 0x8000000000000000) != 0x8000000000000000) { //if right rook moved
-				castleRooks[0] = -1;
-				if (whenWhRightRookMoved == 0)
-					whenWhRightRookMoved = whMoveCounter;
-			}
-			if ((whRook & 0x100000000000000) != 0x100000000000000) { //if left rook moved
-				castleRooks[1] = -1;
-				if (whenWhLeftRookMoved == 0)
-					whenWhLeftRookMoved = whMoveCounter;
-			}
-		}
-		else if (((1ULL << initialTileIndex) & whQueen) != 0) {
-			whQueenPiece->removePieceBitBoard(initialTileIndex);
-			whQueenPiece->addPieceBitBoard(newTileIndex);
-		}
-		else if (((1ULL << initialTileIndex) & whKnight) != 0) {
-			whKnightPiece->removePieceBitBoard(initialTileIndex);
-			whKnightPiece->addPieceBitBoard(newTileIndex);
-		}
-	}
-	void makeMoveBlackPieceAI(const int& initialTileIndex, const int& newTileIndex) {
-		if (((1ULL << initialTileIndex) & blKing) != 0) {
-			timesBlackKingMoved++;
-			blKingPiece->removePieceBitBoard(initialTileIndex);
-			blKingPiece->addPieceBitBoard(newTileIndex);
-		}
-		else if (((1ULL << initialTileIndex) & blPawn) != 0) {
-			blPawnPiece->removePieceBitBoard(initialTileIndex);
-			blPawnPiece->addPieceBitBoard(newTileIndex);
-		}
-		else if (((1ULL << initialTileIndex) & blBishop) != 0) {
-			blBishopPiece->removePieceBitBoard(initialTileIndex);
-			blBishopPiece->addPieceBitBoard(newTileIndex);
-		}
-		else if (((1ULL << initialTileIndex) & blRook) != 0) {
-			blRookPiece->removePieceBitBoard(initialTileIndex);
-			blRookPiece->addPieceBitBoard(newTileIndex);
-			if ((blRook & 128) != 128) { //if right rook moved
-				castleRooks[2] = -1;
-				if (whenBlRightRookMoved == 0)
-					whenBlRightRookMoved = blMoveCounter;
-			}
-			if ((blRook & 1) != 1) { //if left rook moved
-				castleRooks[3] = -1;
-
-				if (whenBlLeftRookMoved == 0)
-					whenBlLeftRookMoved = blMoveCounter;
-			}
-		}
-		else if (((1ULL << initialTileIndex) & blQueen) != 0) {
-			blQueenPiece->removePieceBitBoard(initialTileIndex);
-			blQueenPiece->addPieceBitBoard(newTileIndex);
-		}
-		else if (((1ULL << initialTileIndex) & blKnight) != 0) {
-			blKnightPiece->removePieceBitBoard(initialTileIndex);
-			blKnightPiece->addPieceBitBoard(newTileIndex);
-		}
-	}
-public:
 	void makeAIMove(uint16_t beforeNAfterMove, bool isItWhiteMove, const int currDepth) {
 		if (isItWhiteMove == true) {
 			moveNumber++;
@@ -591,12 +587,13 @@ public:
 			makeAIMoveBlack(beforeNAfterMove, currDepth);
 			enPassantBlack = 0ULL;
 		}
-		isWhiteMove = !isWhiteMove;
+		updateIsWhiteMove();
 	}
 	void commitAIMove(uint16_t& beforeNAfterMove) {
 		int dummyDepth = 0;
 
 		if (isWhiteMove == true) {
+			moveNumber++;
 			makeAIMoveWhite(beforeNAfterMove, dummyDepth);
 			enPassantWhite = 0ULL;
 		}
@@ -605,6 +602,12 @@ public:
 			enPassantBlack = 0ULL;
 		}
 
+		if (beforeNAfterMove & 32768) 	{ //if castled
+			movedPieceHighlightLoc = 0ULL;
+		}
+		else 	{
+			updateMovedPieceHighlightLoc(beforeNAfterMove & 63, (beforeNAfterMove & 16128) >> 8);
+		}
 		updateDisplayOfPieces();
 		updateIsWhiteMove();
 	}
@@ -650,9 +653,7 @@ public:
 		}
 		whPieces &= ~(1ULL << index);
 		blPieces &= ~(1ULL << index);
-		if (whMoveCounter < 5) {
-			//customStartPosition();
-		}
+
 		updateDisplayOfPieces();
 	}
 
@@ -781,17 +782,12 @@ public:
 
 		checkForCheckWhite(); //check if white is now in check
 	}
+	void updateMovedPieceHighlightLoc(const int& initialTileIndex, const int& newTileIndex) {
+		movedPieceHighlightLoc = 0ULL;
+		movedPieceHighlightLoc |= 1ULL << initialTileIndex;
+		movedPieceHighlightLoc |= 1ULL << newTileIndex;
+	}
 	void updateIsWhiteMove() { isWhiteMove = !isWhiteMove; }
-
-	void updateWhenWhRightRookMoved() { whenWhRightRookMoved = whMoveCounter; }
-	void updateWhenWhLeftRookMoved() { whenWhLeftRookMoved = whMoveCounter; }
-	void updateWhenBlRightRookMoved() { whenBlRightRookMoved = blMoveCounter; }
-	void updateWhenBlLeftRookMoved() { whenBlLeftRookMoved = blMoveCounter; }
-	void updateTimesWhiteKingMoved() { timesWhiteKingMoved++; }
-	void updateTimesBackKingMoved() { timesBlackKingMoved++; }
-	 
-	void updateWhMoveCounter() { whMoveCounter++; }
-	void updateBlMoveCounter() { blMoveCounter++; }
 
 	void checkForCheckWhite() {
 		numberOfChecks = 0;
@@ -873,12 +869,6 @@ public:
 	void setIsWhiteMove(const bool& wm) { isWhiteMove = wm; }
 	void setIsCheckMate(const bool& cm) { isCheckMate = cm; }
 	void setIsStaleMate(const bool& sm) { isStaleMate = sm; }
-
-	int getWhenWhRightRookMoved() const { return whenWhRightRookMoved; }
-	int getWhenWhLeftRookMoved() const { return whenWhLeftRookMoved; }
-
-	int getWhenBlRightRookMoved() const { return whenBlRightRookMoved; }
-	int getWhenBlLeftRookMoved() const { return whenBlLeftRookMoved; }
 	
 	Pawn* getWhitePawnPiece() { return whPawnPiece; }
 	Rook* getWhiteRookPiece() { return whRookPiece; }

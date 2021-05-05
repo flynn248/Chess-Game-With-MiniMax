@@ -1,6 +1,12 @@
 #pragma once
 //Weights determine better piece placement for AI
 struct TileWeights 	{
+	//If few enemy pieces left, quarter off the board where king is at
+	static const short firstQuadrant[64];
+	static const short secndQuadrant[64];
+	static const short thirdQuadrant[64];
+	static const short forthQuadrant[64];
+	static const short emptyQuadrant[64]; //an empty quadrant weight
 	//opening
 	static const short whKingWeightOp[64];
 	static const short whRookWeightOp[64];

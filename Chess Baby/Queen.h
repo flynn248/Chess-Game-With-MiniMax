@@ -50,12 +50,13 @@ public:
 
 	std::unique_ptr<std::vector<uint16_t>> legalMoves(unsigned long long pieceBitBoard) { //Queen legal moves
 		std::unique_ptr<std::vector<uint16_t>> possibleMoves = std::make_unique<std::vector<uint16_t>>();
-		uint16_t mergeOfBeforeNAfterMove;
-		unsigned long long queenPiece = pieceBitBoard;
-		unsigned long long allPotentialMoves = 0ULL;
+		possibleMoves->reserve(12);
 
-		while (queenPiece != 0) {
-			int queenLocation = numOfTrailingZeros(queenPiece);
+		uint16_t mergeOfBeforeNAfterMove;
+		unsigned long long allPotentialMoves = 0ULL;
+		
+		while (pieceBitBoard != 0) {
+			int queenLocation = numOfTrailingZeros(pieceBitBoard);
 
 			if (((1ULL << queenLocation) & pinnedPiecesBitBoard) != 0) //if piece is pinned
 				allPotentialMoves = moveableSquaresWhenPinned(queenLocation) & squaresToBlockCheckOrCapture;
@@ -74,7 +75,6 @@ public:
 				aPotentialMove = allPotentialMoves & ~(allPotentialMoves - 1);
 			}
 			pieceBitBoard &= ~(1ULL << queenLocation);
-			queenPiece = pieceBitBoard;
 		}
 		
 		return possibleMoves;

@@ -3,8 +3,9 @@
 int revCount = 0;
 
 struct BoardInfo {
-private:
+private: //frequently used variables in below functions.
 	static unsigned int v, v2;
+	static int d;
 public:
 	static unsigned long long bitBoard;
 	static unsigned long long whPieces;
@@ -85,7 +86,9 @@ public:
 	static const unsigned long long diagonalMasks[15]; //Top left to bottom right
 	static const unsigned long long antiDiagonalMasks[15]; //Top right to bottom left
 
-	static char pieceIndexBoard[64];
+	//Not needed in Saved Game State
+	static unsigned long long movedPieceHighlightLoc; //see where the last piece was moved from
+	static char pieceIndexBoard[64]; //dead variable
 
 	static void setStartPosition() { //Set start position of pieces on the bitBoard
 	//Index of new bit defined by (row * 8 + col)
@@ -200,33 +203,13 @@ public:
 		origBits = ((unsigned long long)v) << 32;
 		origBits |= v2;
 		return origBits;
-		/* Also very efficient, but slightly slower than the above one
-		unsigned long long s = sizeof(origBits) * CHAR_BIT; // bit size; must be power of 2 
-		unsigned long long mask = ~0;
-		while ((s >>= 1) > 0) {
-			mask ^= (mask << s);
-			origBits = ((origBits >> s) & mask) | ((origBits << s) & ~mask);
-		}
-
-		return origBits;
-		*/
-
-		/* Old version
-		unsigned long long reversed = 0ULL;
-		for (int i = 0; i < 64; i++) { //fastest method so far
-			reversed |= ((origBits >> i) & 0b1) << (63 - i);
-		}
-		return reversed;
-		*/
 	}
 
 	static int numOfTrailingZeros(unsigned long long bitMap) { //potentially change this idea to instead keep a vector of each piece location on their bitMap
-				//binary search method
-		int d;     // d will be the number of zero bits on the right,
-							// so if bitMap is 1101000 (base 2), then d will be 3
-		// NOTE: if 0 == bitMap, then d = 31.
-		if (bitMap & 0x1) {
-			// special dase for odd bitMap (assumed to happen half of the time)
+		//binary search method
+		// d will be the number of zero bits on the right
+
+		if (bitMap & 0x1) { //bitMap starts with a 1
 			return 0;
 		}
 		else {
@@ -253,7 +236,6 @@ public:
 			}
 			d -= bitMap & 0x1;
 		}
-
 
 		return d;
 	}

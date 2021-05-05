@@ -13,9 +13,7 @@ private:
 	unsigned long long spotsToRightRook = 0ULL;
 	unsigned long long spotsToLeftRook = 0ULL;
 public:
-	King() {
-
-	}
+	King() {}
 	King(const int& val, const float& scale, const std::string& fileName, const float& posX, const bool& isWhite, const std::string name, unsigned long long& bitBoardPosition, const int numPieces)
 		: Piece(val, scale, fileName, posX, isWhite, name, bitBoardPosition, numPieces) {
 	}
@@ -83,9 +81,7 @@ public:
 			if ((spotsToLeftRook & ~squaresWhiteAttacks & ~whPieces & (notCapturable ^ 17)) == spotsToLeftRook)  //if no pieces attack castling squares
 				movableSquaresForDisplay ^= 4;
 	}
-	void setSquaresTheEnemyAttacks(unsigned long long enemy) {
-		squaresTheEnemyAttacks = enemy;
-	}
+	void setSquaresTheEnemyAttacks(unsigned long long enemy) { squaresTheEnemyAttacks = enemy; }
 	void updateHasKingMoved() {
 		hasKingMoved = true;
 	}
@@ -98,12 +94,15 @@ public:
 		else
 			allPotentialMoves = KingSpan >> (9 - kingLocation);
 
-		enemyPiecesThatAreDefended |= allPotentialMoves & myPieces;
 		
-		if (kingLocation % 8 < 4)  //prevent magical looping of king to other side of board
+		if (kingLocation % 8 < 4) {  //prevent magical looping of king to other side of board
+			enemyPiecesThatAreDefended |= allPotentialMoves & myPieces & ~FILE_GH;
 			allPotentialMoves &= ~FILE_GH & notCapturable;
-		else
+		}
+		else {
+			enemyPiecesThatAreDefended |= allPotentialMoves & myPieces & ~FILE_AB;
 			allPotentialMoves &= ~FILE_AB & notCapturable;
+		}
 
 		attackSquaresKing = 0ULL;
 		attackSquaresKing |= allPotentialMoves;
@@ -136,13 +135,12 @@ public:
 
 	std::unique_ptr<std::vector<uint16_t>> legalMoves(unsigned long long pieceBitBoard) {
 		std::unique_ptr<std::vector<uint16_t>> possibleMoves = std::make_unique<std::vector<uint16_t>>();
+		possibleMoves->reserve(8);
 		uint16_t mergeOfBeforeNAfterMove;
-
-		unsigned long long kingPiece = pieceBitBoard;
 		unsigned long long allPotentialMoves = 0ULL;
 		
-		while (kingPiece != 0) { //find center of king
-			int kingLocation = numOfTrailingZeros(kingPiece);
+		while (pieceBitBoard != 0) { //find center of king
+			int kingLocation = numOfTrailingZeros(pieceBitBoard);
 			if (kingLocation > 9)
 				allPotentialMoves = KingSpan << (kingLocation - 9);
 			else
@@ -168,7 +166,6 @@ public:
 				aPotentialMove = allPotentialMoves & ~(allPotentialMoves - 1);
 			}
 			pieceBitBoard &= ~(1ULL << kingLocation);
-			kingPiece = pieceBitBoard & ~(pieceBitBoard - 1);
 		}
 		
 		return possibleMoves;

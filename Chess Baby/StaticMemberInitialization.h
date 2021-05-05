@@ -78,6 +78,8 @@ const unsigned long long BoardInfo::QUEEN_SIDE = 0xF0F0F0F0F0F0F0FULL;
 //Not needed to be in Saved Game State
 unsigned int BoardInfo::v = 0;
 unsigned int BoardInfo::v2 = 0;
+int BoardInfo::d = 0;
+unsigned long long BoardInfo::movedPieceHighlightLoc = 0ULL;
 
 const unsigned long long BoardInfo::fileMasks[8] = //File A to file H
 { 0x101010101010101ULL, 0x202020202020202ULL, 0x404040404040404ULL, 0x808080808080808ULL,
@@ -94,6 +96,45 @@ const unsigned long long BoardInfo::antiDiagonalMasks[15] = //Top right to botto
 	  0x804020100000000ULL, 0x402010000000000ULL, 0x201000000000000ULL, 0x100000000000000ULL };
 
 char BoardInfo::pieceIndexBoard[64]; //not currently in use
+
+/*******Quadrants of Board*********/
+const short TileWeights::firstQuadrant[64] = { 0, 0, 0, 0, 20, 20, 20, 20,
+											   0, 0, 0, 0, 20, 20, 20, 20,
+											   0, 0, 0, 0, 20, 20, 20, 20,
+											   0, 0, 0, 0, 20, 20, 20, 20,
+											   0, 0, 0, 0, 0, 0, 0, 0,
+											   0, 0, 0, 0, 0, 0, 0, 0,
+											   0, 0, 0, 0, 0, 0, 0, 0,
+											   0, 0, 0, 0, 0, 0, 0, 0 };
+
+const short TileWeights::secndQuadrant[64] = { 20, 20, 20, 20, 0, 0, 0, 0,
+											   20, 20, 20, 20, 0, 0, 0, 0,
+											   20, 20, 20, 20, 0, 0, 0, 0,
+											   20, 20, 20, 20, 0, 0, 0, 0,
+											   0, 0, 0, 0, 0, 0, 0, 0,
+											   0, 0, 0, 0, 0, 0, 0, 0,
+											   0, 0, 0, 0, 0, 0, 0, 0,
+											   0, 0, 0, 0, 0, 0, 0, 0 };
+
+const short TileWeights::thirdQuadrant[64] = { 0, 0, 0, 0, 0, 0, 0, 0,
+											   0, 0, 0, 0, 0, 0, 0, 0,
+											   0, 0, 0, 0, 0, 0, 0, 0,
+											   0, 0, 0, 0, 0, 0, 0, 0,
+											   20, 20, 20, 20, 0, 0, 0, 0,
+											   20, 20, 20, 20, 0, 0, 0, 0,
+											   20, 20, 20, 20, 0, 0, 0, 0,
+											   20, 20, 20, 20, 0, 0, 0, 0 };
+
+const short TileWeights::forthQuadrant[64] = { 0, 0, 0, 0, 0, 0, 0, 0,
+											   0, 0, 0, 0, 0, 0, 0, 0,
+											   0, 0, 0, 0, 0, 0, 0, 0,
+											   0, 0, 0, 0, 0, 0, 0, 0,
+											   0, 0, 0, 0, 20, 20, 20, 20,
+											   0, 0, 0, 0, 20, 20, 20, 20,
+											   0, 0, 0, 0, 20, 20, 20, 20,
+											   0, 0, 0, 0, 20, 20, 20, 20 };
+
+const short TileWeights::emptyQuadrant[64] = {};
 
 /********White Opening***********/
 const short TileWeights::whKingWeightOp[64] = { 0, 0, 0, 0, 0, 0, 0, 0,

@@ -407,6 +407,7 @@ private:
 	void updateGameState(const int& initialTileIndex, const int& newTileIndex) {
 		grabbedPiece->updateBitBoardPosition();
 		board->updateBitBoard();
+		board->updateMovedPieceHighlightLoc(initialTileIndex, newTileIndex);
 		if (board->moveNumber == 1) 	{
 			std::cout << "Opening..." << std::endl;
 		}
@@ -424,19 +425,15 @@ private:
 			
 			if ((board->whRook & 0x8000000000000000) != 0x8000000000000000) { //if right rook moved
 				board->castleRooks[0] = -1;
-				if (board->getWhenWhRightRookMoved() != 0)
-					board->updateWhenWhRightRookMoved();
+
 			}
 			if ((board->whRook & 0x100000000000000) != 0x100000000000000) { //if left rook moved
 				board->castleRooks[1] = -1;
-				if (board->getWhenWhLeftRookMoved() != 0)
-					board->updateWhenWhLeftRookMoved();
+
 			}
 			if (King *king = dynamic_cast<King*>(grabbedPiece)) 	{
 				king->updateHasKingMoved();
-				board->updateTimesWhiteKingMoved();
 			}
-			board->updateWhMoveCounter();
 		}
 		else 	{
 			board->updateSquaresBlackAttacks();
@@ -444,20 +441,13 @@ private:
 
 			if ((board->blRook & 128) != 128) { //if right rook moved
 				board->castleRooks[2] = -1;
-				if (board->getWhenBlRightRookMoved() != 0)
-					board->updateWhenBlRightRookMoved();
 			}
 			if ((board->blRook & 1) != 1) { //if left rook moved
 				board->castleRooks[3] = -1;
-
-				if (board->getWhenBlLeftRookMoved() != 0)
-					board->updateWhenBlLeftRookMoved();
 			}
 			if (King* king = dynamic_cast<King*>(grabbedPiece)) {
 				king->updateHasKingMoved();
-				board->updateTimesBackKingMoved();
 			}
-			board->updateBlMoveCounter();
 		}
 		board->updateIsWhiteMove(); //Change move to other player
 	}

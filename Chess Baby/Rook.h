@@ -52,12 +52,12 @@ public:
 
 	std::unique_ptr<std::vector<uint16_t>> legalMoves(unsigned long long pieceBitBoard) {
 		std::unique_ptr<std::vector<uint16_t>> possibleMoves = std::make_unique<std::vector<uint16_t>>();
+		possibleMoves->reserve(12);
 		uint16_t mergeOfBeforeNAfterMove;
-		unsigned long long rookPiece = pieceBitBoard;
 		unsigned long long allPotentialMoves = 0ULL;
 
-		while (rookPiece != 0) {
-			int rookLocation = numOfTrailingZeros(rookPiece);
+		while (pieceBitBoard != 0) {
+			int rookLocation = numOfTrailingZeros(pieceBitBoard);
 			
 			if (((1ULL << rookLocation) & pinnedPiecesBitBoard) != 0)//if piece is pinned
 				allPotentialMoves = moveableSquaresWhenPinned(rookLocation) & squaresToBlockCheckOrCapture;
@@ -76,7 +76,6 @@ public:
 				aPotentialMove = allPotentialMoves & ~(allPotentialMoves - 1);
 			}
 			pieceBitBoard &= ~(1ULL << rookLocation);
-			rookPiece = pieceBitBoard;
 		}
 		
 		return possibleMoves;

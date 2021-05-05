@@ -45,12 +45,12 @@ public:
 
 	std::unique_ptr<std::vector<uint16_t>> legalMoves(unsigned long long pieceBitBoard) { //might want to add parameters to have something more local for whBishop. Might cause update issues later
 		std::unique_ptr<std::vector<uint16_t>> possibleMoves = std::make_unique<std::vector<uint16_t>>();
+		possibleMoves->reserve(10);
 		uint16_t mergeOfBeforeNAfterMove;
-		unsigned long long bishopPiece = pieceBitBoard;
 		unsigned long long allPotentialMoves = 0ULL;
 		
-		while (bishopPiece != 0) {
-			int bishopLocation = numOfTrailingZeros(bishopPiece);
+		while (pieceBitBoard != 0) {
+			int bishopLocation = numOfTrailingZeros(pieceBitBoard);
 			if (((1ULL << bishopLocation) & pinnedPiecesBitBoard) != 0)//if piece is pinned
 				allPotentialMoves = moveableSquaresWhenPinned(bishopLocation) & squaresToBlockCheckOrCapture;
 			else
@@ -68,7 +68,6 @@ public:
 				aPotentialMove = allPotentialMoves & ~(allPotentialMoves - 1);
 			}
 			pieceBitBoard &= ~(1ULL << bishopLocation); //remove bishop from bitmap of bishops
-			bishopPiece = pieceBitBoard; //grab next bishop on map
 		}
 		
 		return possibleMoves;

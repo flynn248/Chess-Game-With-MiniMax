@@ -81,17 +81,15 @@ public:
 
 	std::unique_ptr<std::vector<uint16_t>> legalMoves(unsigned long long pieceBitBoard) {
 		std::unique_ptr<std::vector<uint16_t>> possibleMoves = std::make_unique<std::vector<uint16_t>>();
+		possibleMoves->reserve(8);
 		uint16_t mergeOfBeforeNAfterMove;
-
-		unsigned long long knightPiece = pieceBitBoard;
 		unsigned long long allPotentialMoves = 0ULL;
-		//attackSquaresKnight = 0ULL;
-		while (knightPiece != 0) { //find center of knight
-			int knightLocation = numOfTrailingZeros(knightPiece);
+
+		while (pieceBitBoard != 0) { //find center of knight
+			int knightLocation = numOfTrailingZeros(pieceBitBoard);
 
 			if ((pinnedPiecesBitBoard & (1ULL << knightLocation)) != 0) { //A pinned knight cannot move
 				pieceBitBoard &= ~(1ULL << knightLocation);
-				knightPiece = pieceBitBoard & ~(pieceBitBoard - 1);
 				continue;
 			}
 
@@ -105,7 +103,6 @@ public:
 			else
 				allPotentialMoves &= ~FILE_AB & notCapturable & squaresToBlockCheckOrCapture;
 
-			//attackSquaresKnight |= allPotentialMoves;
 			unsigned long long aPotentialMove = allPotentialMoves & ~(allPotentialMoves - 1);
 			while (aPotentialMove != 0) {
 				int movedSquare = numOfTrailingZeros(aPotentialMove);
@@ -117,7 +114,6 @@ public:
 				aPotentialMove = allPotentialMoves & ~(allPotentialMoves - 1);
 			}
 			pieceBitBoard &= ~(1ULL << knightLocation);
-			knightPiece = pieceBitBoard & ~(pieceBitBoard - 1);
 		}
 		
 		return possibleMoves;

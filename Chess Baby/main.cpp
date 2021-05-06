@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
 					commitmentIsHard = allKnowingAI.miniMax(false);
 				}
 				board->commitAIMove(commitmentIsHard);
-				//std::cout << "Reverse bits went: " << revCount << " times.\n";
+				std::cout << "Reverse bits went: " << revCount << " times.\n";
 				revCount = 0;
 			}
 		}

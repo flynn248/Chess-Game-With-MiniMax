@@ -70,7 +70,7 @@ public:
 			std::cout << "Failed loading image!" << std::endl;
 		}
 	}
-
+	virtual ~Piece(){}
 	bool setUpSprite(const std::string& fileName) {
 		if (!texture.loadFromFile(fileName)) {
 			return false;

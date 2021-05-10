@@ -151,27 +151,27 @@ private: /******PRIVATE******/
 		//moveThreads.clear();
 	}
 	void getFirstHalfOfMovesWhite(AllLegalMoves& moves) {
-		moves.allMoves->at(1) = board->queenMovesWhite();
+		moves.allMoves->at(0) = board->queenMovesWhite();
 		moves.allMoves->at(2) = board->rookMovesWhite();
 		moves.allMoves->at(3) = board->bishopMovesWhite();
 	}
 	void getSecondHalfOfMovesWhite(AllLegalMoves& moves) {
-		moves.allMoves->at(0) = board->kingMovesWhite();
+		moves.allMoves->at(5) = board->kingMovesWhite();
 		moves.allMoves->at(4) = board->knightMovesWhite();
-		moves.allMoves->at(5) = board->pawnMovesWhite();
+		moves.allMoves->at(1) = board->pawnMovesWhite();
 		moves.allMoves->at(6) = board->castlingMovesWhite();
 		moves.allMoves->at(7) = board->enPassantMovesWhite();
 	}
 
 	void getFirstHalfOfMovesBlack(AllLegalMoves& moves) {
-		moves.allMoves->at(1) = board->queenMovesBlack();
+		moves.allMoves->at(0) = board->queenMovesBlack();
 		moves.allMoves->at(2) = board->rookMovesBlack();
 		moves.allMoves->at(3) = board->bishopMovesBlack();
 	}
 	void getSecondHalfOfMovesBlack(AllLegalMoves& moves) {
-		moves.allMoves->at(0) = board->kingMovesBlack();
+		moves.allMoves->at(5) = board->kingMovesBlack();
 		moves.allMoves->at(4) = board->knightMovesBlack();
-		moves.allMoves->at(5) = board->pawnMovesBlack();
+		moves.allMoves->at(1) = board->pawnMovesBlack();
 		moves.allMoves->at(6) = board->castlingMovesBlack();
 		moves.allMoves->at(7) = board->enPassantMovesBlack();
 	}

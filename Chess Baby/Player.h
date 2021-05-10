@@ -8,7 +8,6 @@
 
 class Player {
 	std::shared_ptr<ChessBoard> board;
-	//ChessBoard* board = nullptr;
 	Piece* grabbedPiece = nullptr;
 	bool madeEnPassantMove = false;
 	bool madeCastleMove = false;
@@ -16,155 +15,7 @@ class Player {
 	bool pawnPromoting = false;
 	int rookBeforeCastle = -1;
 	int rookAfterCastle = -1;
-	//Have a vector of possible moves. When a piece is grabbed, update the vector which in turn updates the hilighted squares. Then when placed, check the vector if legal. Clear vector before grabbing another piece.
-public:
-	Player(std::shared_ptr<ChessBoard>& board) {
-		this->board = board;
-	}
 
-	void movePiece(const int& x, const int& y, sf::RenderWindow& window) {
-		int clickedTileIndex = y * 8 + x; //Finds the tile as the index
-		sf::Sprite pieceSprite;
-		grabbedPiece = nullptr;
-
-		if ((board->bitBoard & (1ULL << clickedTileIndex)) == 0) { //if no piece was clicked
-			return;
-		}
-		//std::cout << board->getBlackRookPiece()->getNumPieces() << " " << board->getWhiteRookPiece()->getNumPieces() << std::endl;
-		if (board->getIsWhiteMove()) { //white to move
-			if ((board->blPieces & (1ULL << clickedTileIndex)) != 0) { //if piece is not white
-				return;
-			}
-
-			if (isThisPieceGrabbed(board->whPawn, clickedTileIndex)) {
-				pieceSprite = board->getWhitePawnPiece()->getSprite();
-				grabbedPiece = board->getWhitePawnPiece();
-
-			}
-			else if (isThisPieceGrabbed(board->whQueen, clickedTileIndex)) {
-				pieceSprite = board->getWhiteQueenPiece()->getSprite();
-				grabbedPiece = board->getWhiteQueenPiece();
-			}
-			else if (isThisPieceGrabbed(board->whBishop, clickedTileIndex)) {
-				pieceSprite = board->getWhiteBishopPiece()->getSprite();
-				grabbedPiece = board->getWhiteBishopPiece();
-			}
-			else if (isThisPieceGrabbed(board->whKnight, clickedTileIndex)) {
-				pieceSprite = board->getWhiteKnightPiece()->getSprite();
-				grabbedPiece = board->getWhiteKnightPiece();
-			}
-			else if (isThisPieceGrabbed(board->whRook, clickedTileIndex)) {
-				pieceSprite = board->getWhiteRookPiece()->getSprite();
-				grabbedPiece = board->getWhiteRookPiece();
-			}
-			else if (isThisPieceGrabbed(board->whKing, clickedTileIndex)) {
-				pieceSprite = board->getWhiteKingPiece()->getSprite();
-				grabbedPiece = board->getWhiteKingPiece();
-			}
-		}
-		else { //black turn to move
-			if ((board->whPieces & (1ULL << clickedTileIndex)) != 0) { //if piece is white
-				return;
-			}
-
-			if (isThisPieceGrabbed(board->blPawn, clickedTileIndex)) {
-				pieceSprite = board->getBlackPawnPiece()->getSprite();
-				grabbedPiece = board->getBlackPawnPiece();
-			}
-			else if (isThisPieceGrabbed(board->blQueen, clickedTileIndex)) {
-				pieceSprite = board->getBlackQueenPiece()->getSprite();
-				grabbedPiece = board->getBlackQueenPiece();
-			}
-			else if (isThisPieceGrabbed(board->blBishop, clickedTileIndex)) {
-				pieceSprite = board->getBlackBishopPiece()->getSprite();
-				grabbedPiece = board->getBlackBishopPiece();
-			}
-			else if (isThisPieceGrabbed(board->blKnight, clickedTileIndex)) {
-				pieceSprite = board->getBlackKnightPiece()->getSprite();
-				grabbedPiece = board->getBlackKnightPiece();
-			}
-			else if (isThisPieceGrabbed(board->blRook, clickedTileIndex)) {
-				pieceSprite = board->getBlackRookPiece()->getSprite();
-				grabbedPiece = board->getBlackRookPiece();
-			}
-			else if (isThisPieceGrabbed(board->blKing, clickedTileIndex)) {
-				pieceSprite = board->getBlackKingPiece()->getSprite();
-				grabbedPiece = board->getBlackKingPiece();
-			}
-		}
-
-		if (grabbedPiece->getIsWhite()) {
-			board->notCapturable = ~(board->whPieces | board->blKing); //avoid illegal capture of black king
-		}
-		else {
-			board->notCapturable = ~(board->blPieces | board->whKing); //avoid illegal capture of white king
-		}
-
-		bool isPieceGrabbed = true;
-		int newX, newY;
-		bool isLegalMove = false;
-		grabbedPiece->removeAPieceFromDisplay(clickedTileIndex);
-
-		while (isPieceGrabbed) {
-			sf::Event e;
-
-			while (window.pollEvent(e)) {
-				sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-				pieceSprite.setPosition(sf::Vector2f((float)mousePos.x, (float)mousePos.y));
-				grabbedPiece->findMoveableSquares(clickedTileIndex);
-
-				if (e.type == sf::Event::MouseButtonReleased) {
-
-					newX = (mousePos.x) / 120;
-					newY = (mousePos.y) / 120;
-
-					pieceSprite.setPosition(sf::Vector2f((float)(newX * 120 + 60), (float)(newY * 120 + 60)));
-
-					if (newX != x || newY != y) { //if placed on a different square
-						int newTileIndex = (newY * 8) + newX;
-
-						if (isThisALegalSquare(newTileIndex, clickedTileIndex)) {
-
-							if (isAnEnemyHere(newTileIndex)) { //if captured a piece
-								if (pawnPromoting) {
-									doEnemyPieceCapture(newTileIndex, clickedTileIndex);
-									doPawnPromotion(newTileIndex, clickedTileIndex, window);
-								}
-								else
-									doEnemyPieceCapture(newTileIndex, clickedTileIndex);
-							}
-							else if (pawnMovedTwoSquares) {
-								doPawnMovedTwoSquares(newTileIndex);
-							}
-							else if (pawnPromoting)
-								doPawnPromotion(newTileIndex, clickedTileIndex, window);
-							else if (madeEnPassantMove)
-								doEnpassantMove(newTileIndex, clickedTileIndex);
-							else if (madeCastleMove)
-								doCastleMove(newTileIndex, clickedTileIndex);
-							else // Normal move
-								grabbedPiece->addAPieceToDisplay(newTileIndex);
-															
-							
-							updateGameState(clickedTileIndex, newTileIndex);
-						}
-						else //if not placed on legal square
-							grabbedPiece->addAPieceToDisplay(clickedTileIndex);
-					}
-					else { //if placed on same square
-						grabbedPiece->addAPieceToDisplay(clickedTileIndex);
-					}
-					isPieceGrabbed = false;
-				}
-				window.clear();
-				board->drawBoard(window);
-				grabbedPiece->drawPieceAttackSquares(window);
-				window.draw(pieceSprite);
-				window.display();
-			}
-		}
-	}
-private:
 	void doEnemyPieceCapture(const int& newTileIndex, const int& clickedTileIndex) {
 		board->removeCapturedPiece(newTileIndex);
 		grabbedPiece->removeAPieceFromDisplay(clickedTileIndex);
@@ -450,6 +301,154 @@ private:
 			}
 		}
 		board->updateIsWhiteMove(); //Change move to other player
+	}
+
+public:
+	Player(std::shared_ptr<ChessBoard>& board) {
+		this->board = board;
+	}
+
+	void movePiece(const int& x, const int& y, sf::RenderWindow& window) {
+		int clickedTileIndex = y * 8 + x; //Finds the tile as the index
+		sf::Sprite pieceSprite;
+		grabbedPiece = nullptr;
+
+		if ((board->bitBoard & (1ULL << clickedTileIndex)) == 0) { //if no piece was clicked
+			return;
+		}
+
+		if (board->getIsWhiteMove()) { //white to move
+			if ((board->blPieces & (1ULL << clickedTileIndex)) != 0) { //if piece is not white
+				return;
+			}
+
+			if (isThisPieceGrabbed(board->whPawn, clickedTileIndex)) {
+				pieceSprite = board->getWhitePawnPiece()->getSprite();
+				grabbedPiece = board->getWhitePawnPiece();
+
+			}
+			else if (isThisPieceGrabbed(board->whQueen, clickedTileIndex)) {
+				pieceSprite = board->getWhiteQueenPiece()->getSprite();
+				grabbedPiece = board->getWhiteQueenPiece();
+			}
+			else if (isThisPieceGrabbed(board->whBishop, clickedTileIndex)) {
+				pieceSprite = board->getWhiteBishopPiece()->getSprite();
+				grabbedPiece = board->getWhiteBishopPiece();
+			}
+			else if (isThisPieceGrabbed(board->whKnight, clickedTileIndex)) {
+				pieceSprite = board->getWhiteKnightPiece()->getSprite();
+				grabbedPiece = board->getWhiteKnightPiece();
+			}
+			else if (isThisPieceGrabbed(board->whRook, clickedTileIndex)) {
+				pieceSprite = board->getWhiteRookPiece()->getSprite();
+				grabbedPiece = board->getWhiteRookPiece();
+			}
+			else if (isThisPieceGrabbed(board->whKing, clickedTileIndex)) {
+				pieceSprite = board->getWhiteKingPiece()->getSprite();
+				grabbedPiece = board->getWhiteKingPiece();
+			}
+		}
+		else { //black turn to move
+			if ((board->whPieces & (1ULL << clickedTileIndex)) != 0) { //if piece is white
+				return;
+			}
+
+			if (isThisPieceGrabbed(board->blPawn, clickedTileIndex)) {
+				pieceSprite = board->getBlackPawnPiece()->getSprite();
+				grabbedPiece = board->getBlackPawnPiece();
+			}
+			else if (isThisPieceGrabbed(board->blQueen, clickedTileIndex)) {
+				pieceSprite = board->getBlackQueenPiece()->getSprite();
+				grabbedPiece = board->getBlackQueenPiece();
+			}
+			else if (isThisPieceGrabbed(board->blBishop, clickedTileIndex)) {
+				pieceSprite = board->getBlackBishopPiece()->getSprite();
+				grabbedPiece = board->getBlackBishopPiece();
+			}
+			else if (isThisPieceGrabbed(board->blKnight, clickedTileIndex)) {
+				pieceSprite = board->getBlackKnightPiece()->getSprite();
+				grabbedPiece = board->getBlackKnightPiece();
+			}
+			else if (isThisPieceGrabbed(board->blRook, clickedTileIndex)) {
+				pieceSprite = board->getBlackRookPiece()->getSprite();
+				grabbedPiece = board->getBlackRookPiece();
+			}
+			else if (isThisPieceGrabbed(board->blKing, clickedTileIndex)) {
+				pieceSprite = board->getBlackKingPiece()->getSprite();
+				grabbedPiece = board->getBlackKingPiece();
+			}
+		}
+
+		if (grabbedPiece->getIsWhite()) {
+			board->notCapturable = ~(board->whPieces | board->blKing); //avoid illegal capture of black king
+		}
+		else {
+			board->notCapturable = ~(board->blPieces | board->whKing); //avoid illegal capture of white king
+		}
+
+		bool isPieceGrabbed = true;
+		int newX, newY;
+		bool isLegalMove = false;
+		grabbedPiece->removeAPieceFromDisplay(clickedTileIndex);
+
+		while (isPieceGrabbed) {
+			sf::Event e;
+
+			while (window.pollEvent(e)) {
+				sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+				pieceSprite.setPosition(sf::Vector2f((float)mousePos.x, (float)mousePos.y));
+				grabbedPiece->findMoveableSquares(clickedTileIndex);
+
+				if (e.type == sf::Event::MouseButtonReleased) {
+
+					newX = (mousePos.x) / 120;
+					newY = (mousePos.y) / 120;
+
+					pieceSprite.setPosition(sf::Vector2f((float)(newX * 120 + 60), (float)(newY * 120 + 60)));
+
+					if (newX != x || newY != y) { //if placed on a different square
+						int newTileIndex = (newY * 8) + newX;
+
+						if (isThisALegalSquare(newTileIndex, clickedTileIndex)) {
+
+							if (isAnEnemyHere(newTileIndex)) { //if captured a piece
+								if (pawnPromoting) {
+									doEnemyPieceCapture(newTileIndex, clickedTileIndex);
+									doPawnPromotion(newTileIndex, clickedTileIndex, window);
+								}
+								else
+									doEnemyPieceCapture(newTileIndex, clickedTileIndex);
+							}
+							else if (pawnMovedTwoSquares) {
+								doPawnMovedTwoSquares(newTileIndex);
+							}
+							else if (pawnPromoting)
+								doPawnPromotion(newTileIndex, clickedTileIndex, window);
+							else if (madeEnPassantMove)
+								doEnpassantMove(newTileIndex, clickedTileIndex);
+							else if (madeCastleMove)
+								doCastleMove(newTileIndex, clickedTileIndex);
+							else // Normal move
+								grabbedPiece->addAPieceToDisplay(newTileIndex);
+															
+							
+							updateGameState(clickedTileIndex, newTileIndex);
+						}
+						else //if not placed on legal square
+							grabbedPiece->addAPieceToDisplay(clickedTileIndex);
+					}
+					else { //if placed on same square
+						grabbedPiece->addAPieceToDisplay(clickedTileIndex);
+					}
+					isPieceGrabbed = false;
+				}
+				window.clear();
+				board->drawBoard(window);
+				grabbedPiece->drawPieceAttackSquares(window);
+				window.draw(pieceSprite);
+				window.display();
+			}
+		}
 	}
 };
 

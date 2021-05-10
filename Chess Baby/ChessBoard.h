@@ -368,7 +368,7 @@ private:
 		}
 	}
 public:											  												  
-	ChessBoard(const float &tileWidth, sf::Color & whiteCol, sf::Color & blkCol, const float &frstSquareCentRef, const int& stackSize) {
+	ChessBoard(const float &tileWidth, sf::Color & whiteCol, sf::Color & blkCol, const float &frstSquareCentRef) {
 		this->tileWidth = tileWidth;
 		whtTileColor = whiteCol;
 		blkTileColor = blkCol;
@@ -611,7 +611,7 @@ public:
 		updateDisplayOfPieces();
 		updateIsWhiteMove();
 	}
-
+	/***********End AI Functions********/
 	void addWhiteQueenToBoard(const int& index) { whQueenPiece->addPieceBitBoard(index); }
 	void addWhiteRookToBoard(const int& index) { whRookPiece->addPieceBitBoard(index); }
 	void addWhiteBishopToBoard(const int& index) { whBishopPiece->addPieceBitBoard(index); }

@@ -1,7 +1,7 @@
 //Developed by Shane Flynn
 //Chess game with an AI using Alpha Beta pruning on a minimax algortihm
 //Using SFML for the graphics
-//Last edited 05/04/2021
+//Last edited 05/09/2021
 
 #include <SFML/Graphics.hpp>
 #include <iostream>
@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
 			willAI = true;
 		}
 	}
-	const int depthAI = 2; //set the depth the AI will search till
+	const int depthAI = 4; //set the depth the AI will search till
 	float windowWidth = 960; //x and y of window
 	sf::Color blkTileColor = sf::Color::Black;
 	sf::Color whtTileColor = sf::Color((sf::Uint8)211, (sf::Uint8)211, (sf::Uint8)211); //change the color of the tiles easily

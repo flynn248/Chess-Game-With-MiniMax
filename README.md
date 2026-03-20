@@ -8,5 +8,5 @@ The game is visually displayed through the use of SFML.
 
 The future goal of this project is for it to be uploaded on the cloud.
 
-## System Reccomendations
+## System Recommendations
   The binary files are built for x64 for Windows 10. The game can run on x84, but it works best on x64.

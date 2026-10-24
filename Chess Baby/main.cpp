@@ -9,6 +9,7 @@
 #include "StaticMemberInitialization.h"
 #include "Player.h"
 #include "MiniMax.h"
+#include "BoardView.h"
 
 void endScreen(sf::RenderWindow&, std::shared_ptr<ChessBoard>&, std::string);
 
@@ -29,13 +30,15 @@ int main(int argc, char* argv[]) {
 		}
 	}
 	const int depthAI = 4; //set the depth the AI will search till
-	float windowWidth = 960; //x and y of window
+	float windowWidth = BOARD_PIXELS; //board size in drawing coordinates. Leave this alone and resize the window instead
+	unsigned int startWindowSize = 960; //starting window width and height in pixels. The window can also be resized while playing
 	sf::Color blkTileColor = sf::Color::Black;
 	sf::Color whtTileColor = sf::Color((sf::Uint8)211, (sf::Uint8)211, (sf::Uint8)211); //change the color of the tiles easily
 	
 	const float frstSquareCentRef = windowWidth / 8 / 2;
 	int mouseX, mouseY;
-	sf::RenderWindow window(sf::VideoMode((uint16_t)windowWidth, (uint16_t)windowWidth), "Chess AI Implementation");
+	sf::RenderWindow window(sf::VideoMode(startWindowSize, startWindowSize), "Chess AI Implementation");
+	fitBoardToWindow(window);
 	std::shared_ptr<ChessBoard> board = std::make_shared<ChessBoard>(windowWidth / 8, whtTileColor, blkTileColor, frstSquareCentRef);
 
 	Player player(board);
@@ -65,14 +68,15 @@ int main(int argc, char* argv[]) {
 			}
 		}
 		while (window.pollEvent(e)) {
+			handleResize(window, e);
 			if (e.type == sf::Event::Closed) {
 				window.close();
 			}
 			else if (e.type == sf::Event::MouseButtonPressed) {
 				if (e.mouseButton.button == sf::Mouse::Left) {
-					mouseX = e.mouseButton.x / 120;
-					mouseY = e.mouseButton.y / 120;
-					if (board->isPieceHere(mouseX, mouseY)) {
+					//convert the click from window pixels to a board square so it still lines up after a resize
+					if (pixelToTile(window, e.mouseButton.x, e.mouseButton.y, mouseX, mouseY)
+						&& board->isPieceHere(mouseX, mouseY)) {
 						player.movePiece(mouseX, mouseY, window);
 					}
 				}
@@ -100,12 +104,13 @@ void endScreen(sf::RenderWindow& window, std::shared_ptr<ChessBoard>& board, std
 		displayTxt.setCharacterSize(120);
 		displayTxt.setStyle(sf::Text::Bold);
 		displayTxt.setOrigin(sf::Vector2f(310.f, 60.f));
-		displayTxt.setPosition(sf::Vector2f(window.getSize().x / 2.f, window.getSize().y / 2.f));
+		displayTxt.setPosition(sf::Vector2f(BOARD_PIXELS / 2.f, BOARD_PIXELS / 2.f)); //center of the board, whatever the window size
 	}
 
 	while (window.isOpen()) {
 		sf::Event e;
 		while (window.pollEvent(e)) {
+			handleResize(window, e);
 			if (e.type == sf::Event::Closed) {
 				window.close();
 			}

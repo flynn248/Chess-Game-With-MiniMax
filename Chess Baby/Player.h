@@ -1,6 +1,7 @@
 //#include "MoveGenerator.h"
 #include "SFML/Graphics.hpp"
 #include "ChessBoard.h"
+#include "BoardView.h"
 #include <iostream>
 #include <memory>
 #ifndef PLAYER_H
@@ -133,16 +134,21 @@ class Player {
 		while (notPickedPiece) 	{
 			sf::Event e;
 			while (window.pollEvent(e)) 	{
+				handleResize(window, e);
 				if (e.type == sf::Event::MouseButtonPressed) 	{
 					if (e.mouseButton.button == sf::Mouse::Left) 	{
-						if ((e.mouseButton.x / 120) != (newTileIndex % 8)) //if clicked somewhere other than the tile with the pieces on it
+						int col, row;
+						if (!pixelToTile(window, e.mouseButton.x, e.mouseButton.y, col, row)) //if clicked off the board
 							break;
-						if (e.mouseButton.y / 120 != ((newTileIndex - e.mouseButton.x / 120) / 8))
+						if (col != (newTileIndex % 8)) //if clicked somewhere other than the tile with the pieces on it
 							break;
-						
+						if (row != (newTileIndex / 8))
+							break;
 
-						int x = e.mouseButton.x / 60;
-						int y = e.mouseButton.y / 60;
+						//each promotion choice fills a quarter of the tile
+						sf::Vector2f clickPos = toBoardCoords(window, e.mouseButton.x, e.mouseButton.y);
+						int x = (int)(clickPos.x / 60.f);
+						int y = (int)(clickPos.y / 60.f);
 
 						if ((x % 2) == 0) 	{
 							if ((y % 2) == 0)
@@ -395,14 +401,18 @@ public:
 			sf::Event e;
 
 			while (window.pollEvent(e)) {
-				sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-				pieceSprite.setPosition(sf::Vector2f((float)mousePos.x, (float)mousePos.y));
+				handleResize(window, e);
+				//mouse position comes in window pixels, so convert it to board coordinates before using it
+				sf::Vector2i mousePixel = sf::Mouse::getPosition(window);
+				pieceSprite.setPosition(toBoardCoords(window, mousePixel.x, mousePixel.y));
 				grabbedPiece->findMoveableSquares(clickedTileIndex);
 
 				if (e.type == sf::Event::MouseButtonReleased) {
 
-					newX = (mousePos.x) / 120;
-					newY = (mousePos.y) / 120;
+					if (!pixelToTile(window, mousePixel.x, mousePixel.y, newX, newY)) { //if dropped off the board, put the piece back
+						newX = x;
+						newY = y;
+					}
 
 					pieceSprite.setPosition(sf::Vector2f((float)(newX * 120 + 60), (float)(newY * 120 + 60)));
 
